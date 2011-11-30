@@ -245,7 +245,7 @@ if strcmpi('y', countgood)
         cd([Alldata '/' TrialName 'RUNfinal'])
         saveas (gcf, [DateFldrNms{W},'ObjParams',imageName,'.pdf'])% save as PDF
         %%
-        cd([Alldata '/' TrialName 'SubtrPics'])
+        cd([Alldata '/' TrialName 'RUNfinal'])
         figure; imagesc(img); title('subtracted images scaled '); colorbar
         hold on;
         plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*', 'MarkerSize', 5)

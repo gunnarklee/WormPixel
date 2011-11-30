@@ -93,9 +93,9 @@ text(50,450, ['\fontsize{16}', '\color{magenta}',CurImgNm]) ;
 text(50,425, ['\fontsize{16}', '\color{magenta}', Assaytime]);
 text(50,400, ['\fontsize{16}', '\color{magenta}', Measur]);
           
-         axes ('position', [.65, .1, .3, .3]);
-         plot(BBratio(:,2),BBratio(:,1));
-         title('Major/minor axis Vs image number');
+    %>>     axes ('position', [.65, .1, .3, .3]);
+    %>>     plot(BBratio(2,:),BBratio(1,:));
+    %>>    title('Major/minor axis Vs image number');
 
 
 % Poisition figure for "printing" with no border

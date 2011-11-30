@@ -2,8 +2,9 @@
 vers='chronos7INTENSITY(8_9_11)- single cell flouresence'
 
 %% ImageAnalysisMode
+framerate=6
 EvenImgBgSub= 'single'
-
+imgfmt='*jpg'
 %path smoothng options
 SmoothInt=5% 
 SmoothMeth='moving'
@@ -43,15 +44,13 @@ BndLim=.65;  % PRC MODE- dynamicBndLim deactivates this one .25
 %>>Maxbnd=20 
 
 %% PARTICLE FILTERS
-
 FiltApp='SZ_Ax_BB'%'all'
-LowLim=800; UpLim=1500; % AREA %col10 <<NEEDED TO RAise AREA TO <85 for clump; <5 for smallest only
-%>eccL=.5; eccU=1; %col 5 
-MajAxL=50; MajAxU=300; %col 8   <<NEEDED TO RAise AREA TO >24 for clump;  <3.3 for smallest only
-MinAxL=10; MinAxU=300; %col 9   <<NEEDED TO RAise AREA TO >12 for clump;
-%>ExtL=0; ExtU=1; %  col 15   <<NEEDED TO lover AREA TO <.25 for clump; <.90 for small (2 particles)
-BndBx4L=25; BndBx4U=1000; %col14 <<NEEDED TO RAise AREA TO >19 for clump; <2 for smallest only 
-TotAxU = 200  ; TotAxL = 110  %(MajAxL+MinAxL)
+LowLim=500; UpLim=1200; % AREA %col10 <<NEEDED TO 
+MajAxL=50; MajAxU=300; %col 8   <<NEEDED TO RAise 
+MinAxL=10; MinAxU=300; %col 9   <<NEEDED TO RAise 
+BndBx4L=25; BndBx4U=1000; %col14 <<NEEDED TO RAise 
+TotAxL = 85; TotAxU = 200  %(MajAxL+MinAxL)
+
 %% Second pass- STRINGENT variable set
 if strcmpi('y', StringentFilter) 
 
@@ -78,7 +77,8 @@ end
 %WorkFldTest = exist ('DataDir') % if this is running without wormviewsuite you need to specify directory
 %if WorkFldTest > 0 
 %else
-%message= ('choose the "working" folder') % this is the folder that will collect the results
+%message= ('choose the "working" folder') % this is the folder that will
+%collect the results
 %DataDir = uigetdir('choose the "working" folder')
 %end
 
