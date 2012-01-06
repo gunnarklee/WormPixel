@@ -39,7 +39,7 @@ param.maxarea = Inf;
 param.npoints = 30;
 param.optmid = false;
 param.filterwidth = false;
-param.contourlevel =10; %10
+param.contourlevel =1; %10
 param.channel = 1;
 param.wdfilter = false;
 filename = [];
@@ -152,8 +152,8 @@ if size(image,3) > 1, image = image(:,:,param.channel); end; % If the image is m
 celldata.parameters = param;
 %NOTE: removed "imadjust" in front of "image" in next line
 
-%contourdata = contourc(double((image)),[param.contourlevel param.contourlevel]); % Get contour matrix with 1 level from image
-contourdata = contourc(double((image))); % Get contour matrix with 1 level from image
+contourdata = contourc(double((image)),[param.contourlevel param.contourlevel]); % Get contour matrix with 1 level from image
+%contourdata = contourc(double((image)),1); % Get contour matrix with 1 level from image
 
 % Split contour matrix (from CONTOURC, CONTOUR, etc.) into individual cell data
 ind = 1;

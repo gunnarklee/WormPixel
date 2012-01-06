@@ -22,18 +22,45 @@ WmImgPad(Rowpad, ColPad)=WmImg
 close all
 SE=strel('disk', 3);
 minWm=imerode(WmImgPad, SE);
-figure ;imshow(minWm)
-figure ;imshow(WmImgPad)
+
+figure ;imshow(minWm, 'InitialMagnification', 400); title ('minworm')
+figure ;imshow(WmImgPad,'InitialMagnification', 400); title ('WmImgPad')
 
 %%
 [x,y]=find(minWm)
 xx=1:size(WmImgPad, 2)
+size(WmImgPad)
 
 
-[Totalcelldata cellnums]=cloadfinal2(WmImgPad)
+skele=bwmorph(WmImgPad, 'skel', Inf);
+%[x,y]=ind2sub(size(skele), find(skele))
+figure; imshow(imoverlay (mat2gray(WmImgPad), skele,  [255, 0, 0]));
+skele2=bwmorph(skele, 'spur');
+figure; imshow(imoverlay (mat2gray(WmImgPad), skele2,  [0,255, 0]));
+
+skele3=bwmorph(skele2, 'spur');
+figure; imshow(imoverlay (mat2gray(WmImgPad), skele3,  [0, 0, 255]));
+
+skeleSH=bwmorph(skele3, 'shrink');
+figure; imshow(imoverlay (mat2gray(WmImgPad), skeleSH,  [0, 0, 255]), 'InitialMagnification', 400)
+[x,y]=ind2sub(size(skeleEND), find(skeleSH))
+
+%% build list of endpoints
+
+skeleEND=bwmorph(skeleSH, 'endpoints');
+figure; imshow(imoverlay (mat2gray(WmImgPad), skeleEND,  [0, 0, 255]), 'InitialMagnification', 400)
+[x,y]=ind2sub(size(skeleEND), find(skeleEND))
+seed= [x(1),y(1)]
+
+
+
+
+%figure; imshow(WmImgPad)
+%[Totalcelldata cellnums]=cloadfinal2(WmImgPad)
 %figure; imshow(ims)
 %hold on
-
+%[Totalcelldata cellnums]=cload(WmImgPad)
+%
 %%sicic spline finding and segmenting
 cplot(Totalcelldata, 'R', 'mid', 1)
 cplot(Totalcelldata, 'b', 'border', 1)
