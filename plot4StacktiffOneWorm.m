@@ -1,6 +1,5 @@
 function [vertLn,horzLn] = plot4Stacktiff (plotpoints, CentrComp, plotcol, I, F, textls, PlotMd, LayerNm, boundingBox, BBratio)
 
-
 Smoothstart=50
 %plot4Stacktiff, L. Parsons and G. kleemnann 7_15_11
 %function to automatically make a stacked image tiff uisng imshow and/or imagesc 
@@ -102,7 +101,10 @@ text(50,400, ['\fontsize{16}', '\color{magenta}', Measur]);
 set(F, 'Units', 'points', 'PaperUnits', 'points', 'PaperPositionMode', 'auto');
 % Print (save) figure as bitmapped image, resizing by factor N
 screen_DPI = get(0, 'ScreenPixelsPerInch');
-print(F, '-dtiff', sprintf('-r%d', N * screen_DPI), LayerNm);
+%print(F, '-dtiff', sprintf('-r%d', N * screen_DPI), LayerNm);
+print(F, '-dtiff', sprintf('-r%d', N * screen_DPI),[LayerNm, '.tmp']);
 %print(F, '-dpng', sprintf('-r%d', N * screen_DPI), 'pout_with_plot.png');
 % Close figure
 %sclose(F)
+
+

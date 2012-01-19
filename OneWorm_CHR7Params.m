@@ -12,7 +12,7 @@ SmoothMeth='moving'
 %within Plot4StacktiffOneWorm < later import all params as single matirx
 
 SnglImgProofMd = 'off'  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
-DataCapMode = 'StackTiff' %'StackTiff','Simple'
+DataCapMode = 'StackGiff' %'StackTiff','Simple'
 allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
 ProofingImgs = 'n' % extra proofing images

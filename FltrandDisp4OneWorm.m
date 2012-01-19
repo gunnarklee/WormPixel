@@ -2,49 +2,22 @@
 %G.kleemann 2/6/08
 %version 3 adds optional image supression
 
-
 % size filter to exclude unwanted vaules (1 or 9..46 and above) -(Image_PropertiesAll(:,3)
 % this will be done twice, once for "long" or worm like objects, once for "round" or egg like objects
 
 %% Apply any of the filters and display the results...Integrate a quesiton with a switch statement for testing
-%you can combine filtes by multipling them
-%ImageTiffFilename = [OutDir filesep 'Image.tif'];
-%StackTiffFilename = [OutDir filesep DateFldrNms{W},DateFldrNmsSub{Y},'stack.tif'];
-StackTiffFilename = [OutDir filesep DateFldrNms{W},'stack.tif'];
+%you can combine filters by multipling them
 
 countgood = 'n'
 FiltersTried=1
-cd(Alldata)
-%>>>if strcmpi(ProofingImgs, 'y')
-mkdir([TrialName 'RUNfinal'])
-%>mkdir([TrialName 'ScoredPics'])
-%mkdir([Alldata '/' TrialName 'SubtrPics'])
-cd([Alldata '/' TrialName 'RUNfinal'])
-%Nm = [strrep(DateFldrNms2{ImN}([1:end-15]), '-','_'), DateFldrNms{W}];
-       
-
-%%
 
 while strcmpi('n', countgood)
     
     switch FiltApp
-        case 'no'
-            filter = ones (size (Image_PropertiesAll,1));
-            filter= filter(:,1);
         case 'all'
             filter= [BndBxFlt4L.* BndBxFlt4U.* szFltU.* szFltL.*EccFltU.* EccFltL.*MajAxFltU.* MajAxFltL.*MinAxFltU.* MinAxFltL.*ExtFltL.*ExtFltU];
         case 'SZ_Ax_BB'
             filter= [szFltU.* szFltL.*MajAxFltU.* MajAxFltL.*MinAxFltU.* MinAxFltL.*TotAxFltU.*TotAxFltL];    %BndBxFlt4L.* BndBxFlt4U.*
-        case 'sz'
-            filter= [szFltU.* szFltL];
-        case 'ec'
-            filter= [EccFltU.* EccFltL];
-        case 'majax'
-            filter= [MajAxFltU.* MajAxFltL];
-        case 'minax'
-            filter= [MinAxFltU.* MinAxFltL];
-        case 'ext'
-            filter= [ExtFltL.*ExtFltU];
         case 'uin'
             filter= filter; %specified as filter by callng program
     end
@@ -54,7 +27,7 @@ while strcmpi('n', countgood)
     Img_Propfilt=Image_PropertiesAll(filtVal,:); %new matrix with 0s filtered out
        
 
-             %% GET HEAD POSITON STEP
+%% GET HEAD POSITON STEP
          %HeadPosnLs=[]...$get this from the skeleton
 
     %% PARTICLE COUNT CHECK
@@ -82,11 +55,7 @@ while strcmpi('n', countgood)
     else% WORMS BELOW COUNT THRESHOLD size(Img_Propfilt, 1)<=MaxWorms*MaxWormFactor
         countgood = 'y';
     end
-    
-    
-    
 end
-
 
 if strcmpi('y', countgood)
     %% COLLECT DATA
@@ -102,7 +71,7 @@ if strcmpi('y', countgood)
         centrSmthY=[centroidLs(1,:);centrSmthY] % need to add a spacer.
         end
         
-    CentrComp= [centroidLs, centrSmthY] % rebuilding CentrCOmp each time
+    CentrComp= [centroidLs, centrSmthY] % rebuilding CentrComp each time
     %headposn
     
     Imagesfilt={};
@@ -119,7 +88,7 @@ if strcmpi('y', countgood)
     ImgCell=(ImgCellmsk.*ImgCellPic);
     
     
-        %% extract intensity data
+%% extract partilce params
     areaboundingBox= boundingBox(3)* boundingBox(4)
     ImgCellNoZero=ImgCell(ImgCell~=0);
     areacell = (Img_Propfilt(1,3))
@@ -179,11 +148,11 @@ if strcmpi('y', countgood)
     
     Image_PropertiesList = Image_PropertiesAll; ctX = 6; ctY = 7; TxtCol = 4; NumCol = 'r'; FntSz = 6;
     if strcmpi ('y', allow_img);
-        cd(CodeDir)
+        %cd(CodeDir)
         PrintObjParamsAug11
     end
     
-    cd([Alldata '/' TrialName 'RUNfinal'])
+    %cd([Alldata '/' TrialName 'RUNfinal'])
     %% FILTERED FIGURE FOR SCORING DIAGNOSIS
     
     if strcmpi(ProofingImgs, 'y')
@@ -200,96 +169,45 @@ if strcmpi('y', countgood)
         hold on;
         plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*', 'MarkerSize', 2);...
             title (['FilterNumber_',num2str(FiltersTried)])
-        saveas (gcf, [DateFldrNms{W},'MultView',imageName,'.pdf'])% save as PDF
-        
-        
-        %% SCORED OBJECTS MULTIPLE Parameters
-        %shared params
-        NumCol = 'K';
-        figure ('position', scrsz);
-        subplot(2,3,1); imagesc(img);
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r>', 'MarkerSize', 5);...
-            title((['area',num2str(LowLim),'-' ,num2str(UpLim) ,'__', imageName])); colorbar
-        Image_PropertiesList = Img_Propfilt; ctX = 6; ctY = 7; TxtCol = 3
-        cd(CodeDir)
-        PrintObjParamsAug11
-        subplot(2,3,2); imagesc(img);
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r>', 'MarkerSize', 5)
-        title((['MajorAxis  ',num2str(MajAxL),'-' ,num2str(MajAxU)])); colorbar
-        Image_PropertiesList = Img_Propfilt; ctX = 6; ctY = 7; TxtCol = 8
-        PrintObjParamsAug11
-        subplot(2,3,3); imagesc(img); title('subtracted images scaled '); colorbar
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r.', 'MarkerSize', 5)
-        title((['MinorAxis  ',num2str(MinAxL),'-' ,num2str(MinAxU)])); colorbar
-        Image_PropertiesList = Img_Propfilt; ctX = 6; ctY = 7; TxtCol = 9
-        PrintObjParamsAug11
-        subplot(2,3,4); imagesc(MasImg);
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'ro', 'MarkerSize', 5)
-        title((['bndBx4(col14)-MasImg',num2str(BndBx4L),'-' ,num2str(BndBx4U)])); colorbar
-        Image_PropertiesList = Img_Propfilt; ctX = 6; ctY = 7; TxtCol = 14
-        PrintObjParamsAug11
-        subplot(2,3,5); imagesc(imgBW);
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'ro', 'MarkerSize', 5)
-        title((['Extent-imgBW',num2str(ExtL),'-' ,num2str(ExtU)])); colorbar
-        Image_PropertiesList = Img_Propfilt; ctX = 6; ctY = 7; TxtCol = 15
-        PrintObjParamsAug11
-        subplot(2,3,6); imshow(imgdsp2); %axis equal;
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'w>')
-        %%
-        cd([Alldata '/' TrialName 'RUNfinal'])
-        saveas (gcf, [DateFldrNms{W},'ObjParams',imageName,'.pdf'])% save as PDF
-        %%
-        cd([Alldata '/' TrialName 'RUNfinal'])
-        figure; imagesc(img); title('subtracted images scaled '); colorbar
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*', 'MarkerSize', 5)
-        saveas (gcf, [DateFldrNms{W},'ScaledSingle',imageName,'.pdf'])% save as PDF
-        
+        saveas (gcf, [DateFldrNms{W},'MultView',imageName,'.pdf'])% save as PDF   
     end %end proofing images loop
     
    
     %% CAPTURE AS STACKED TIFF
-    %Plot ontop of an image and save as a bitmapped image at the same resolution as the original image.
-    %This preserves the image quality and converts the vector plot objects
-
-
-    if strcmpi(DataCapMode, 'StackTiff')
+    if strcmpi(DataCapMode, 'StackGiff')
         
-        cd([Alldata '/' TrialName 'RUNfinal'])%cd([Alldata, '/',DateFldrNms{W}]);   
-        
-        Fhand = figure('Visible', proofingImgVIS);  % Create a new figure without displaying it
-        Fig= uint8(img1); 
-        measure =['BB-ratio',num2str(MajvsMin)]
-        textls={'Thrashing in Buffer'; imageName; [num2str(timeintv), 'secs']; measure}
-%         hold on
+        %cd([Alldata '/' TrialName 'RUNfinal'])%cd([Alldata, '/',DateFldrNms{W}]);   
+        %StackGiffFilename = [RUNfinalDir filesep DateFldrNms{W},'stack.gif'];
+        %Fhand = figure('Visible', proofingImgVIS);  % Create a new figure without displaying it
+        %Fig= uint8(img1); 
+        %measure =['BB-ratio',num2str(MajvsMin)]
+        %  hold on
 % %             text(boundingBox(1), boundingBox(2)+100, ['\fontsize{15}', '\color{blue}','BB-ratio',num2str(boundingBox(3)/ boundingBox(4))])
 % %             subimage(boundingBox(1), boundingBox(2), imcomplement(ImgCell));
 % %             plot(centroidLs(:,1),centroidLs(:,2),'-r*','LineWidth',2)%(
 %         hold off
-        cd(CodeDir);
-        plot4StacktiffOneWorm ('y', CentrComp, [1,2,3,4], Fig, Fhand, textls, 'imshow', 'Image.tif', boundingBox, BBratio);
-        %records the comosite image as 'Image.tif
-        
-        I = imread('Image.tif');
-        if exist(StackTiffFilename) >0
-            imwrite(I, StackTiffFilename, 'writemode', 'append');
-        else
-            imwrite(I, StackTiffFilename);
+%       plot4StacktiffOneWorm ('y', CentrComp, [1,2,3,4], Fig, Fhand, textls, 'imshow', StackGiffFilename, boundingBox, BBratio);
+          % Append to stack of images
+       %Filename = [RUNfiltDir, filesep, DateFileNms{Pair}(1:end-9), 'stack.gif'];
+        Filename = [RUNfinalDir filesep DateFldrNms{W},'stack.gif']
+        measure = ['BB-ratio',num2str(MajvsMin)]%
+        textls={'Thrashing in Buffer'; imageName; [num2str(timeintv), 'secs']; measure}
+        Nm2=strrep(Filename, '_', '-');
+        saveImageToStack(uint8(img1), Filename, ...
+            'title', 'Image', ...
+            'image_name', Nm2, ...
+            'scale_image', false, ...
+            'display_image', 'on',...
+            'CentrComp', CentrComp,...
+            'boundingBox', boundingBox,...
+            'plotcol',[1,2,3,4]); %proofingImgVIS
         end
-        
-    end
 
     %% GetSUBIMAGE OF CELL
     %% save compile data
     %cd([Alldata '/' TrialName 'RUNfinal']);
-    save ([Alldata filesep TrialName, 'RUNfinal' filesep imageName(1:end-4), '.mat'], 'img1','Image_PropertiesAll',...
-        'Image_PropertiesList', 'Images', 'Imagesfilt', 'Img_Propfilt') %, 'CumulImg'
+   % save ([RUNfinalDir filesep imageName(1:end-4), 'final.mat'], 'img1','Image_PropertiesAll',...
+   %     'Image_PropertiesList', 'Images', 'Imagesfilt', 'Img_Propfilt') %, 'CumulImg'
     %figure; imagesc(img)
 end
 
