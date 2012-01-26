@@ -2,7 +2,7 @@
 vers='chronos7INTENSITY(8_9_11)- single cell flouresence'
 
 %% ImageAnalysisMode
-framerate=6
+framerate=20
 EvenImgBgSub= 'single'
 imgfmt='*jpg'
 %path smoothng options
@@ -13,9 +13,10 @@ SmoothMeth='moving'
 
 SnglImgProofMd = 'off'  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
 DataCapMode = 'StackGiff' %'StackTiff','Simple'
-allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
+allow_img= 'y'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
 ProofingImgs = 'n' % extra proofing images
+stoppoint='n'
 
  App='New'
  FntSz = 14;
