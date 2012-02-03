@@ -31,7 +31,6 @@ figure ;imshow(WmImgPad,'InitialMagnification', 400); title ('WmImgPad')
 xx=1:size(WmImgPad, 2)
 size(WmImgPad)
 
-
 skele=bwmorph(WmImgPad, 'skel', Inf);
 %[x,y]=ind2sub(size(skele), find(skele))
 skele2=bwmorph(skele, 'spur');
@@ -97,6 +96,7 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
     skeleEND=bwmorph(WorkSpine, 'endpoints');
     [x,y]=ind2sub(size(skeleEND), find(skeleEND));
     
+
     %Distance between head position and top of matrix
     TopHeaddist=sqrt((poshead(2) - x(1))^2 + (poshead(1) - y(1))^2)
     %Distance between head position and bottom of matrix
@@ -111,11 +111,10 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
         anchor =[x(2),y(2)]; % the matirx is in the correct orientation, anchor the bottom
     end
     
+%% BUILD SPINE - use ~(not)anchor point as current point    
     for Pt=1:size(wkSpnX, 1)-1
         skeleEND=bwmorph(WorkSpine, 'endpoints');
         [x,y]=ind2sub(size(skeleEND), find(skeleEND));
-        
-        %% BUILD SPINE - use ~(not)anchor point as current point
         
         % Identify the position of the anchor row
         anchorROW=find (x == anchor(1))
@@ -123,8 +122,19 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
             anchorROW=find (y == anchor(2))
         end
         
+    %for each iteration of spine decay check that there are still 2 endpoints
+    %deals with case of spine that crosses itself to make a circle
+    if size (x,1) <2  % bad spine case
+    SpineData.spinegood = 'n'
+    SpineData.endpoints = size(x, 1);
+    break
+    end
+    
+        
         
         % Take the non-anchor point as the current point
+        % if it can't locate the anchor at any iteration the spine is bad
+        
         if anchorROW == 1
             CurrPt= [x(2),y(2)];
         else
