@@ -2,7 +2,9 @@
 vers='chronos7INTENSITY(8_9_11)- single cell flouresence'
 
 %% ImageAnalysisMode
-framerate=20
+framerate=29
+MicroM_Pixel=1
+
 EvenImgBgSub= 'single'
 imgfmt='*jpg'
 %path smoothng options
@@ -10,13 +12,16 @@ SmoothInt=5%
 SmoothMeth='moving'
 %Smoothstart=25 %dont plot until smoothed index is this long <<specify
 %within Plot4StacktiffOneWorm < later import all params as single matirx
+poshead=[]
+
 
 SnglImgProofMd = 'off'  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
 DataCapMode = 'StackGiff' %'StackTiff','Simple'
-allow_img= 'y'%allow_img= input ('Allow images? (Y/N)', 's')
+allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
 ProofingImgs = 'n' % extra proofing images
 stoppoint='n'
+
 
  App='New'
  FntSz = 14;
@@ -48,7 +53,7 @@ BndLim=.65;  % PRC MODE- dynamicBndLim deactivates this one .25
 FiltApp='SZ_Ax_BB'%'all'
 LowLim=500; UpLim=1200; % AREA %col10 <<NEEDED TO 
 MajAxL=50; MajAxU=300; %col 8   <<NEEDED TO RAise 
-MinAxL=10; MinAxU=300; %col 9   <<NEEDED TO RAise 
+MinAxL=5; MinAxU=300; %col 9   <<NEEDED TO RAise <<needed to lower Min 10>5
 BndBx4L=25; BndBx4U=1000; %col14 <<NEEDED TO RAise 
 TotAxL = 85; TotAxU = 200  %(MajAxL+MinAxL)
 

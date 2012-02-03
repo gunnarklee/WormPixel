@@ -24,6 +24,7 @@ while strcmpi('n', countgood)
     
     clear ('filtVal')
     filtVal=find(filter); %finds row addresses of values
+
     Img_Propfilt=Image_PropertiesAll(filtVal,:); %new matrix with 0s filtered out
        
 
