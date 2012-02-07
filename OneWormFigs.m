@@ -114,15 +114,20 @@ for w=1:length(DateFileNms)
     
     close all
 end
-  save ([DataDir RecentFldr 'SummData'], 'centroid', 'imgs', 'CurveMtx', 'SpineList', 'Pointlist', 'velocity', 'time'); %does not save sub structure
+  save ([DataDir RecentFldr 'SummData'], 'centroid', 'imgs', 'CurveMtx', 'SpineList', 'Pointlist', 'velocity', 'time', 'img1'); %does not save sub structure
     
     figure;imagesc(CurveMtx)
     figure;plot(centroid(:,1),centroid(:,2),'*b') ; title ('centroid position'); xlim ([1,size(img1,1)]); ylim([1, size(img1, 2)]); 
+    figure;plot(centroid(:,1),centroid(:,2),'*b') ; title ('centroid position'); xlim ([1,450]); ylim([1,400]); 
+    
+    
     figure;plot(time,velocity,'-r') ; title ('velocity vs. time')
     hold on
     axes('position', [.75 .15 .15 .15]) 
     plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r')
     
+   %pot neck movement 
+   figure; plot(CurveMtx(3,:))
     
 %     plot(SpineList{W}(:,1), SpineList{W}(:,2));
 %     hold on

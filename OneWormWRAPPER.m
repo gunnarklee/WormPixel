@@ -19,7 +19,7 @@ InputDir='/Users/budoday/Desktop/DATA/AldulanteSwimmingTest/'
 Outputdir=InputDir
 trailName='TestDS1_12_12test2'
 
-GetWorm(InputDir, Outputdir, trailName)
+%GetWorm(InputDir, Outputdir, trailName)
 OneWormFigs(InputDir, Outputdir, trailName)
 
 %NumDig = 3;

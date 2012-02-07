@@ -15,9 +15,9 @@ SmoothMeth='moving'
 poshead=[]
 
 
-SnglImgProofMd = 'off'  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
+SnglImgProofMd = 'off';  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
 DataCapMode = 'StackGiff' %'StackTiff','Simple'
-allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
+allow_img= 'y'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
 ProofingImgs = 'n' % extra proofing images
 stoppoint='n'

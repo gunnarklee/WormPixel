@@ -15,7 +15,7 @@ GoodCrop = 'n'; % for the first iteration you will allow user to recrop until th
 % this is reqired because the masking circle is biggger than expected
 while strcmpi(GoodCrop ,'n')
 
-disp('circle the included region');
+disp('indicate the included region');
 disp('DOUBLE CLICK WHEN DONE!');
 %% 
         clear ('posctr'); clear ('posedge');
@@ -26,7 +26,7 @@ disp('DOUBLE CLICK WHEN DONE!');
         % Update position in title using newPositionCallback
         addNewPositionCallback(h,@(h) title(sprintf('(%1.0f,%1.0f)',h(1),h(2))));
         % Construct boundary constraint function
-        fcn = makeConstrainToRectFcn('imellipse',get(gca,'XLim'),get(gca,'YLim'));
+        fcn = makeConstrainToRectFcn('imrect',get(gca,'XLim'),get(gca,'YLim'));
         % Enforce boundary constraint function using setPositionConstraintFcn
         setPositionConstraintFcn(h,fcn);
         setColor(h,'r');
@@ -48,11 +48,11 @@ disp('DOUBLE CLICK WHEN DONE!');
         subplot (2,1,1); imagesc(imgCP);
         subplot (2,1,2); imagesc(imgtmp); hold on;  
    
-    cd(OutDir)
+%   cd(OutDir)
     %print('-dtiff', [ImageSetName, 'CrclMask'])
 %end
 
-GoodCrop=input('is the crop good (y/n))', 's');
+%GoodCrop=input('is the crop good (y/n))', 's');
 end
 else %just  crop with the good parameters
 
@@ -71,11 +71,9 @@ else %just  crop with the good parameters
         theta=linspace(0,2*pi);
         plot(xctr+sqrt(radSqr)*cos(theta),yctr+sqrt(radSqr)*sin(theta), 'w');
         axis equal
-        cd(OutDir)
+        %cd(OutDir)
         %print('-dtiff', [ImageSetName, 'CrclMask'])
-        end
-        
-        
+        end  
     
 end
 
