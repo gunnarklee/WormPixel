@@ -21,7 +21,7 @@ allow_img= 'y'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
 ProofingImgs = 'n' % extra proofing images
 stoppoint='n'
-
+SortByDtStamp= 'n' %can introudce errors when date stamp is wrong dont use unless files are ordered wrong to start
 
  App='New'
  FntSz = 14;

@@ -45,7 +45,7 @@ while strcmpi('n', countgood)
         countgood = 'n';
         StringentFilter = 'y';
         FiltersTried=FiltersTried+1;
-        OneWorm_CHR7Params  %reload params for next filtering
+       % OneWorm_CHR7Params  % ** dont overwrite adapted params **reload params for next filtering
     elseif and (~size(Img_Propfilt, 1) == MinWorms*MaxWormFactor, FiltersTried == MaxFilt);
         % if you have tried all teh filters and htere are still too many
         % worms, discard the time point

@@ -149,29 +149,29 @@ for W=FldStart:FldMax; %loop folders
     centrSmthY=[];
     
     dirOutput2 = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
+    
     if size(dirOutput2 ,1) < 1
-        dirOutput2  = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
-    end
-    %  sort the structure into dates order from time stamp
-    %convert dates to serial numbers
-    for n= 1:size(dirOutput2,1);
-        dirOutput2(n).datenum=datenum({dirOutput2(n).date});
+       error('I can not find any images')
+        % dirOutput2  = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
     end
     
-    [unused, order] = sort([dirOutput2(:).datenum]); %sort by number
-    dirOutput2 = dirOutput2(order);
-    {dirOutput2.date}';
     
-    DateFldrNms2 = {dirOutput2.name}';
+%% sort the structure into dates order from time stamp    
+if strcmpi(SortByDtStamp, 'y')
+    [dirOutput2] = SortByDtSt (dirOutput2)
+   % sometimes this mis-orders files if the time stamp is wrong
+end
+           
+    %>> Date_NameLs=[{dirOutput2.date}', {dirOutput2.name}'] %report
+    DateFldrNms2 = {dirOutput2.name}'; % cell array to matrix
 
     close all
     Images=[];
     
-    if strcmpi(EvenImgBgSub, 'y') % only for non-simple mode
-        CumulImg=double(imread(DateFldrNms2{1}));
-    end
-    %%
-    %read the images into the work space as a STACK
+%     if strcmpi(EvenImgBgSub, 'y') % only for non-simple mode
+%         CumulImg=double(imread(DateFldrNms2{1}));
+%     end
+    %read the images into the workspace
     %in EvenImgBgSub mode, make cumulimages.
     for ImN=1:size(DateFldrNms2,1);
         if strcmpi('off', SnglImgProofMd); % switch for single pairmode
@@ -216,15 +216,18 @@ for W=FldStart:FldMax; %loop folders
             BBmask (boundingBox(2)-boundingBox(4).*PadPrc:boundingBox(2)+boundingBox(4).*2.*PadPrc,...
                 boundingBox(1)-boundingBox(3).*PadPrc:boundingBox(1)+boundingBox(3).*2.*PadPrc)= ones;
             %Be sure that padded BB does not stretch the mask beyond the edges of img
-            BBmask=BBmask(1:size(img,1), 1:size(img,2))
+            BBmask=BBmask(1:size(img,1), 1:size(img,2));
             
             img=(img.*BBmask); %% pass the masked image into the particle analysis to avoit off target particles.
+            if (strcmpi (allow_img, 'y'))
             figure; imshow(uint8(img));
+            end
             %stoppt=input('next step?', 's')
             %clear ('PaddedBox', 'boundingBox')
         end
         
-        % MASK BY INTensity ** removing middle tones
+%% MASK BY INTensity ** removing middle tones
+        %>>>function [MasImg, maskParams] = MaskByIntns (img,params) 
         %be careful this can lead to rescaling and washing
         % out of extreeme features. this seems to start with BndLim < .8...
         % Mask=(img < (bnd+avg) | img > (avg-bnd)); %threshold set as bounds around AVERAGE
@@ -234,6 +237,7 @@ for W=FldStart:FldMax; %loop folders
         close all
         %BndLim=.3
         
+     
         % dynamically determine bound limits from image characteristics
         switch dynamicBndLim;
             case 'stdv'
@@ -279,6 +283,7 @@ for W=FldStart:FldMax; %loop folders
             figure ('position', scrsz); subplot (2,2,1); imagesc(subimg); title ('original image'); colorbar; subplot (2,2,2); imagesc(Mask);title ('Mask image'); colorbar; subplot (2,2,3); imagesc(MasImg); title ('MasImg image'); colorbar;
         end
         
+        close all
         
         %% IDENTIFY OBJECTS and FILTER DATA
         %%BW THRESHLDING - the boundlimit subtraction above takes care of the thresholding
@@ -331,7 +336,7 @@ for W=FldStart:FldMax; %loop folders
         [SpineData, poshead2] = SpineWorm(Imagesfilt, Img_Propfilt, img1, ErrorDir, allow_img, stoppoint, poshead)
         
         [poshead]=updatePoshead (poshead2, poshead)
-        
+        close all 
         %check for errors
         if strcmpi('n', SpineData.spinegood)
             save ([ErrorDir filesep imageName(1:end-4), 'SpineError.mat'], 'F',... %'Imagesfilt',
@@ -353,7 +358,8 @@ for W=FldStart:FldMax; %loop folders
         %program refereces specific columns throughout
         
         %these are graphed in "GetImgPropsDrop.m"
-        %for a description of a specific measure look up "regionprops" in help
+        %for a description of a specific measure look up "regionprops" in
+        %help
         Allsizes = Img_Propfilt(:,3);
         sizesScored = Image_PropertiesAll(:,3);
         
@@ -404,7 +410,7 @@ for W=FldStart:FldMax; %loop folders
     save ([RUNfinalDir, filesep ,DateFldrNms{W},'_',DateFldrNms2{ImN}, 'AllData.mat']) % OutDir
     save([RUNfinalDir, filesep ,DateFldrNms{W} 'OneWormdata.mat'], 'OneWorm_DataHeaders', 'OneWorm_Data')
 end % FOLDERS LOOP
-end
+end %end main function
 
 %% make sure you have a good head position
 function [poshead]=updatePoshead (poshead2, poshead)
@@ -445,6 +451,7 @@ end
 
 end
 
+%% get Param range for the worm
 function Particleparams (Alldata, DateFldrNms, imgfmt)
 %% get particle filter values by asking the user to idenfity the worm in 5 pictures.
 WormProps=[]
@@ -454,26 +461,21 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
     if size( dirOutputCropPar,1) < 1 % if there are no filter params, then get them
         %>DateFldrNms2 = {dirOutputCropPar.name}'; % get image list
         dirOutputtif = dir(fullfile([Alldata, '/',DateFldrNms{W}], imgfmt)); %list the images
-        %> if size(dirOutputtif,1) < 1
-        %%?? this just does hte same thing ?
-        %>    dirOutputtif = dir(fullfile([Alldata, '/',DateFldrNms{W}], imgfmt)); %list the images
-        %> end
-        %cd([Alldata, '/',DateFldrNms{W}]);
-        for imgnm=1:5 %load 5 images to choose particles
+       for imgnm=1:5 %load 5 images to choose particles
             imgtmp=imread([Alldata filesep DateFldrNms{W} filesep dirOutputtif(imgnm).name]); %load the first image in the folder
             imgtmp=rgb2gray(imgtmp);
             
             thresh_hold = graythresh(imgtmp);% dynamically determine threshold
             imgBW=imcomplement(im2bw(imgtmp,thresh_hold));% apply threshold
-            
+
             %find particles and get partilce properties
             [imgBWL, F, Image_PropertiesAll] = GetImgProps (imgBW, 'y');
+            if imgnm==1; StartPos=[ceil(size(imgBWL(:,:,1), 2)*.5), ceil(size(imgBWL (:,:,1), 1)*.5)]; end
             
             %identify the worm
-            disp('find the worm centorid')
-            [pos] = GetPoint(imgBWL, [ceil(size(imgBWL(:,:,1), 2)*.85), ceil(size(imgBWL (:,:,1), 1)*.85)])
-            
-            
+            disp('Double click on the worm centorid')
+            [pos] = GetPoint(imgBWL, StartPos)
+            StartPos=pos
             %get the particle with the closest centroid to the selected location
             [row, mindiff]=CloseCentr(pos, Image_PropertiesAll)
             
@@ -539,4 +541,21 @@ stats.upper=stats.mean+stats.mean*PRCbracket;upper=stats.upper;
 stats.lower=stats.mean-stats.mean*PRCbracket;lower=stats.lower;
 stats.std=std(DataList);
 
+end
+
+
+function [dirOutput2] = SortByDtSt (dirOutput2)
+   
+   % sometimes this mis-orders files if the time stamp is wrong
+   % Make it optional
+
+    %convert dates to serial numbers >
+    for n= 1:size(dirOutput2,1);
+        dirOutput2(n).datenum=datenum({dirOutput2(n).date})
+    end
+     %sort by date serial number the datetamp is wrong on some of these? 
+     %'N2 A1 1_frame_0200.jpg', ... 0400.jpg, 0700.jpg, 1000.jpg but not 0300.jpg
+     %may have smting to do with when the image was saved?
+    [unused, order] = sort([dirOutput2(:).datenum]);
+    dirOutput2 = dirOutput2(order);
 end

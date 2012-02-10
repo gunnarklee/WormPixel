@@ -52,6 +52,7 @@ disp('DOUBLE CLICK WHEN DONE!');
     %print('-dtiff', [ImageSetName, 'CrclMask'])
 %end
 
+GoodCrop='y'
 %GoodCrop=input('is the crop good (y/n))', 's');
 end
 else %just  crop with the good parameters
