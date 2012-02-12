@@ -14,4 +14,4 @@ Outputdir=InputDir
 trialName='TestDS1_12_12test2'
 
 GetWorm(InputDir, Outputdir, trialName)
-%OneWormFigs(InputDir, Outputdir, trialName)
+OneWormFigs(InputDir, Outputdir, trialName)
