@@ -23,8 +23,6 @@ close all
 SE=strel('disk', 3);
 minWm=imerode(WmImgPad, SE);
 
-figure ;imshow(minWm, 'InitialMagnification', 400); title ('minworm')
-figure ;imshow(WmImgPad,'InitialMagnification', 400); title ('WmImgPad')
 
 %%
 [x,y]=find(minWm)
@@ -37,7 +35,9 @@ skele2=bwmorph(skele, 'spur');
 skele3=bwmorph(skele2, 'spur');
 skeleSH=bwmorph(skele3, 'shrink');
 
-if (strcmpi (allow_img, 'y'));
+if (strcmpi (allow_img, 'y'));  
+    figure ;imshow(minWm, 'InitialMagnification', 400); title ('minworm')
+    figure ;imshow(WmImgPad,'InitialMagnification', 400); title ('WmImgPad')
     figure; imshow(imoverlay (mat2gray(WmImgPad), skele,  [255, 0, 0]), 'InitialMagnification', 400); title ('skele-original');
     figure; imshow(imoverlay (mat2gray(WmImgPad), skele2,  [0,255, 0]), 'InitialMagnification', 400); title ('skele2-despurred1x');
     figure; imshow(imoverlay (mat2gray(WmImgPad), skele3,  [0, 0, 255]), 'InitialMagnification', 400); title ('skele3-despurred2x');
@@ -143,18 +143,6 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
         
         if size (SpineList, 1) > 0
             lastPt=SpineList(end, :) %get last point appended
-            %if x and y values for both points are different get
-            %you have a slanted line, find the hypotenuse
-            %             if (CurrPt(1) == lastPt(1)) + (CurrPt(2) == lastPt(2)) == 0
-            %                 ThridPt=[CurrPt(1),lastPt(2)]
-            %
-            %                 %This works because points are in a line with the third point
-            %                 pointdistA=abs(CurrPt(1)-ThridPt(1)+CurrPt(2)-ThridPt(2))
-            %                 pointdistB=abs(lastPt(1)-ThridPt(1)+lastPt(2)-ThridPt(2))
-            %                 pointdist=hypot(pointdistA, pointdistB)
-            %             else % the points are direclty next to each other
-            %                 pointdist=1
-            %             end
             
             %get the distance between the two points
             pointdist=sqrt((lastPt(1) - CurrPt(1))^2 + (lastPt(2) - CurrPt(2))^2)
@@ -165,7 +153,6 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
         
         %append the current point
         SpineList=[SpineList;CurrPt];
-        
         
         %addpoint to imgage with new color
         WmImgPadcolor=(imoverlay (mat2gray(WmImgPadcolor), skeleEND,  cmap(Pt,:)));

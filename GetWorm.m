@@ -207,10 +207,6 @@ end
         if ImN > 2
             %Search only in a padded region boinding the last worm
             PadPrc=1.5
-            %PaddedBox = [boundingBox(1)*PadPrc,boundingBox(2).*PadPrc,boundingBox(3)*PadPrc*4,boundingBox(4)*PadPrc*4]
-            %PlotBoundBox(img, PaddedBox) % to check..
-            PlotBoundBox(img, boundingBox) % to check..
-            %PaddedBox,boundingBox
             BBmask = zeros(size(img));
             %Be sure that padded BB does not stretch the mask beyond the edges of img
             BBmask (boundingBox(2)-boundingBox(4).*PadPrc:boundingBox(2)+boundingBox(4).*2.*PadPrc,...
@@ -221,6 +217,7 @@ end
             img=(img.*BBmask); %% pass the masked image into the particle analysis to avoit off target particles.
             if (strcmpi (allow_img, 'y'))
             figure; imshow(uint8(img));
+            PlotBoundBox(img, boundingBox) % to check..
             end
             %stoppt=input('next step?', 's')
             %clear ('PaddedBox', 'boundingBox')
@@ -277,7 +274,6 @@ end
         img=double(img);
         MasImg=(img.*Mask);
         if (strcmpi (allow_img, 'y'))
-            %>            figure; imagesc(Straightsubimg); title ('Straightsubimg')
             figure; imagesc(MasImg); title ('MasImg')
             figure; imagesc(Mask); title ('Mask')
             figure ('position', scrsz); subplot (2,2,1); imagesc(subimg); title ('original image'); colorbar; subplot (2,2,2); imagesc(Mask);title ('Mask image'); colorbar; subplot (2,2,3); imagesc(MasImg); title ('MasImg image'); colorbar;
