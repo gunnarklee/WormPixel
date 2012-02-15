@@ -9,9 +9,9 @@
 %InputDir='C:\Documents and Settings\mlab\Desktop\reproductive_span_robot\RSbatch2screen1-verify12_2011'
 
 
-InputDir='/Users/budoday/Desktop/DATA/AldulanteSwimmingTest/'
-Outputdir=InputDir
-trialName='TestDS1_12_12test2'
+InputDir='/Users/budoday/Desktop/DATA/AldulanteSwimmingTest/N2_24hrun/';
+Outputdir=InputDir;
+trialName='TestDS1_12_12test2';
 
-GetWorm(InputDir, Outputdir, trialName)
+%GetWorm(InputDir, Outputdir, trialName)
 OneWormFigs(InputDir, Outputdir, trialName)

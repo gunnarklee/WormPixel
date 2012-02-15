@@ -50,85 +50,150 @@ OneWorm_CHR7Params
 % Setup variables
 scrsz = get(0,'ScreenSize');
 
-%% Make new directories
-[DateFileNms RecentFldr namedate] = GetFolderMat (DataDir, 'final', 'final')
+%% GET THE MOST RECENT "final.mat" folder for looping
+[DateFileNms RecentFldr namedate] = GetFolderMat (DataDir, 'final', 'final');
 
 centroid=[];
 SpineCoords={};
 CurveMtx=[];
-imgs=[];
-CurveMtx=[]
-SpineList={}
-Pointlist={}
+imgs={};
+CurveMtx=[];
+SpineList={};
+Pointlist={};
 poshead=[];
 velocity=[];
 time=[];
 
-%% check each folder or crop params if absent get them
 
-for w=1:length(DateFileNms)
-    load([DataDir 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}])
-    CurrCent=[Img_Propfilt(1,1),Img_Propfilt(1,2)]
-    insttime=1/framerate %seconds
+%preallocate Matricies 
+
+leng=length(DateFileNms)
+
+distanceMv=zeros(leng, 1);   %velocity=[velocity;vel];
+centroid=zeros(leng, 2);   %centroid=[centroid;CurrCent];
+imgs=cell(leng, 1);  %imgs=[imgs;imgBWL];
+CurveMtx=zeros(10, leng);%CurveMtx=[CurveMtx,SpineData.AngleLs];
+SpineList=cell(leng, 1);   %SpineList=[SpineList,SpineData.SpineList];
+Pointlist=cell(leng, 2);   %Pointlist=[Pointlist,SpineData.Pointlist];
+time=zeros(leng, 1);   %time=[time;insttime+time(end,:)];
+
+
+%% stack the data from "final.mat" files
+
+for w=1:length(DateFileNms);
+    load([DataDir 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
+    
+    [CurrCent]=FindCentr(Img_Propfilt, 'CtrMass'); %CtrMass
+    
+    insttime=1/framerate; %seconds
     
     %use last centroid and current centroid to calcualte velocity
-    if isempty(velocity)
-        velocity=[0];
+    if w==1
+        distanceMv(w,1)=0;
     else
-        vel=(pdist2(centroid(end,:),CurrCent)*MicroM_Pixel)/insttime;
-        %sqrt((CurrCent(2)-centroid(end,2))^2+(CurrCent(1)-centroid(end,1))^2)
-        velocity=[velocity;vel]
+        distMv=(pdist2(centroid(end-1,:),CurrCent));%*MicroM_Pixel)/insttime;
+        distanceMv(w,1)=distMv;
     end
-    
-    
     
     %cocatenate the order corrected matricies
-    centroid=[centroid;CurrCent];
-    imgs=[imgs;imgBWL];
-    CurveMtx=[CurveMtx,SpineData.AngleLs];
-    SpineList=[SpineList,SpineData.SpineList];
-    Pointlist=[Pointlist,SpineData.Pointlist];
-   
-   
+    centroid(w,1:2)=CurrCent;
+    imgs{w}=imgBWL;%not sure if necc
+    CurveMtx(:,w)=SpineData.AngleLs;
+    SpineList{w}=SpineData.SpineList;
+    Pointlist{w}=SpineData.Pointlist;
     
-    
-    if isempty(time)
-        time=[0]
+    if w==1
+        time(w)=0;
     else
-        time=[time;insttime+time(end,:)]
+        time(w)=insttime+time(w-1);
     end
     
     
     
-%% make figs    
-    figure;imagesc(CurveMtx)
-    figure;plot(centroid(:,1),centroid(:,2),'*b') ; title ('centroid position'); xlim ([1,size(img1,1)]); ylim([1, size(img1, 2)]); 
-    figure;plot(time,velocity,'-r') ; title ('velocity vs. time')
-    hold on
-    axes('position', [.75 .15 .15 .15]) 
-    plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r')
+    %% make figs
+    
+    if strcmpi (allow_img, 'y')
+        figure;imagesc(CurveMtx);
+        figure;plot(centroid(:,1),centroid(:,2),'*b') ; title ('centroid position'); xlim ([1,size(img1,1)]); ylim([1, size(img1, 2)]);
+        figure;plot(time,velocity,'-r') ; title ('displacement vs. time');
+        hold on
+        axes('position', [.75 .15 .15 .15]);
+        plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+    end
     
     if strcmpi (stoppoint, 'y')
-        stopPt= input ('next image?', 's')
+        stopPt= input ('next image?', 's');
     end
     
     close all
 end
-  save ([DataDir RecentFldr 'SummData'], 'centroid', 'imgs', 'CurveMtx', 'SpineList', 'Pointlist', 'velocity', 'time', 'img1'); %does not save sub structure
-    
-    figure;imagesc(CurveMtx)
-    figure;plot(centroid(:,1),centroid(:,2),'*b') ; title ('centroid position'); xlim ([1,size(img1,1)]); ylim([1, size(img1, 2)]); 
-    figure;plot(centroid(:,1),centroid(:,2),'*b') ; title ('centroid position'); xlim ([1,450]); ylim([1,400]); 
-    
-    
-    figure;plot(time,velocity,'-r') ; title ('velocity vs. time')
-    hold on
-    axes('position', [.75 .15 .15 .15]) 
-    plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r')
-    
-   %pot neck movement 
-   figure; plot(CurveMtx(3,:))
-    
+
+
+numFr =250
+
+save ([DataDir RecentFldr 'SummData'], 'centroid', 'imgs', 'CurveMtx', 'SpineList', 'Pointlist', 'distanceMv', 'time', 'img1'); %does not save sub structure
+
+figure;imagesc(CurveMtx)
+saveas (gcf, [DataDir RecentFldr 'CurveMtx'], 'pdf')
+
+figure;imagesc(CurveMtx(:,1:numFr))
+saveas (gcf, [DataDir RecentFldr 'CurveMtx' num2str(numFr)], 'pdf')
+
+
+figure;plot(centroid(:,1),centroid(:,2), '--rs',...
+    'LineWidth', 2, 'MarkerEdgeColor','k',...
+    'MarkerFaceColor','g', 'MarkerSize', 1);...
+    title ('centroid position'); xlim ([1,size(img1,2)]); ylim([1, size(img1, 1)]);
+saveas (gcf, [DataDir RecentFldr 'PathTraveled'], 'pdf')
+
+figure;imagesc(CurveMtx)
+figure;plot(centroid(1:numFr,1),centroid(1:numFr,2), '--rs',...
+    'LineWidth', 2, 'MarkerEdgeColor','k',...
+    'MarkerFaceColor','g', 'MarkerSize', 1);...
+    title ('centroid position'); xlim ([1,size(img1,2)]); ylim([1, size(img1, 1)]);
+saveas (gcf, [DataDir RecentFldr 'PathTraveled' num2str(numFr)], 'pdf')
+
+
+
+%figure;plot(centroid(:,1),centroid(:,2),'*b') ; title ('centroid position'); xlim ([1,450]); ylim([1,400]);
+
+%plot displacement 
+figure;plot(time,distanceMv,'-r') ; title ('displacement vs. time');
+hold on
+axes('position', [.75 .15 .15 .15]);
+plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+saveas (gcf, [DataDir RecentFldr 'Distvstm'], 'pdf')
+
+figure;plot(time(1:numFr,:),distanceMv(1:numFr,:),'-r') ; title ('displacement vs. time');
+hold on
+axes('position', [.75 .15 .15 .15]);
+plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+saveas (gcf, [DataDir RecentFldr 'DistVstm' num2str(numFr)], 'pdf')
+
+%Cummulative Dist
+CumulDist=cumsum(distanceMv)
+figure;plot(time,CumulDist,'-r') ; title ('Cumldispl vs. time');
+hold on
+axes('position', [.75 .15 .15 .15]);
+plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+saveas (gcf, [DataDir RecentFldr 'CumlPathTraveled'], 'pdf')
+
+figure;plot(time(1:numFr,:),CumulDist(1:numFr,:),'-r') ; title ('Cumldispl vs. time');
+hold on
+axes('position', [.75 .15 .15 .15]);
+plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+saveas (gcf, [DataDir RecentFldr 'CumlPathTraveled' num2str(numFr)], 'pdf')
+
+
+
+
+%plot neck movement
+figure; plot(CurveMtx(3,1:numFr));
+saveas (gcf, [DataDir RecentFldr 'NeckMovement' num2str(numFr)], 'pdf')
+figure; plot(CurveMtx(3,:));
+saveas (gcf, [DataDir RecentFldr 'NeckMovement'], 'pdf')
+
+
 %     plot(SpineList{W}(:,1), SpineList{W}(:,2));
 %     hold on
 %     %figure; imagesc(CurveMtx);
@@ -144,3 +209,21 @@ end
 %     hold on
 %     %addpoint to imgage with new color
 %     WmImgPadcolor=(imoverlay (mat2gray(WmImgPadcolor), skeleEND, cmap(Pt,:)));
+end
+
+function [CurrCent]=FindCentr(Img_Propfilt, mode) %CtrMass
+
+switch mode
+    case 'CtrMass'
+        %centroid as center of mass of particle
+        CurrCent=[Img_Propfilt(1,1),Img_Propfilt(1,2)];
+        
+    case 'CtrBB'
+        %centroid as center of bounding box (Pierce-Shimomoura method)
+        uplfX=Img_Propfilt(11);
+        uplfY=Img_Propfilt(12);
+        Xwid=Img_Propfilt(13);
+        yhgt=Img_Propfilt(14);
+        CurrCent=[(uplfX+(Xwid/2)),(uplfY-(yhgt/2))];
+end
+end
