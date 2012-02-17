@@ -14,14 +14,19 @@ SmoothMeth='moving'
 %within Plot4StacktiffOneWorm < later import all params as single matirx
 poshead=[]
 
+%% worm spining features
+pad=20
+numpts=13 %number of spine points
 
+%Visulization modes
 SnglImgProofMd = 'off';  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
 DataCapMode = 'StackGiff' %'StackTiff','Simple'
 allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
 ProofingImgs = 'n' % extra proofing images
 stoppoint='n'
-SortByDtStamp= 'n' %can introudce errors when date stamp is wrong dont use unless files are ordered wrong to start
+SortByName= 'n' %sort in ASCII order. pad your numeric indees with zeros
+%date stammp can introudce errors when date stamp is wrong dont use unless files are ordered wrong to start
 
  App='New'
  FntSz = 14;
@@ -41,13 +46,16 @@ MaxWormFactor=1 %skips if MaxWorms * MaxWormFactor is exceeded
 MaxWorms=1 % MAXIMUM PARTICLES COUNTED
 MinWorms=1
 %% THRESHOLDING FILTERS value -OR use graythesh to dynamically determine     
-dynamicTH = 'y' %when set to automatic seems to switch between .0001 (bad) and .49 (ok)
+dynamicTH = 'y-ShortCircuit' %'y', n , y, y-ShortCircuit (LOW CONTRAST IMGS)
+
+%when set to automatic seems to switch between .0001 (bad) and .49 (ok)
 thresh_hold=.49; % dynamicTH deactivates this one .25
 dynamicBndLim = 'prc' %'stdv', 'prc''static' 
 %>>NumStd=7 %three standard deviations do not seem to do it (7 matches a .25% boundlimit (about))
-BndLim=.65;  % PRC MODE- dynamicBndLim deactivates this one .25
+BndLim=0;  % PRC MODE- dynamicBndLim deactivates this one .25
 %>>Minbnd=-20% STATIC MODE- specifically remove the middle 'bnd' % of colors
 %>>Maxbnd=20 
+smoothbkg='y'
 
 %% PARTICLE FILTERS
 FiltApp='SZ_Ax_BB'%'all'

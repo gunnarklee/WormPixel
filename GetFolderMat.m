@@ -16,6 +16,7 @@ dirOutput = dir(fullfile([fldrPath,'*RUN' folderID])); %specifiy source folder
 end 
 
 DateFldrNms = {dirOutput.name}';
+if isempty(DateFldrNms); error (['I dont find your' folderID 'folder, make sure you built it']); end
 namedate=sortrows([{dirOutput.datenum}', DateFldrNms]); %order by folder age
 RecentFldr=namedate{end,2};%select the last folder built
 dirOutput = dir(fullfile([fldrPath, filesep, RecentFldr], ['*' fileID '.mat']))

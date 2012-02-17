@@ -72,7 +72,7 @@ leng=length(DateFileNms)
 distanceMv=zeros(leng, 1);   %velocity=[velocity;vel];
 centroid=zeros(leng, 2);   %centroid=[centroid;CurrCent];
 imgs=cell(leng, 1);  %imgs=[imgs;imgBWL];
-CurveMtx=zeros(10, leng);%CurveMtx=[CurveMtx,SpineData.AngleLs];
+CurveMtx=zeros(numpts-2, leng);%CurveMtx=[CurveMtx,SpineData.AngleLs];
 SpineList=cell(leng, 1);   %SpineList=[SpineList,SpineData.SpineList];
 Pointlist=cell(leng, 2);   %Pointlist=[Pointlist,SpineData.Pointlist];
 time=zeros(leng, 1);   %time=[time;insttime+time(end,:)];
@@ -81,7 +81,7 @@ time=zeros(leng, 1);   %time=[time;insttime+time(end,:)];
 %% stack the data from "final.mat" files
 
 for w=1:length(DateFileNms);
-    load([DataDir 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
+    load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
     
     [CurrCent]=FindCentr(Img_Propfilt, 'CtrMass'); %CtrMass
     

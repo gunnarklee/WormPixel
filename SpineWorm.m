@@ -1,8 +1,7 @@
-function [SpineData, poshead] = SpineWorm(Imagesfilt, Img_Propfilt, img1, ErrorDir, allow_img, stoppoint, poshead)
+function [SpineData, poshead] = SpineWorm(Imagesfilt, Img_Propfilt, img1, ErrorDir, allow_img, stoppoint, poshead, numpts, pad)
 %UNTITLED2 Summary of this function goes here
 %Single worm is input, get image characteristics
-pad=20
-numpts=12 %number of spine points
+
 
 if iscell(Imagesfilt)
     WmImg=Imagesfilt{1,1};
