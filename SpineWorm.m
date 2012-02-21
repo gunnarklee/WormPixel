@@ -9,33 +9,34 @@ else
     WmImg=Imagesfilt;
 end
 
-%WmImg=~WmImg
-%figure ;imshow(WmImg)
-size(WmImg)%pad image
-WmImgPad = zeros(size(WmImg)+pad)
-Rowpad=(pad/2+1:size(WmImgPad, 1)-pad/2)
-ColPad=(pad/2+1:size(WmImgPad, 2)-pad/2)
-WmImgPad(Rowpad, ColPad)=WmImg
-%figure ;imshow(WmImgPad)
-%%   get spine
-close all
-SE=strel('disk', 3);
-minWm=imerode(WmImgPad, SE);
-
-
-%%
-[x,y]=find(minWm)
+%pad image
+[WmImgPad] = padImg (WmImg, pad)
+%%GET SPINE
 xx=1:size(WmImgPad, 2)
 size(WmImgPad)
 
 skele=bwmorph(WmImgPad, 'skel', Inf);
-%[x,y]=ind2sub(size(skele), find(skele))
 skele2=bwmorph(skele, 'spur');
+[DiffPts1]= MtxDiff (skele, skele2); %record endpoints removed
 skele3=bwmorph(skele2, 'spur');
+[DiffPts2]= MtxDiff (skele2, skele3); %record endpoints removed
 skeleSH=bwmorph(skele3, 'shrink');
+[DiffPts3]= MtxDiff (skele3, skeleSH); %record endpoints removed
+
+DiffPts=[DiffPts1; DiffPts2; DiffPts3]
+
+%reconsitute endpoints
+row=1:length(DiffPts)
+row=sort(row, 'descend')
+for PointTst=row
+DiffPts(PointTst)   
+ skeleCurr 
+ END=bwmorph(skeleCurr, 'endpoints')
+end
+
 
 if (strcmpi (allow_img, 'y'));  
-    figure ;imshow(minWm, 'InitialMagnification', 400); title ('minworm')
+  %  figure ;imshow(minWm, 'InitialMagnification', 400); title ('minworm')
     figure ;imshow(WmImgPad,'InitialMagnification', 400); title ('WmImgPad')
     figure; imshow(imoverlay (mat2gray(WmImgPad), skele,  [255, 0, 0]), 'InitialMagnification', 400); title ('skele-original');
     figure; imshow(imoverlay (mat2gray(WmImgPad), skele2,  [0,255, 0]), 'InitialMagnification', 400); title ('skele2-despurred1x');
@@ -151,11 +152,9 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
         end
         
         %append the current point
-        SpineList=[SpineList;CurrPt];
-        
+        SpineList=[SpineList;CurrPt];        
         %addpoint to imgage with new color
         WmImgPadcolor=(imoverlay (mat2gray(WmImgPadcolor), skeleEND,  cmap(Pt,:)));
-        
         %erase the current point
         WorkSpine(CurrPt(1),CurrPt(2))=0;
     end
@@ -253,8 +252,9 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
             [CnewPt(1),CnewPt(2)]=pol2cart(CnewPolar(1),CnewPolar(2));
             [AnewPt(1),AnewPt(2)]=pol2cart(AnewPolar(1),AnewPolar(2));
             
-            
-            figure; plot(PointAori(1),PointAori(2),'b+',  PointBori(1), PointBori(2), 'b*',...
+            figure; imshow(img1)
+            hold on
+            plot(PointAori(1),PointAori(2),'b+',  PointBori(1), PointBori(2), 'b*',...
                 PointCori(1), PointCori(2), 'bo')
             hold on
             plot(PointA(1),PointA(2),'r+',  PointB(1), PointB(2), 'r*',...
@@ -284,7 +284,7 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
             
             
             
-            %DIAGNOSTIC- check for consistencies in old versus new triangles -
+%% DIAGNOSTIC- check for consistencies in old versus new triangles -
             %TRIG VERIFICATION
             angleB=acosd((ABlength^2+BClength^2-CAlength^2)/(2*ABlength*BClength));
             ABNewlength = sqrt((AnewPt(1) - PointBori(1))^2 + (AnewPt(2) - PointBori(2))^2);
@@ -318,6 +318,8 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
     SpineData.SpineList = SpineList
     SpineData.Pointlist = Pointlist
     SpineData.endpoints = size(x, 1)
+    SpineData.poshead=poshead
+    SpineData.padimg=WmImgPad
 else  % end good spine process
     
     % bad spine case

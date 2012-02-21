@@ -65,7 +65,7 @@ velocity=[];
 time=[];
 
 
-%preallocate Matricies 
+%preallocate Matricies
 
 leng=length(DateFileNms)
 
@@ -115,10 +115,25 @@ for w=1:length(DateFileNms);
     if strcmpi (allow_img, 'y')
         figure;imagesc(CurveMtx);
         figure;plot(centroid(:,1),centroid(:,2),'*b') ; title ('centroid position'); xlim ([1,size(img1,1)]); ylim([1, size(img1, 2)]);
-        figure;plot(time,velocity,'-r') ; title ('displacement vs. time');
+      %>>  figure;plot(time,velocity,'-r') ; title ('displacement vs. time');
         hold on
         axes('position', [.75 .15 .15 .15]);
         plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+        
+        %%CHECK CURVE MATRICIES
+        CurveMtxtemp(:,1:15)=repmat(SpineData.AngleLs, 1, 15);
+        pos=[50 50 size(Imagesfilt{1,1},1) size(Imagesfilt{1,1},2)]
+
+        figure; subplot(1,2,1); imagesc(CurveMtxtemp)
+        [WmImgPad] = padImg (Imagesfilt{1,1}, pad)
+        subplot(1,2,2); imagesc(WmImgPad)
+        
+        WmImgPadcolor=(imoverlay (mat2gray(WmImgPadcolor), skeleEND,  cmap(Pt,:)));
+        figure; imshow(WmImgPadcolor, 'InitialMagnification', 400);
+        hold on
+        plot(Pointlist(:,2), Pointlist(:,1), 'b*', 'MarkerSize', 10)
+        
+        
     end
     
     if strcmpi (stoppoint, 'y')
@@ -157,7 +172,7 @@ saveas (gcf, [DataDir RecentFldr 'PathTraveled' num2str(numFr)], 'pdf')
 
 %figure;plot(centroid(:,1),centroid(:,2),'*b') ; title ('centroid position'); xlim ([1,450]); ylim([1,400]);
 
-%plot displacement 
+%plot displacement
 figure;plot(time,distanceMv,'-r') ; title ('displacement vs. time');
 hold on
 axes('position', [.75 .15 .15 .15]);
