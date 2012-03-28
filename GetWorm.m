@@ -117,7 +117,10 @@ if isempty(DateFldrNms); error('No "PIC_..." folder, Check folder name and paths
 CheckGetCrop(Alldata, DateFldrNms, imgfmt)
 
 % If filter params are missing, have user identify 5 worms and get params
-Particleparams (Alldata, DateFldrNms, imgfmt)
+Particleparams (Alldata, DateFldrNms, imgfmt, dynamicTH)
+
+
+%% get head position
 
 %%
 %Single image mode
@@ -226,6 +229,11 @@ for W=FldStart:FldMax; %loop folders
         if ImN > 2
             %Search only in a padded region boinding the last worm
             PadPrc=1.5;
+            
+            %if there is no bounding box then make one
+            %boundingBox=Img_Propfilt(:,11:14)
+            if exist('boundingBox')==0; boundingBox=[200.  250.   100.0000   100.0000]; end
+            
             BBmask = zeros(size(img));
             %Be sure that padded BB does not stretch the mask beyond the edges of img
             BBmask (boundingBox(2)-boundingBox(4).*PadPrc:boundingBox(2)+boundingBox(4).*2.*PadPrc,...
@@ -470,7 +478,7 @@ for W=1:length(DateFldrNms)
         %cd([Alldata filesep DateFldrNms{W}]);
         %save ('CropParam.mat', 'radSqr', 'xctr', 'mask', 'center'); %save parameters
         %save ([Alldata filesep DateFldrNms{W} filesep], 'CropParam.mat', 'mask', 'posctr'); %save parm -posctr s ellipse
-        save ([Alldata filesep DateFldrNms{1} filesep 'CropParam.mat'], 'mask', 'posctr'); %save parm -posctr s ellipse
+        save ([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat'], 'mask', 'posctr'); %save parm -posctr s ellipse
         close all %clean up
         %else
         %cd([Alldata, '/',DateFldrNms{W}]);
@@ -481,7 +489,7 @@ end
 end
 
 %% get Param range for the worm
-function Particleparams (Alldata, DateFldrNms, imgfmt)
+function Particleparams (Alldata, DateFldrNms, imgfmt, dynamicTH)
 %% get particle filter values by asking the user to idenfity the worm in 5 pictures.
 WormProps=[];
 
@@ -495,8 +503,25 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
             
             if isrgb(imgtmp); imgtmp=rgb2gray(imgtmp); end
             
+            if strcmpi(dynamicTH, 'y')
             thresh_hold = graythresh(imgtmp);% dynamically determine threshold
-            imgBW=imcomplement(im2bw(imgtmp,thresh_hold));% apply threshold
+            end
+            
+%% allow threshold adjustment in first image
+            if imgnm==1
+            TH = 'y'
+            while strcmpi (TH, 'n') == 0
+                imgBW=imcomplement(im2bw(imgtmp,thresh_hold));% apply threshold
+                figure; imagesc(imgBW)
+                display(thresh_hold)
+                TH=input('rethreshold? - value or "n"','s')
+                if strcmpi(TH, 'n')==0
+                thresh_hold=str2num(TH)%=input('new value')
+                dynamicTH = 'n'
+                end
+            end
+            display(thresh_hold)
+            end
             
             %find particles and get partilce properties
             [imgBWL, F, Image_PropertiesAll] = GetImgProps (imgBW, 'y');
@@ -542,7 +567,7 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         
         FiltApp='SZ_Ax_BB';%'all'
         
-        save ([Alldata filesep DateFldrNms{1} filesep 'FltrParams.mat'], 'FltrParams', 'pos'); %save parm -posctr s ellipse
+        save ([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'], 'FltrParams', 'pos'); %save parm -posctr s ellipse
         close all %clean up
     end
 end %folder loop

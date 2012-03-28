@@ -148,10 +148,14 @@ numFr =250
 
 save ([DataDir RecentFldr 'SummData'], 'centroid', 'imgs', 'CurveMtx', 'SpineList', 'Pointlist', 'distanceMv', 'time', 'img1'); %does not save sub structure
 
+MakeTricolMap
 figure;imagesc(CurveMtx)
+colormap(RWBcMap2); colorbar
+
 saveas (gcf, [DataDir RecentFldr 'CurveMtx'], 'pdf')
 
 figure;imagesc(CurveMtx(:,1:numFr))
+colormap(RWBcMap2); colorbar
 saveas (gcf, [DataDir RecentFldr 'CurveMtx' num2str(numFr)], 'pdf')
 
 

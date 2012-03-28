@@ -2,7 +2,6 @@ function [SpineData, poshead] = SpineWorm(Imagesfilt, Img_Propfilt, img1, ErrorD
 %UNTITLED2 Summary of this function goes here
 %Single worm is input, get image characteristics
 
-
 if iscell(Imagesfilt)
     WmImg=Imagesfilt{1,1};
 else
@@ -22,17 +21,20 @@ skele3=bwmorph(skele2, 'spur');
 [DiffPts2]= MtxDiff (skele2, skele3); %record endpoints removed
 skeleSH=bwmorph(skele3, 'shrink');
 [DiffPts3]= MtxDiff (skele3, skeleSH); %record endpoints removed
-
 DiffPts=[DiffPts1; DiffPts2; DiffPts3]
 
 %reconsitute endpoints
-row=1:length(DiffPts)
+%%>> IN PROGRESS <<<<
+
+row=1:length(DiffPts) % LIST OF ENDPOINTS REMOVED
 row=sort(row, 'descend')
-for PointTst=row
-DiffPts(PointTst)   
- skeleCurr 
- END=bwmorph(skeleCurr, 'endpoints')
-end
+%>>for PointTst=row
+%>>DiffPts(PointTst)   
+%>> skeleCurr 
+%>> END=bwmorph(skeleCurr, 'endpoints')
+%>>end
+%%>> IN PROGRESS <<<<
+
 
 
 if (strcmpi (allow_img, 'y'));  
@@ -237,7 +239,7 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
         if abs(angle) > 180 % constrain to under 180 degrees
             angle=angle-360
         end    
-        AngleLs=[AngleLs;angle] %,angleB, AnglDir]
+        AngleLs=[AngleLs;angle]; %,angleB, AnglDir]
         
         %% DIAGNOSITICS
         if strcmpi(allow_img, 'y')

@@ -11,9 +11,16 @@
 %InputDir='/Users/budoday/Desktop/DATA/AldulanteSwimmingTest'
 %InputDir='/Users/budoday/Desktop/DATA/AldulanteSwimmingTest/N2_24hrun/';
 %InputDir='smb://murphylab.princeton.edu/data/people/kleemann/Murphylabdata/Geneva-N2thrash/PICS_A'
-InputDir='/Users/budoday/Desktop/DATA/Geneva-N2thrash'
+%InputDir='/Users/budoday/Desktop/DATA/Geneva-N2thrash'
+
+InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/SwimData'
 Outputdir=InputDir;
 trialName='TestDS1_12_12test2';
 
 GetWorm(InputDir, Outputdir, trialName)
-OneWormFigs(InputDir, Outputdir, trialName)
+%OneWormFigs(InputDir, Outputdir, trialName)
+
+%FinalFile = '/Users/budoday/Desktop/DATA/Geneva-N2thrash/RESULTS/TestDS1_12_12test2RUNfinal/N2_frame_0179final.mat'
+
+%FinalFile = '/Users/budoday/Desktop/DATA/AldulanteSwimmingTest/NL_A6run/RESULTS/TestDS1_12_12test2RUNfinal/NL A6 resol max_frame_0100final'
+%OutputChecker(FinalFile)
