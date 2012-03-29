@@ -12,8 +12,12 @@
 %InputDir='/Users/budoday/Desktop/DATA/AldulanteSwimmingTest/N2_24hrun/';
 %InputDir='smb://murphylab.princeton.edu/data/people/kleemann/Murphylabdata/Geneva-N2thrash/PICS_A'
 %InputDir='/Users/budoday/Desktop/DATA/Geneva-N2thrash'
+<<<<<<< local
+InputDir='C:\Documents and Settings\mlab\My Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld3'
+=======
 
 InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/SwimData'
+>>>>>>> other
 Outputdir=InputDir;
 trialName='TestDS1_12_12test2';
 
