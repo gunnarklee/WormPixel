@@ -136,7 +136,8 @@ end
 for W=FldStart:FldMax; %loop folders
     %New Partilce parameters
     load([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'])
-    
+   
+        
     %update filter values
     LowLim=FltrParams.ParticleFilt.LowLim;
     UpLim=FltrParams.ParticleFilt.UpLim;
@@ -178,6 +179,8 @@ for W=FldStart:FldMax; %loop folders
     %read the images into the workspace
     %in EvenImgBgSub mode, make cumulimages.
     for ImN=1:size(DateFldrNms2,1);
+       CropPar=load([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat']);%reload each time  
+       mask =CropPar.mask; posctr=CropPar.posctr;
         if strcmpi('off', SnglImgProofMd); % switch for single pairmode
             ImgNmMax=size(DateFldrNms2,1)-1;
             ImgStrt=1;
@@ -185,7 +188,6 @@ for W=FldStart:FldMax; %loop folders
             ImgStrt=ImgNmMax;
         end
         
-        load([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat']);
         startimageName=[DateFldrNms2{1}];
         imageName=[DateFldrNms2{ImN}];
         suffix=DateFldrNms{W}(findstr('_',DateFldrNms{W})+1:end);
@@ -335,7 +337,9 @@ for W=FldStart:FldMax; %loop folders
         if strcmpi(allow_img, 'y'); figure; imagesc(imgBW); end
         %BW=imgBW;
         %GetImgPropsDropAug11;
-        clear ('Image_PropertiesAll', 'F', 'AlabeldAll', 'gnumAll', 'yy', 'yyy', 'xx', 'xxx', 'ym', 'xm', 'mask')
+        %clear ('Image_PropertiesAll', 'F', 'AlabeldAll', 'gnumAll', 'yy', 'yyy', 'xx', 'xxx', 'ym', 'xm', 'mask')
+        
+        Image_PropertiesAll=[]; F=[]; AlabeldAll=[]; gnumAll=[]; yy=[]; yyy=[]; xx=[]; xxx=[]; ym=[];xm=[];mask=[];
         [imgBWL, F, Image_PropertiesAll] = GetImgProps (imgBW, allow_img);
         
         if size(Image_PropertiesAll, 1) < 1 %values absent - make one dummy line
@@ -355,27 +359,58 @@ for W=FldStart:FldMax; %loop folders
         imgdsp=img1; %J1_exp;
         imgdsp2=imgBWL;
         if strcmpi ('y', allow_img); figure ; imshow(imgBWL); end
-        clear ('Img_Propfilt')
+        Img_Propfilt=[];
         
         AppFltsAug11 %needs to add fliter on bounding box BndBxFlt4L.* BndBxFlt4U.*
         FltrandDisp4OneWorm
         %% COUNT ERROR-  Too many particles, then SKIP THE PAIR
         if strcmpi('n', countgood)
             %adjust your particle thresholds']); break
-            save ([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], 'F',... %'Imagesfilt',
-                'filtVal','imgBWL', 'img', 'img1', 'Img_Propfilt', 'Image_PropertiesAll');%'ProcessDate'
+            %save ([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], 'F',... %'Imagesfilt',
+            %    'filtVal','imgBWL', 'img', 'img1', 'Img_Propfilt',
+            %    'Image_PropertiesAll');%'ProcessDate'            
+        varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
+        varStruct.filters.filtVal=filtVal
+        %varStruct.filters.FltNm2= FltNm2
+        %varStruct.images.imgBWL=imgBWL
+        varStruct.images.img=img
+        varStruct.images.img1=img1
+        %varStruct.images.Imagesfilt=Imagesfilt
+        varStruct.analysis.F=F
+        varStruct.analysis.ImgPropHeaders=ImgPropHeaders
+        varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll
+        %varStruct.analysis.Img_Propfilt=Img_Propfilt
+        %varStruct.SpineData=SpineData
+            
+            saveThis([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], varStruct)
             continue
         end
-        
-        %% spine worm
+%% spine worm
         [SpineData, poshead2] = SpineWorm(Imagesfilt, Img_Propfilt, img1, ErrorDir, allow_img, stoppoint, poshead, numpts, pad);
         
         [poshead]=updatePoshead (poshead2, poshead);
         close all
+        
+%% BADSPINE DUMP        
         %check for errors
         if strcmpi('n', SpineData.spinegood)
-            save ([ErrorDir filesep imageName(1:end-4), 'SpineError.mat'], 'F',... %'Imagesfilt',
-                'filtVal','imgBWL', 'img1', 'Img_Propfilt', 'Image_PropertiesAll');%'ProcessDate'
+           % varStruct=struct(F, filtVal,imgBWL, img, img1, Img_Propfilt, Image_PropertiesAll)
+                varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
+                varStruct.filters.filtVal=filtVal
+                %varStruct.filters.FltNm2= FltNm2
+                %varStruct.images.imgBWL=imgBWL
+                varStruct.images.img=img
+                varStruct.images.img1=img1
+                %varStruct.images.Imagesfilt=Imagesfilt
+                varStruct.analysis.F=F
+                varStruct.analysis.ImgPropHeaders=ImgPropHeaders
+                varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll
+                varStruct.analysis.Img_Propfilt=Img_Propfilt
+                %varStruct.SpineData=SpineData
+
+            saveThis ([ErrorDir filesep imageName(1:end-4), 'SpineError.mat'],varStruct);
+            %saveThis ([ErrorDir filesep imageName(1:end-4), 'SpineError.mat'], 'F',... %'Imagesfilt',
+             %   'filtVal','imgBWL', 'img1', 'Img_Propfilt', 'Image_PropertiesAll');%'ProcessDate'
             continue
         end
         
@@ -409,12 +444,32 @@ for W=FldStart:FldMax; %loop folders
         % date indicated
         %cd(Alldata);
         
-        
+%% PREPARE for separate save function (required for parallel processing)        
         %save (['final.mat'], 'ProcessDate', 'filtVal', 'FltNm2' ,'imgBWL',...
         %'imgCP',  'Img_Propfilt', 'Image_PropertiesAll','imsubLC', 'img1', 'img2', 'radSqr')
+
+        %varStruct=struct('F',F, 'filtVal', filtVal,'imgBWL',imgBWL,'img', img,'img1', img1,...
+        %    'Img_Propfilt',Img_Propfilt, 'Image_PropertiesAll',Image_PropertiesAll, 'Imagesfilt',...
+        %    Imagesfilt, 'ImgPropHeaders',ImgPropHeaders, 'FltNm2', FltNm2,'SpineData', SpineData)
+        varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
+        varStruct.filters.filtVal=filtVal
+        varStruct.filters.FltNm2= FltNm2
+        varStruct.images.imgBWL=imgBWL
+        varStruct.images.img=img
+        varStruct.images.img1=img1
+        varStruct.images.Imagesfilt=Imagesfilt
+        varStruct.analysis.F=F
+        varStruct.analysis.ImgPropHeaders=ImgPropHeaders
+        varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll
+        varStruct.analysis.Img_Propfilt=Img_Propfilt
+        varStruct.SpineData=SpineData
+       %>> VarStruct=MakeStruct(F, filtVal)
+       
+        SaveImNm=imageName(1:end-4)
+        saveThis([RUNfinalDir filesep SaveImNm, 'final.mat'], varStruct);%'ProcessDate'
         
-        save ([RUNfinalDir filesep imageName(1:end-4), 'final.mat'],  'Imagesfilt', 'ImgPropHeaders', 'F',...
-            'filtVal', 'FltNm2' ,'imgBWL', 'img1', 'Img_Propfilt', 'Image_PropertiesAll', 'SpineData');%'ProcessDate'
+        %save ([RUNfinalDir filesep imageName(1:end-4), 'final.mat'],  'Imagesfilt', 'ImgPropHeaders', 'F',...
+        %    'filtVal', 'FltNm2' ,'imgBWL', 'img1', 'Img_Propfilt', 'Image_PropertiesAll', 'SpineData');%'ProcessDate'
         
         %  save ([RUNfinalDir filesep imageName(1:end-4), 'final.mat'], 'img1','Image_PropertiesAll',...
         % 'Image_PropertiesList', 'Images', 'Imagesfilt', 'Img_Propfilt') %, 'CumulImg'
@@ -585,7 +640,7 @@ for Ptnm=1:size(Image_PropertiesAll, 1)
 end
 %row and dist for the closest particle
 [row,col]=find(distancediff==min(distancediff));
-mindiff=distancediff(row,:)
+mindiff=distancediff(row,:);
 end
 
 % get parameter limits from a list of a property
@@ -611,6 +666,39 @@ end
 %sort by date serial number the datetamp is wrong on some of these?
 %'N2 A1 1_frame_0200.jpg', ... 0400.jpg, 0700.jpg, 1000.jpg but not 0300.jpg
 %may have smting to do with when the image was saved?
-[unused, order] = sort({dirOutput2(:).name});
+[~, order] = sort({dirOutput2(:).name});
 dirOutput2 = dirOutput2(order);
 end
+
+%Save function required for paralell processing
+function  saveThis (name, varStruct);%'ProcessDate'
+save (name, 'varStruct')
+end
+
+%%>>>In Progress<<<
+%>>function [Struct]=MakeStruct(varargin)
+
+%>>p = inputParser;
+%p.addRequired('inputdir', @isdir);
+%p.addRequired('outputdir', @isdir);
+%p.addOptional('trialname', 'trialname', @ischar);
+
+% Parse Inputs
+%>>p.parse(varargin{:})  %%%%"Must Be Scalar
+
+
+
+%>>filtVal
+%>>for n=1:length(elelmentList)
+%>>    Element='F'
+%>>    item=F
+
+%>>Struct.(Element)=item
+
+    
+    
+%>>end 
+%>>end
+
+    
+    
