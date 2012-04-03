@@ -12,12 +12,10 @@
 %InputDir='/Users/budoday/Desktop/DATA/AldulanteSwimmingTest/N2_24hrun/';
 %InputDir='smb://murphylab.princeton.edu/data/people/kleemann/Murphylabdata/Geneva-N2thrash/PICS_A'
 %InputDir='/Users/budoday/Desktop/DATA/Geneva-N2thrash'
-<<<<<<< local
-InputDir='C:\Documents and Settings\mlab\My Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld3'
-=======
 
-InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/SwimData'
->>>>>>> other
+InputDir='C:\Documents and Settings\mlab\My Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld2'
+%InputDir='C:\Documents and Settings\mlab\My Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_CL2120 A1 11RUNfinal'
+
 Outputdir=InputDir;
 trialName='TestDS1_12_12test2';
 

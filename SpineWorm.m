@@ -1,16 +1,7 @@
-function [SpineData, poshead] = SpineWorm(Imagesfilt, Img_Propfilt, img1, ErrorDir, allow_img, stoppoint, poshead, numpts, pad)
-%UNTITLED2 Summary of this function goes here
-%Single worm is input, get image characteristics
+function [SpineData, poshead] = SpineWorm (WmImgPad, img1, allow_img, stoppoint, poshead, numpts)
+%Single worm is input, get SPINE characteristics
 
-if iscell(Imagesfilt)
-    WmImg=Imagesfilt{1,1};
-else
-    WmImg=Imagesfilt;
-end
-
-%pad image
-[WmImgPad] = padImg (WmImg, pad)
-%%GET SPINE
+%% GET SPINE
 xx=1:size(WmImgPad, 2)
 size(WmImgPad)
 
@@ -89,10 +80,10 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
     %hold on
     %end
     
-    if isempty(poshead)
-        WmImg=imoverlay (mat2gray(WmImgPad), WorkSpine,  [0, 0, 255]);title ('skeleSH-shrunk');
-        [poshead] = GetPoint(WmImg, [ceil(size(WmImg (:,:,1), 2)*.85), ceil(size(WmImg (:,:,1), 1)*.85)])
-    end
+  %>  if isempty(poshead)
+  %>      WmImg=imoverlay (mat2gray(WmImgPad), WorkSpine,  [0, 0, 255]);title ('skeleSH-shrunk');
+  %>      [poshead] = GetPoint(WmImg, [ceil(size(WmImg (:,:,1), 2)*.85), ceil(size(WmImg (:,:,1), 1)*.85)])
+  %>  end
     
     %set anchor once use ~(not)anchor as curr point
     skeleEND=bwmorph(WorkSpine, 'endpoints');
