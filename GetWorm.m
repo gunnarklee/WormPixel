@@ -72,10 +72,10 @@ disp(['Output directory: ' Alldata]);
 disp(['Trial name: ' TrialName]);
 
 %% Make new directories
-RUNfinalDir = [Alldata, 'RESULTS', filesep, TrialName, 'RUNfinal'];
-ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, 'ErrorDir'];
-mkdir(RUNfinalDir);
-mkdir(ErrorDir)
+%RUNfinalDir = [Alldata, 'RESULTS', filesep, TrialName, 'RUNfinal'];
+%ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, 'ErrorDir'];
+%mkdir(RUNfinalDir);
+%mkdir(ErrorDir)
 ProcessDate=(date);
 %>>>save ([RUNfinalDir, filesep, 'Params'], 'Params');
 %% SPECIFY FILTER PARAMETERS
@@ -117,7 +117,7 @@ if isempty(DateFldrNms); error('No "PIC_..." folder, Check folder name and paths
 CheckGetCrop(Alldata, DateFldrNms, imgfmt)
 
 % If filter params are missing, have user identify 5 worms and get params
-Particleparams (Alldata, DateFldrNms, imgfmt, dynamicTH)
+Particleparams (Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold)
 
 
 %% get head position
@@ -134,6 +134,15 @@ end
 
 %%
 for W=FldStart:FldMax; %loop folders
+    %% new directory for each video
+    %% Make new directories
+    RUNfinalDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'RUNfinal'];
+    ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'ErrorDir'];
+    mkdir(RUNfinalDir);
+    mkdir(ErrorDir)
+    
+    
+    
     %New Partilce parameters
     load([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'])
    
@@ -167,18 +176,14 @@ for W=FldStart:FldMax; %loop folders
     % sometimes this mis-orders files if the time stamp is wrong
     %end
     
-    %>> Date_NameLs=[{dirOutput2.date}', {dirOutput2.name}'] %report
     DateFldrNms2 = {dirOutput2.name}'; % cell array to matrix
     
     close all
     Images=[];
-    
-    %     if strcmpi(EvenImgBgSub, 'y') % only for non-simple mode
-    %         CumulImg=double(imread(DateFldrNms2{1}));
-    %     end
-    %read the images into the workspace
-    %in EvenImgBgSub mode, make cumulimages.
+    poshead=[];
     for ImN=1:size(DateFldrNms2,1);
+       
+       varStruct=[] ;
        CropPar=load([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat']);%reload each time  
        mask =CropPar.mask; posctr=CropPar.posctr;
         if strcmpi('off', SnglImgProofMd); % switch for single pairmode
@@ -253,17 +258,8 @@ for W=FldStart:FldMax; %loop folders
         end
         
         %% MASK BY INTensity ** removing middle tones
-        %>>>function [MasImg, maskParams] = MaskByIntns (img,params)
         %be careful this can lead to rescaling and washing
-        % out of extreeme features. this seems to start with BndLim < .8...
-        % Mask=(img < (bnd+avg) | img > (avg-bnd)); %threshold set as bounds around AVERAGE
-        %.9 masks almost nothing, .00001 masks everything
-        % Mask=(img > (bnd+avg) | img < (avg-bnd)); %this masks the extreeme values around bndlim
-        % OR .9 masks almost everything and, .00001 masks almost nothing
         close all
-        %BndLim=.3
-        
-        
         % dynamically determine bound limits from image characteristics
         switch dynamicBndLim;
             case 'stdv'
@@ -277,10 +273,7 @@ for W=FldStart:FldMax; %loop folders
                 Maxbnd=Maxbnd;
                 
         end
-        
-        %avg=mean2(img); doesnt seem to work in matlab 2010
         avg=mean(img(:));
-        %>>>[xm,ym]=meshgrid(1:lng1,1:lng2); %meshgrid adapts to picture size
         Mask=(img < (Minbnd) | img > (Maxbnd)); %threshold set as bounds around AVERAGE
         %>>Mask=(img > (bnd+avg) | img < (avg-bnd)); %this masks the extreeme
         %values around bndlim
@@ -332,12 +325,8 @@ for W=FldStart:FldMax; %loop folders
             imgBW=im2bw(img1,thresh_hold);% apply threshold
             %figure; imagesc(imgBW);
         end
-        
-        
+
         if strcmpi(allow_img, 'y'); figure; imagesc(imgBW); end
-        %BW=imgBW;
-        %GetImgPropsDropAug11;
-        %clear ('Image_PropertiesAll', 'F', 'AlabeldAll', 'gnumAll', 'yy', 'yyy', 'xx', 'xxx', 'ym', 'xm', 'mask')
         
         Image_PropertiesAll=[]; F=[]; AlabeldAll=[]; gnumAll=[]; yy=[]; yyy=[]; xx=[]; xxx=[]; ym=[];xm=[];mask=[];
         [imgBWL, F, Image_PropertiesAll] = GetImgProps (imgBW, allow_img);
@@ -345,14 +334,6 @@ for W=FldStart:FldMax; %loop folders
         if size(Image_PropertiesAll, 1) < 1 %values absent - make one dummy line
             Image_PropertiesAll= ones(1,21);
         end
-        
-        %if strcmpi(allow_img, 'y')
-        %figure;
-        %subplot (2,2,2); imagesc(BW); title ('thresholded image');
-        %subplot (2,2,3); imshow(BW);colorbar;
-        %subplot (2,2,4); imagesc(imgBWL); title ('BW labeled image');%axis equal;
-        %subplot (2,2,1); imagesc(MasImg); title ('masked image');%axis equal;
-        %end
         
         %% Filter and present data. >>** expand this ti include separate filtering
         %% and tabulaiton for before/ afterlists
@@ -369,7 +350,7 @@ for W=FldStart:FldMax; %loop folders
             %save ([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], 'F',... %'Imagesfilt',
             %    'filtVal','imgBWL', 'img', 'img1', 'Img_Propfilt',
             %    'Image_PropertiesAll');%'ProcessDate'            
-        varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
+        %varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
         varStruct.filters.filtVal=filtVal
         %varStruct.filters.FltNm2= FltNm2
         %varStruct.images.imgBWL=imgBWL
@@ -377,7 +358,7 @@ for W=FldStart:FldMax; %loop folders
         varStruct.images.img1=img1
         %varStruct.images.Imagesfilt=Imagesfilt
         varStruct.analysis.F=F
-        varStruct.analysis.ImgPropHeaders=ImgPropHeaders
+        %varStruct.analysis.ImgPropHeaders=ImgPropHeaders
         varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll
         %varStruct.analysis.Img_Propfilt=Img_Propfilt
         %varStruct.SpineData=SpineData
@@ -385,9 +366,18 @@ for W=FldStart:FldMax; %loop folders
             saveThis([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], varStruct)
             continue
         end
+%% get head position for first worm
+    if isempty(poshead)
+    %display a few images to tell which part is the head
+    Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
+    %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,) 
+    [poshead, WmImgPad]=PadGetHead (poshead, pad, Imagesfilt); 
+    varStruct.Pos.poshead=poshead;
+    close all
+    end
 %% spine worm
-        [SpineData, poshead2] = SpineWorm(Imagesfilt, Img_Propfilt, img1, ErrorDir, allow_img, stoppoint, poshead, numpts, pad);
-        
+                                            
+        [SpineData, poshead2] = SpineWorm (WmImgPad, img1, allow_img, stoppoint, poshead, numpts);   
         [poshead]=updatePoshead (poshead2, poshead);
         close all
         
@@ -395,7 +385,7 @@ for W=FldStart:FldMax; %loop folders
         %check for errors
         if strcmpi('n', SpineData.spinegood)
            % varStruct=struct(F, filtVal,imgBWL, img, img1, Img_Propfilt, Image_PropertiesAll)
-                varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
+                %varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
                 varStruct.filters.filtVal=filtVal
                 %varStruct.filters.FltNm2= FltNm2
                 %varStruct.images.imgBWL=imgBWL
@@ -403,7 +393,7 @@ for W=FldStart:FldMax; %loop folders
                 varStruct.images.img1=img1
                 %varStruct.images.Imagesfilt=Imagesfilt
                 varStruct.analysis.F=F
-                varStruct.analysis.ImgPropHeaders=ImgPropHeaders
+               % varStruct.analysis.ImgPropHeaders=ImgPropHeaders
                 varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll
                 varStruct.analysis.Img_Propfilt=Img_Propfilt
                 %varStruct.SpineData=SpineData
@@ -451,7 +441,7 @@ for W=FldStart:FldMax; %loop folders
         %varStruct=struct('F',F, 'filtVal', filtVal,'imgBWL',imgBWL,'img', img,'img1', img1,...
         %    'Img_Propfilt',Img_Propfilt, 'Image_PropertiesAll',Image_PropertiesAll, 'Imagesfilt',...
         %    Imagesfilt, 'ImgPropHeaders',ImgPropHeaders, 'FltNm2', FltNm2,'SpineData', SpineData)
-        varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
+        %varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
         varStruct.filters.filtVal=filtVal
         varStruct.filters.FltNm2= FltNm2
         varStruct.images.imgBWL=imgBWL
@@ -544,7 +534,7 @@ end
 end
 
 %% get Param range for the worm
-function Particleparams (Alldata, DateFldrNms, imgfmt, dynamicTH)
+function Particleparams (Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold)
 %% get particle filter values by asking the user to idenfity the worm in 5 pictures.
 WormProps=[];
 
@@ -610,16 +600,7 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         
         FltrParams.TotAxL=FltrParams.ParticleFilt.MinAxL+FltrParams.ParticleFilt.MajAxL;
         FltrParams.TotAxU=FltrParams.ParticleFilt.MinAxU+FltrParams.ParticleFilt.MajAxU;
-        %% Unused filters
-        % particle size limits
-        %FltrParams.ParticleFilt.eccL=.7;
-        %FltrParams.ParticleFilt.eccU=.99; %col 5
-        %FltrParams.ParticleFilt.ExtL=.20;
-        %FltrParams.ParticleFilt.ExtU=.92; %  col 15   <<NEEDED TO lover AREA TO <.25 for clump; <.90 for small (2 particles)
-        %FltrParams.ParticleFilt.BndBx4L=5;
-        %FltrParams.ParticleFilt.BndBx4U=55; %col14 <<NEEDED TO RAise AREA TO >19
-        %for clump; <2 for smallest only
-        
+        %% filters 
         FiltApp='SZ_Ax_BB';%'all'
         
         save ([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'], 'FltrParams', 'pos'); %save parm -posctr s ellipse
@@ -675,7 +656,20 @@ function  saveThis (name, varStruct);%'ProcessDate'
 save (name, 'varStruct')
 end
 
-%%>>>In Progress<<<
+function [poshead, WmImgPad]=PadGetHead (poshead, pad, Imagesfilt) 
+    if iscell(Imagesfilt)
+    WmImg=Imagesfilt{1,1};
+    else
+    WmImg=Imagesfilt;
+    end
+    %pad image
+    [WmImgPad] = padImg (WmImg, pad);
+
+     if isempty(poshead)
+        [poshead] = GetPoint(WmImgPad, [ceil(size(WmImgPad (:,:,1), 2)*.85), ceil(size(WmImgPad (:,:,1), 1)*.85)]);
+     end
+end
+     %%>>>In Progress<<<
 %>>function [Struct]=MakeStruct(varargin)
 
 %>>p = inputParser;
