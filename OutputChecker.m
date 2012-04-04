@@ -6,7 +6,14 @@ load(finalfile)
 %load image and spine dat
 
 %% SPECIFY PARAMETERS
-OneWorm_CHR7Params
+OneWorm_CHR7Params;
+Imagesfilt=varStruct.images.Imagesfilt;
+pad=5
+SpineData.Pointlist=varStruct.SpineData.Pointlist;
+SpineData.SpineList=varStruct.SpineData.SpineList;
+SpineData.AngleLs=varStruct.SpineData.AngleLs;
+
+
 
 %Pad image in older versions I will need to reconsittute this padded image
 if iscell(Imagesfilt)

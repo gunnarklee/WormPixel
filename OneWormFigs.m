@@ -81,9 +81,10 @@ time=zeros(leng, 1);   %time=[time;insttime+time(end,:)];
 %% stack the data from "final.mat" files
 
 for w=1:length(DateFileNms);
-    load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
-    
-    [CurrCent]=FindCentr(Img_Propfilt, 'CtrMass'); %CtrMass
+    %load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
+    load([DataDir filesep RecentFldr filesep DateFileNms{w,1}]);
+    img1=varStruct.images.img1;
+    [CurrCent]=FindCentr(varStruct.analysis.Img_Propfilt, 'CtrMass'); %CtrMass
     
     insttime=1/framerate; %seconds
     
@@ -97,10 +98,10 @@ for w=1:length(DateFileNms);
     
     %cocatenate the order corrected matricies
     centroid(w,1:2)=CurrCent;
-    imgs{w}=imgBWL;%not sure if necc
-    CurveMtx(:,w)=SpineData.AngleLs;
-    SpineList{w}=SpineData.SpineList;
-    Pointlist{w}=SpineData.Pointlist;
+    imgs{w}=varStruct.images.imgBWL;%not sure if necc
+    CurveMtx(:,w)=varStruct.SpineData.AngleLs;
+    SpineList{w}=varStruct.SpineData.SpineList;
+    Pointlist{w}=varStruct.SpineData.Pointlist;
     
     if w==1
         time(w)=0;
@@ -118,21 +119,24 @@ for w=1:length(DateFileNms);
       %>>  figure;plot(time,velocity,'-r') ; title ('displacement vs. time');
         hold on
         axes('position', [.75 .15 .15 .15]);
-        plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+        plot(SpineList{w,1}(1,1), SpineList{w,1}(1,2), 'r');
         
         %%CHECK CURVE MATRICIES
-        CurveMtxtemp(:,1:15)=repmat(SpineData.AngleLs, 1, 15);
-        pos=[50 50 size(Imagesfilt{1,1},1) size(Imagesfilt{1,1},2)]
+        CurveMtxtemp(:,1:15)=repmat(varStruct.SpineData.AngleLs, 1, 15);
+        pos=[50 50 size(varStruct.images.Imagesfilt{1,1},1) size(varStruct.images.Imagesfilt{1,1},2)];
 
-        figure; subplot(1,2,1); imagesc(CurveMtxtemp)
-        [WmImgPad] = padImg (Imagesfilt{1,1}, pad)
-        subplot(1,2,2); imagesc(WmImgPad)
+        figure; subplot(1,2,1); imagesc(CurveMtxtemp);
+        [WmImgPad] = padImg (varStruct.images.Imagesfilt{1,1}, pad);
+        subplot(1,2,2); imagesc(WmImgPad); colorbar;
         
-        WmImgPadcolor=(imoverlay (mat2gray(WmImgPadcolor), skeleEND,  cmap(Pt,:)));
-        figure; imshow(WmImgPadcolor, 'InitialMagnification', 400);
+    %    WmImgPadcolor=(imoverlay (mat2gray(WmImgPad), varStruct.SpineData.SpineList(:,1), varStruct.SpineData.SpineList(:,2), [1,0,0]));
+        figure; imshow(WmImgPad, 'InitialMagnification', 400);
         hold on
-        plot(Pointlist(:,2), Pointlist(:,1), 'b*', 'MarkerSize', 10)
+        plot( varStruct.SpineData.SpineList(:,2), varStruct.SpineData.SpineList(:,1), 'r.', 'MarkerSize', 10)
+        plot(Pointlist{1,1}(:,2), Pointlist{1,1}(:,1), 'b*', 'MarkerSize', 5)
         
+        
+      
         
     end
     
@@ -143,7 +147,7 @@ for w=1:length(DateFileNms);
     close all
 end
 
-
+%% SAVE EVERYTHING
 numFr =250
 
 save ([DataDir RecentFldr 'SummData'], 'centroid', 'imgs', 'CurveMtx', 'SpineList', 'Pointlist', 'distanceMv', 'time', 'img1'); %does not save sub structure
@@ -180,13 +184,13 @@ saveas (gcf, [DataDir RecentFldr 'PathTraveled' num2str(numFr)], 'pdf')
 figure;plot(time,distanceMv,'-r') ; title ('displacement vs. time');
 hold on
 axes('position', [.75 .15 .15 .15]);
-plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+plot(varStruct.SpineData.SpineList(:,1), varStruct.SpineData.SpineList(:,2), 'r');
 saveas (gcf, [DataDir RecentFldr 'Distvstm'], 'pdf')
 
 figure;plot(time(1:numFr,:),distanceMv(1:numFr,:),'-r') ; title ('displacement vs. time');
 hold on
 axes('position', [.75 .15 .15 .15]);
-plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+plot(varStruct.SpineData.SpineList(:,1), varStruct.SpineData.SpineList(:,2), 'r');
 saveas (gcf, [DataDir RecentFldr 'DistVstm' num2str(numFr)], 'pdf')
 
 %Cummulative Dist
@@ -194,13 +198,13 @@ CumulDist=cumsum(distanceMv)
 figure;plot(time,CumulDist,'-r') ; title ('Cumldispl vs. time');
 hold on
 axes('position', [.75 .15 .15 .15]);
-plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+plot(varStruct.SpineData.SpineList(:,1), varStruct.SpineData.SpineList(:,2), 'r');
 saveas (gcf, [DataDir RecentFldr 'CumlPathTraveled'], 'pdf')
 
 figure;plot(time(1:numFr,:),CumulDist(1:numFr,:),'-r') ; title ('Cumldispl vs. time');
 hold on
 axes('position', [.75 .15 .15 .15]);
-plot(SpineData.SpineList(:,1), SpineData.SpineList(:,2), 'r');
+plot(varStruct.SpineData.SpineList(:,1), varStruct.SpineData.SpineList(:,2), 'r');
 saveas (gcf, [DataDir RecentFldr 'CumlPathTraveled' num2str(numFr)], 'pdf')
 
 
