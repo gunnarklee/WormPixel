@@ -189,9 +189,7 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
         plot(Pointlist(:,2), Pointlist(:,1), 'b*', 'MarkerSize', 10)
     end
     
-    [AngleLs]=GetAngles(Pointlist)
-    
-    SpineData.AngleLs = AngleLs;
+    %>>>>>>>SpineData.AngleLs=GetAngles(Pointlist)
     
     %get bounding box
     %Xmin=Img_Propfilt(11)
