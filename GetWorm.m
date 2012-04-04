@@ -366,17 +366,20 @@ for W=FldStart:FldMax; %loop folders
             saveThis([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], varStruct)
             continue
         end
+        
 %% get head position for first worm
+
+    [WmImgPad]=GetPadImg (pad, Imagesfilt) 
     if isempty(poshead)
     %display a few images to tell which part is the head
-    Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
+  %>>>><<<<  Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
     %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,) 
-    [poshead, WmImgPad]=PadGetHead (poshead, pad, Imagesfilt); 
+    [poshead]=GetHead (poshead, WmImgPad); 
     varStruct.Pos.poshead=poshead;
     close all
     end
 %% spine worm
-                                            
+        figure; subplot(1,2,1); imshow(img1); subplot(1,2,2);  imshow(WmImgPad);                                 
         [SpineData, poshead2] = SpineWorm (WmImgPad, img1, allow_img, stoppoint, poshead, numpts);   
         [poshead]=updatePoshead (poshead2, poshead);
         close all
@@ -586,15 +589,15 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         
         %build and save new parameter spec sheet
         %% BUILD THE NEW PARTICLE FILTERS
-        [upper, lower, stats]= GetParamLimits(WormProps(:,3), .5);
+        [upper, lower, stats]= GetParamLimits(WormProps(:,3), .15);
         FltrParams.ParticleFilt.LowLim=lower;
         FltrParams.ParticleFilt.UpLim=upper;  %col10 <<NEEDED TO RAise AREA TO <85 for clump; <5 for smallest only
         
-        [upper, lower, stats]= GetParamLimits(WormProps(:,8), .5);
+        [upper, lower, stats]= GetParamLimits(WormProps(:,8), .35);
         FltrParams.ParticleFilt.MajAxL=lower;
         FltrParams.ParticleFilt.MajAxU=upper; %col 8   <<NEEDED TO RAise AREA TO >24 for clump;  <3.3 for smallest only
         
-        [upper, lower, stats]= GetParamLimits(WormProps(:,9), .5);
+        [upper, lower, stats]= GetParamLimits(WormProps(:,9), .35);
         FltrParams.ParticleFilt.MinAxL=lower;
         FltrParams.ParticleFilt.MinAxU=upper; %col 9   <<NEEDED TO RAise AREA TO >12 for clump;
         
@@ -656,7 +659,14 @@ function  saveThis (name, varStruct);%'ProcessDate'
 save (name, 'varStruct')
 end
 
-function [poshead, WmImgPad]=PadGetHead (poshead, pad, Imagesfilt) 
+function [poshead]=GetHead (poshead, WmImgPad) 
+     if isempty(poshead)
+        [poshead] = GetPoint(WmImgPad, [ceil(size(WmImgPad (:,:,1), 2)*.85), ceil(size(WmImgPad (:,:,1), 1)*.85)]);
+     end
+end
+
+
+function [WmImgPad]=GetPadImg (pad, Imagesfilt) 
     if iscell(Imagesfilt)
     WmImg=Imagesfilt{1,1};
     else
@@ -664,11 +674,8 @@ function [poshead, WmImgPad]=PadGetHead (poshead, pad, Imagesfilt)
     end
     %pad image
     [WmImgPad] = padImg (WmImg, pad);
-
-     if isempty(poshead)
-        [poshead] = GetPoint(WmImgPad, [ceil(size(WmImgPad (:,:,1), 2)*.85), ceil(size(WmImgPad (:,:,1), 1)*.85)]);
-     end
 end
+
      %%>>>In Progress<<<
 %>>function [Struct]=MakeStruct(varargin)
 
