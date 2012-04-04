@@ -372,7 +372,7 @@ for W=FldStart:FldMax; %loop folders
     [WmImgPad]=GetPadImg (pad, Imagesfilt) 
     if isempty(poshead)
     %display a few images to tell which part is the head
-  %>>>><<<<  Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
+    Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
     %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,) 
     [poshead]=GetHead (poshead, WmImgPad); 
     varStruct.Pos.poshead=poshead;
