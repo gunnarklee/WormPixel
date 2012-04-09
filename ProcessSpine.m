@@ -44,7 +44,7 @@ ProcessDate=(date);
 %SummaryFiles=[DataDir RecentFldr filesep 'SummData'],
 
 %% SPECIFY PARAMETERS
-%OneWorm_CHR7Params
+OneWorm_CHR7Params
 
 
 %% GET THE MOST RECENT "final.mat" folder for looping
@@ -54,13 +54,16 @@ ProcessDate=(date);
 
 for w=1:length(DateFileNms);
     %load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
-    RUNfinalDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'RUNfinal'];
+    RUNfinalDir = [Alldata, filesep, RecentFldr, filesep, DateFileNms{w}];
     load([DataDir filesep RecentFldr filesep DateFileNms{w,1}]);
-
-    % get spine angles
-    varStruct.SpineData.AngleLs=GetAngles(varStruct.Pointlist.AngleLs)
     
-saveThis([RUNfinalDir filesep SaveImNm, 'final.mat'], varStruct);%'ProcessDate'
+    % get spine angles
+    varStruct.SpineData.AngleLs=GetAngles(varStruct.SpineData.Pointlist, allow_img)
+    
+%saveThis([RUNfinalDir filesep DateFileNms{w,1}, 'final.mat'], varStruct);%'ProcessDate'
+%save([RUNfinalDir filesep DateFileNms{w,1}, 'final.mat'], 'varStruct', '-append');%'ProcessDate'
+save([RUNfinalDir], 'varStruct', '-append');%'ProcessDate'
+
 end 
 
 end
