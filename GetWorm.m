@@ -654,10 +654,6 @@ end
 dirOutput2 = dirOutput2(order);
 end
 
-%Save function required for paralell processing
-function  saveThis (name, varStruct);%'ProcessDate'
-save (name, 'varStruct')
-end
 
 function [poshead]=GetHead (poshead, WmImgPad) 
      if isempty(poshead)
