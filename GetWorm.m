@@ -589,7 +589,7 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         
         %build and save new parameter spec sheet
         %% BUILD THE NEW PARTICLE FILTERS
-        [upper, lower, stats]= GetParamLimits(WormProps(:,3), .15);
+        [upper, lower, stats]= GetParamLimits(WormProps(:,3), .35);
         FltrParams.ParticleFilt.LowLim=lower;
         FltrParams.ParticleFilt.UpLim=upper;  %col10 <<NEEDED TO RAise AREA TO <85 for clump; <5 for smallest only
         
