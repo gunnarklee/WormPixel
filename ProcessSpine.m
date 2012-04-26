@@ -54,7 +54,8 @@ OneWorm_CHR7Params
 
 for w=1:length(DateFileNms);
     %load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
-    RUNfinalDir = [Alldata, filesep, RecentFldr, filesep, DateFileNms{w}];
+    RUNfinalDir = [DataDir filesep RecentFldr filesep DateFileNms{w,1}];
+   % RUNfinalDir = [Alldata, filesep, RecentFldr, filesep, DateFileNms{w}];
     load([DataDir filesep RecentFldr filesep DateFileNms{w,1}]);
     
     % get spine angles
