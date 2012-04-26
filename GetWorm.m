@@ -151,9 +151,9 @@ for W=FldStart:FldMax; %loop folders
     LowLim=FltrParams.ParticleFilt.LowLim;
     UpLim=FltrParams.ParticleFilt.UpLim;
     MajAxL=FltrParams.ParticleFilt.MajAxL;
-    MajAxU=FltrParams.ParticleFilt.MajAxU;  %<<<lowered for partial worms
+    MajAxU=FltrParams.ParticleFilt.MajAxU; 
     MinAxL=FltrParams.ParticleFilt.MinAxL;
-    MinAxU=FltrParams.ParticleFilt.MinAxU;
+    MinAxU=FltrParams.ParticleFilt.MinAxU+(MinAxU*.8);  %<<<raised to avoud dropping
     TotAxU=FltrParams.TotAxU;
     TotAxL=FltrParams.TotAxL;
     
@@ -351,25 +351,32 @@ for W=FldStart:FldMax; %loop folders
             %    'filtVal','imgBWL', 'img', 'img1', 'Img_Propfilt',
             %    'Image_PropertiesAll');%'ProcessDate'            
         %varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
-        varStruct.filters.filtVal=filtVal
+        varStruct.filters.filtVal=filtVal;
         %varStruct.filters.FltNm2= FltNm2
         %varStruct.images.imgBWL=imgBWL
-        varStruct.images.img=img
-        varStruct.images.img1=img1
+        varStruct.images.img=img;
+        varStruct.images.img1=img1;
         %varStruct.images.Imagesfilt=Imagesfilt
-        varStruct.analysis.F=F
+        varStruct.analysis.F=F;
         %varStruct.analysis.ImgPropHeaders=ImgPropHeaders
-        varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll
-        %varStruct.analysis.Img_Propfilt=Img_Propfilt
+        varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
+        %varStruct.analysis.Img_Propfilt=Img_Propfilt;
         %varStruct.SpineData=SpineData
-            
+        
+        varStruct.filters.szFltL= szFltL;
+        varStruct.filters.szFltU= szFltU;
+        varStruct.filters.MajAxFltL= MajAxFltL; %rows less than 1280 are in chanel 1
+        varStruct.filters.MajAxFltU= MajAxFltU;% the eccentricity of the spot should be less than .8 (usually ~.5)
+        varStruct.filters.MinAxFltL= MinAxFltL; %rows less than 1280 are in chanel 1
+        varStruct.filters.MinAxFltU=MinAxFltU;
+  
             saveThis([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], varStruct)
             continue
         end
         
 %% get head position for first worm
 
-    [WmImgPad]=GetPadImg (pad, Imagesfilt) 
+    [WmImgPad]=GetPadImg (pad, Imagesfilt) ;
     if isempty(poshead)
     %display a few images to tell which part is the head
     Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
@@ -389,16 +396,16 @@ for W=FldStart:FldMax; %loop folders
         if strcmpi('n', SpineData.spinegood)
            % varStruct=struct(F, filtVal,imgBWL, img, img1, Img_Propfilt, Image_PropertiesAll)
                 %varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
-                varStruct.filters.filtVal=filtVal
+                varStruct.filters.filtVal=filtVal;
                 %varStruct.filters.FltNm2= FltNm2
                 %varStruct.images.imgBWL=imgBWL
-                varStruct.images.img=img
-                varStruct.images.img1=img1
+                varStruct.images.img=img;
+                varStruct.images.img1=img1;
                 %varStruct.images.Imagesfilt=Imagesfilt
-                varStruct.analysis.F=F
+                varStruct.analysis.F=F;
                % varStruct.analysis.ImgPropHeaders=ImgPropHeaders
-                varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll
-                varStruct.analysis.Img_Propfilt=Img_Propfilt
+                varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
+                varStruct.analysis.Img_Propfilt=Img_Propfilt;
                 %varStruct.SpineData=SpineData
 
             saveThis ([ErrorDir filesep imageName(1:end-4), 'SpineError.mat'],varStruct);
@@ -445,17 +452,17 @@ for W=FldStart:FldMax; %loop folders
         %    'Img_Propfilt',Img_Propfilt, 'Image_PropertiesAll',Image_PropertiesAll, 'Imagesfilt',...
         %    Imagesfilt, 'ImgPropHeaders',ImgPropHeaders, 'FltNm2', FltNm2,'SpineData', SpineData)
         %varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
-        varStruct.filters.filtVal=filtVal
-        varStruct.filters.FltNm2= FltNm2
-        varStruct.images.imgBWL=imgBWL
-        varStruct.images.img=img
-        varStruct.images.img1=img1
-        varStruct.images.Imagesfilt=Imagesfilt
-        varStruct.analysis.F=F
-        varStruct.analysis.ImgPropHeaders=ImgPropHeaders
-        varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll
-        varStruct.analysis.Img_Propfilt=Img_Propfilt
-        varStruct.SpineData=SpineData
+        varStruct.filters.filtVal=filtVal;
+        varStruct.filters.FltNm2= FltNm2;
+        varStruct.images.imgBWL=imgBWL;
+        varStruct.images.img=img;
+        varStruct.images.img1=img1;
+        varStruct.images.Imagesfilt=Imagesfilt;
+        varStruct.analysis.F=F;
+        varStruct.analysis.ImgPropHeaders=ImgPropHeaders;
+        varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
+        varStruct.analysis.Img_Propfilt=Img_Propfilt;
+        varStruct.SpineData=SpineData;
        %>> VarStruct=MakeStruct(F, filtVal)
        
         SaveImNm=imageName(1:end-4)
@@ -589,15 +596,16 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         
         %build and save new parameter spec sheet
         %% BUILD THE NEW PARTICLE FILTERS
-        [upper, lower, stats]= GetParamLimits(WormProps(:,3), .35);
+        [upper, lower, stats]= GetParamLimits(WormProps(:,3), .4);
         FltrParams.ParticleFilt.LowLim=lower;
         FltrParams.ParticleFilt.UpLim=upper;  %col10 <<NEEDED TO RAise AREA TO <85 for clump; <5 for smallest only
         
-        [upper, lower, stats]= GetParamLimits(WormProps(:,8), .35);
+        %MAJOR and MINOR AXIS NEED TO BE MORE PERMISSIVE
+        [upper, lower, stats]= GetParamLimits(WormProps(:,8), .8); 
         FltrParams.ParticleFilt.MajAxL=lower;
         FltrParams.ParticleFilt.MajAxU=upper; %col 8   <<NEEDED TO RAise AREA TO >24 for clump;  <3.3 for smallest only
         
-        [upper, lower, stats]= GetParamLimits(WormProps(:,9), .35);
+        [upper, lower, stats]= GetParamLimits(WormProps(:,9), .8);
         FltrParams.ParticleFilt.MinAxL=lower;
         FltrParams.ParticleFilt.MinAxU=upper; %col 9   <<NEEDED TO RAise AREA TO >12 for clump;
         
