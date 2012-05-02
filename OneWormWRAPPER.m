@@ -26,7 +26,8 @@ trialName='TestDS1_12_12test2';
 %GetWorm(InputDir, Outputdir, trialName);
 
 InputDir='\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2';
-ProcessSpine(InputDir, Outputdir, trialName);
+Outputdir=InputDir;
+%ProcessSpine(InputDir, Outputdir, trialName);
 OneWormFigs(InputDir, Outputdir, trialName)
 
 %% Final file checker
