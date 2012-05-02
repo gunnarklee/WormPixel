@@ -46,13 +46,15 @@ ProcessDate=(date);
 %% SPECIFY PARAMETERS
 OneWorm_CHR7Params
 
+[DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', 'recent')
 
-%% GET THE MOST RECENT "final.mat" folder for looping
-[DateFileNms RecentFldr namedate] = GetFolderMat (DataDir, 'final', 'final');
+for y=1:length(namedate(:,2));%cycle folders
+    
+%% GET list of "final.mat" files in folder for looping
+[DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', namedate(y,2));
 
 %preallocate Matricies
-
-for w=1:length(DateFileNms);
+for w=1:length(DateFileNms); %cycle data files
     %load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
     RUNfinalDir = [DataDir filesep RecentFldr filesep DateFileNms{w,1}];
    % RUNfinalDir = [Alldata, filesep, RecentFldr, filesep, DateFileNms{w}];
@@ -66,6 +68,8 @@ for w=1:length(DateFileNms);
 save([RUNfinalDir], 'varStruct', '-append');%'ProcessDate'
 
 end 
+
+end
 
 end
 
