@@ -173,9 +173,9 @@ for y=1:length(namedate(:,2));%cycle folders
 %% 
     close all
 
-    numFr =250; % frame count for the zoomed in view
+    numFr =100; % frame count for the zoomed in view
     numFr2 =50;
-    clims = [ -90 90 ];
+    clims = [ -45 45 ];
 
 
     %full color full scale

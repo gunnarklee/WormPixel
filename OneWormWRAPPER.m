@@ -1,4 +1,4 @@
-%% WORKFLOW for OneWorm. 
+%% WORKFLOW for OneWorm.
 % specify your path in input directory. On a PC
 % always specify a trialName
 
@@ -18,16 +18,15 @@
 %Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_CL2120 A1 11RUNfinal'
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
-InputDir='\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld3'
+InputDir='\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld1'
 %InputDir='\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld1RESULTS\TestDS1_12_12test2'
 Outputdir=InputDir;
 trialName='TestDS1_12_12test2';
-
-%GetWorm(InputDir, Outputdir, trialName);
-
-InputDir='\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2';
+GetWorm(InputDir, Outputdir, trialName);
+%%
+InputDir='\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld1RESULTS\TestDS1_12_12test2';
 Outputdir=InputDir;
-%ProcessSpine(InputDir, Outputdir, trialName);
+ProcessSpine(InputDir, Outputdir, trialName);
 OneWormFigs(InputDir, Outputdir, trialName)
 
 %% Final file checker
@@ -35,4 +34,6 @@ OneWormFigs(InputDir, Outputdir, trialName)
 %FinalFile =
 %'/Users/budoday/Desktop/DATA/Geneva-N2thrash/RESULTS/TestDS1_12_12test2RUNfinal/N2_frame_0179final.mat'
 %FinalFile = '/Users/budoday/Desktop/SwimData/fld4RESULTS/TestDS1_12_12test2/PIC_CL2120 A1 5RUNfinal/CL2120 A1 5_frame_0001final'
+
+%FinalFile = '\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_N2_24hRUNfinal\N2 A1 1_frame_0041final'
 %OutputChecker(FinalFile)

@@ -61,7 +61,8 @@ for w=1:length(DateFileNms); %cycle data files
     load([DataDir filesep RecentFldr filesep DateFileNms{w,1}]);
     
     % get spine angles
-    varStruct.SpineData.AngleLs=GetAngles(varStruct.SpineData.Pointlist, allow_img)
+    varStruct.SpineData.AngleLs=GetAngles(varStruct.SpineData.Pointlist, allow_img);
+    varStruct.SpineData.AngleLs
     
 %saveThis([RUNfinalDir filesep DateFileNms{w,1}, 'final.mat'], varStruct);%'ProcessDate'
 %save([RUNfinalDir filesep DateFileNms{w,1}, 'final.mat'], 'varStruct', '-append');%'ProcessDate'
