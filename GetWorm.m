@@ -166,7 +166,6 @@ for W=FldStart:FldMax; %loop folders
     
     if size(dirOutput2 ,1) < 1
         error('I can not find any images')
-        % dirOutput2  = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
     end
     
     
@@ -203,7 +202,7 @@ for W=FldStart:FldMax; %loop folders
         timeintv =imageCt/framerate;
         
         img1=imread([Alldata filesep DateFldrNms{W} filesep DateFldrNms2{ImN}]);
-        
+        img1=imresize(img1, 2);
         if isrgb(img1); img1=rgb2gray(img1); end
         
         %% Remove blotchy background
@@ -346,23 +345,11 @@ for W=FldStart:FldMax; %loop folders
         FltrandDisp4OneWorm
         %% COUNT ERROR-  Too many particles, then SKIP THE PAIR
         if strcmpi('n', countgood)
-            %adjust your particle thresholds']); break
-            %save ([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], 'F',... %'Imagesfilt',
-            %    'filtVal','imgBWL', 'img', 'img1', 'Img_Propfilt',
-            %    'Image_PropertiesAll');%'ProcessDate'            
-        %varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
         varStruct.filters.filtVal=filtVal;
-        %varStruct.filters.FltNm2= FltNm2
-        %varStruct.images.imgBWL=imgBWL
         varStruct.images.img=img;
         varStruct.images.img1=img1;
-        %varStruct.images.Imagesfilt=Imagesfilt
         varStruct.analysis.F=F;
-        %varStruct.analysis.ImgPropHeaders=ImgPropHeaders
         varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
-        %varStruct.analysis.Img_Propfilt=Img_Propfilt;
-        %varStruct.SpineData=SpineData
-        
         varStruct.filters.szFltL= szFltL;
         varStruct.filters.szFltU= szFltU;
         varStruct.filters.MajAxFltL= MajAxFltL; %rows less than 1280 are in chanel 1
@@ -377,6 +364,8 @@ for W=FldStart:FldMax; %loop folders
 %% get head position for first worm
 
     [WmImgPad]=GetPadImg (pad, Imagesfilt) ;
+    %WmImgPad=imresize(logical(WmImgPad), 2);
+    
     if isempty(poshead)
     %display a few images to tell which part is the head
     Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
@@ -387,30 +376,24 @@ for W=FldStart:FldMax; %loop folders
     end
 %% spine worm
         figure; subplot(1,2,1); imshow(img1); subplot(1,2,2);  imshow(WmImgPad);                                 
+    
         [SpineData, poshead2] = SpineWorm (WmImgPad, img1, allow_img, stoppoint, poshead, numpts);   
+       %
         [poshead]=updatePoshead (poshead2, poshead);
         close all
         
 %% BADSPINE DUMP        
         %check for errors
         if strcmpi('n', SpineData.spinegood)
-           % varStruct=struct(F, filtVal,imgBWL, img, img1, Img_Propfilt, Image_PropertiesAll)
-                %varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
                 varStruct.filters.filtVal=filtVal;
-                %varStruct.filters.FltNm2= FltNm2
-                %varStruct.images.imgBWL=imgBWL
                 varStruct.images.img=img;
                 varStruct.images.img1=img1;
-                %varStruct.images.Imagesfilt=Imagesfilt
                 varStruct.analysis.F=F;
-               % varStruct.analysis.ImgPropHeaders=ImgPropHeaders
                 varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
                 varStruct.analysis.Img_Propfilt=Img_Propfilt;
-                %varStruct.SpineData=SpineData
 
             saveThis ([ErrorDir filesep imageName(1:end-4), 'SpineError.mat'],varStruct);
-            %saveThis ([ErrorDir filesep imageName(1:end-4), 'SpineError.mat'], 'F',... %'Imagesfilt',
-             %   'filtVal','imgBWL', 'img1', 'Img_Propfilt', 'Image_PropertiesAll');%'ProcessDate'
+
             continue
         end
         
@@ -422,10 +405,6 @@ for W=FldStart:FldMax; %loop folders
         if strcmpi ('y', allow_img); figure; imagesc(imgBWL); end
         
         numObj=length (Img_Propfilt (:,1));
-        
-        %some variables are repeated in the output
-        %there are two centroid pairs and two areas but dont remove them since the
-        %program refereces specific columns throughout
         
         %these are graphed in "GetImgPropsDrop.m"
         %for a description of a specific measure look up "regionprops" in
@@ -445,13 +424,7 @@ for W=FldStart:FldMax; %loop folders
         %cd(Alldata);
         
 %% PREPARE for separate save function (required for parallel processing)        
-        %save (['final.mat'], 'ProcessDate', 'filtVal', 'FltNm2' ,'imgBWL',...
-        %'imgCP',  'Img_Propfilt', 'Image_PropertiesAll','imsubLC', 'img1', 'img2', 'radSqr')
 
-        %varStruct=struct('F',F, 'filtVal', filtVal,'imgBWL',imgBWL,'img', img,'img1', img1,...
-        %    'Img_Propfilt',Img_Propfilt, 'Image_PropertiesAll',Image_PropertiesAll, 'Imagesfilt',...
-        %    Imagesfilt, 'ImgPropHeaders',ImgPropHeaders, 'FltNm2', FltNm2,'SpineData', SpineData)
-        %varStruct=[]  %% The call to Struct made 21 replicate levels of te same structure (?
         varStruct.filters.filtVal=filtVal;
         varStruct.filters.FltNm2= FltNm2;
         varStruct.images.imgBWL=imgBWL;
@@ -463,17 +436,11 @@ for W=FldStart:FldMax; %loop folders
         varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
         varStruct.analysis.Img_Propfilt=Img_Propfilt;
         varStruct.SpineData=SpineData;
-       %>> VarStruct=MakeStruct(F, filtVal)
-       
+
         SaveImNm=imageName(1:end-4)
         saveThis([RUNfinalDir filesep SaveImNm, 'final.mat'], varStruct);%'ProcessDate'
         
-        %save ([RUNfinalDir filesep imageName(1:end-4), 'final.mat'],  'Imagesfilt', 'ImgPropHeaders', 'F',...
-        %    'filtVal', 'FltNm2' ,'imgBWL', 'img1', 'Img_Propfilt', 'Image_PropertiesAll', 'SpineData');%'ProcessDate'
-        
-        %  save ([RUNfinalDir filesep imageName(1:end-4), 'final.mat'], 'img1','Image_PropertiesAll',...
-        % 'Image_PropertiesList', 'Images', 'Imagesfilt', 'Img_Propfilt') %, 'CumulImg'
-        
+ 
         majAx_minAx = (Img_Propfilt(1,20));
         majA_minAx_extent = (Img_Propfilt(1,21));
         CentrX = (Img_Propfilt(1,1));
@@ -525,15 +492,13 @@ for W=1:length(DateFldrNms)
         end
         %cd([Alldata, '/',DateFldrNms{W}]);
         imgtmp=imread([Alldata filesep DateFldrNms{W} filesep dirOutputtif(5).name]); %load the first image in the folder
+        imgtmp=imresize(imgtmp, 2);
         if isrgb(imgtmp)
             imgtmp=rgb2gray(imgtmp);
         end
         %clear ('posctr'); clear ('posedge');clear('xctr');
         CropRectOneWorm; % collects elipse object in posctr
-        %cd([Alldata filesep DateFldrNms{W}]);
-        %save ('CropParam.mat', 'radSqr', 'xctr', 'mask', 'center'); %save parameters
-        %save ([Alldata filesep DateFldrNms{W} filesep], 'CropParam.mat', 'mask', 'posctr'); %save parm -posctr s ellipse
-        save ([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat'], 'mask', 'posctr'); %save parm -posctr s ellipse
+       save ([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat'], 'mask', 'posctr'); %save parm -posctr s ellipse
         close all %clean up
         %else
         %cd([Alldata, '/',DateFldrNms{W}]);
@@ -555,7 +520,7 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         dirOutputtif = dir(fullfile([Alldata, '/',DateFldrNms{W}], imgfmt)); %list the images
         for imgnm=1:5 %load 5 images to choose particles
             imgtmp=imread([Alldata filesep DateFldrNms{W} filesep dirOutputtif(imgnm).name]); %load the first image in the folder
-            
+            imgtmp=imresize(imgtmp, 2);
             if isrgb(imgtmp); imgtmp=rgb2gray(imgtmp); end
             
             if strcmpi(dynamicTH, 'y')

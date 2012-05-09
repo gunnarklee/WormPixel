@@ -3,7 +3,7 @@ function [AngleLs]=GetAngles(Pointlist, allow_img)
 %% Pierce-Shimomoura's "curvature column"
     %% use the law of cosines to get angles between points
     load 
-    AngleLs=[]
+    AngleLs=[];
     for Pair=1:size(Pointlist, 1)-2
         
         %get three point locations A near end, C nearest anchor
@@ -36,9 +36,9 @@ function [AngleLs]=GetAngles(Pointlist, allow_img)
         %      if AnewPt(1) > 0, AnglDir = -1, else AnglDir = 1, end
         % get central angle and check
         
-        angle=AnewPolar(1)*(180/pi)%%-360 % get angle and assign polarity
+        angle=AnewPolar(1)*(180/pi);%%-360 % get angle and assign polarity
         if abs(angle) > 180 % constrain to under 180 degrees
-            angle=angle-360
+            angle=angle-360;
         end    
         AngleLs=[AngleLs;angle]; %,angleB, AnglDir]
         

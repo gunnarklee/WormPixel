@@ -35,10 +35,7 @@ while strcmpi('n', countgood)
     %IF MORE PARTICLES ARE DETECTED THAN ARE KNOWN TO BE ON PLATE
     %RE-filter with the more stringent set of parameters
     %expect at max 2 times max number
-    
-    %MaxFilt=2
-    %MaxWormFactor=2.1
-    
+
     %% PARTICLE THRESHOLD AND FILTER SWITCHES
     if and(~size(Img_Propfilt, 1) == MinWorms*MaxWormFactor, FiltersTried < MaxFilt);
             %just try one other filter
@@ -47,7 +44,7 @@ while strcmpi('n', countgood)
         FiltersTried=FiltersTried+1;
        % OneWorm_CHR7Params  % ** dont overwrite adapted params **reload params for next filtering
     elseif and (~size(Img_Propfilt, 1) == MinWorms*MaxWormFactor, FiltersTried == MaxFilt);
-        % if you have tried all teh filters and htere are still too many
+        % if you have tried all the filters and htere are still too many
         % worms, discard the time point
         countgood = 'n' %skip image display and mark for continue when out of loop
         Skiplog={Skiplog; imageName};
@@ -61,10 +58,6 @@ end
 if strcmpi('y', countgood)
     %% COLLECT DATA
     centroidLs= [centroidLs; Img_Propfilt(1,1:2)]% add a centroid
-    
-    %centrSmthY=smooth(centroidLs(1),centroidLs(2))%, SmoothInt, 'loess')
-        %if and(length(centrSmthY) == length(centroidLs)-1, ~length(centrSmthY) == 0); 
-     
     centrSmthY=smooth(centroidLs, SmoothInt, SmoothMeth) % smooth in one set
     centrSmthY=reshape(centrSmthY, size( centroidLs, 1), size( centroidLs, 2))
         
@@ -177,17 +170,6 @@ if strcmpi('y', countgood)
     %% CAPTURE AS STACKED TIFF
     if strcmpi(DataCapMode, 'StackGiff')
         
-        %cd([Alldata '/' TrialName 'RUNfinal'])%cd([Alldata, '/',DateFldrNms{W}]);   
-        %StackGiffFilename = [RUNfinalDir filesep DateFldrNms{W},'stack.gif'];
-        %Fhand = figure('Visible', proofingImgVIS);  % Create a new figure without displaying it
-        %Fig= uint8(img1); 
-        %measure =['BB-ratio',num2str(MajvsMin)]
-        %  hold on
-% %             text(boundingBox(1), boundingBox(2)+100, ['\fontsize{15}', '\color{blue}','BB-ratio',num2str(boundingBox(3)/ boundingBox(4))])
-% %             subimage(boundingBox(1), boundingBox(2), imcomplement(ImgCell));
-% %             plot(centroidLs(:,1),centroidLs(:,2),'-r*','LineWidth',2)%(
-%         hold off
-%       plot4StacktiffOneWorm ('y', CentrComp, [1,2,3,4], Fig, Fhand, textls, 'imshow', StackGiffFilename, boundingBox, BBratio);
           % Append to stack of images
        %Filename = [RUNfiltDir, filesep, DateFileNms{Pair}(1:end-9), 'stack.gif'];
         Filename = [RUNfinalDir filesep DateFldrNms{W},'stack.gif']
@@ -202,14 +184,8 @@ if strcmpi('y', countgood)
             'CentrComp', CentrComp,...
             'boundingBox', boundingBox,...
             'plotcol',[1,2,3,4]); %proofingImgVIS
-        end
+     end
 
-    %% GetSUBIMAGE OF CELL
-    %% save compile data
-    %cd([Alldata '/' TrialName 'RUNfinal']);
-   % save ([RUNfinalDir filesep imageName(1:end-4), 'final.mat'], 'img1','Image_PropertiesAll',...
-   %     'Image_PropertiesList', 'Images', 'Imagesfilt', 'Img_Propfilt') %, 'CumulImg'
-    %figure; imagesc(img)
 end
 
 close all
