@@ -71,25 +71,17 @@ disp(['Input directory: ' DataDir]);
 disp(['Output directory: ' Alldata]);
 disp(['Trial name: ' TrialName]);
 
-%% Make new directories
-%RUNfinalDir = [Alldata, 'RESULTS', filesep, TrialName, 'RUNfinal'];
-%ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, 'ErrorDir'];
-%mkdir(RUNfinalDir);
-%mkdir(ErrorDir)
 ProcessDate=(date);
-%>>>save ([RUNfinalDir, filesep, 'Params'], 'Params');
 %% SPECIFY FILTER PARAMETERS
 
 %OPTIONAL Filter Param Specification OR revert to defaults
 %thresh_hold=.0001; %BW threshold value -OR use graythesh to dynamically determine
 %BndLim=.25; LowLim=8; UpLim=35; eccL=.2; eccU=1; MajAxL=5; MajAxU=200; MinAxL=0; MinAxU=20; ExtL=0; ExtU=1; % optional parameter input, OTHERWISE USE DEFAULTS
 
-%cd([CodeDir, '/Chronos7/ObjectOneWormModule'])
 OneWorm_CHR7Params  % load parameters an prefs
-%twoImgDpPramStruct;
+
 
 %% Setup variables
-%% set up variables
 scrsz = get(0,'ScreenSize');
 AliveData={};
 ImPrProcTm=[];
@@ -102,9 +94,6 @@ SpineStack=[];
 CurveMtx=[];
 
 
-%% GET FINAL.mat file names if they exist
-%>>[DateFldrNms RecentFldr namedate] = GetFolderMat (DataDir, 'final',
-%'final')
 
 %% GET folder Names
 dirOutput = dir(fullfile(Alldata, 'PIC_*')); %specifiy source folder
@@ -112,7 +101,6 @@ DateFldrNms = {dirOutput.name}';
 if isempty(DateFldrNms); error('No "PIC_..." folder, Check folder name and paths'); end
 
 %% for each "PIC" folder check to see that the required files are there
-
 % If not already done Crop the useful area from the picture
 CheckGetCrop(Alldata, DateFldrNms, imgfmt)
 
@@ -122,36 +110,28 @@ Particleparams (Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold)
 
 %% get head position
 
-%%
-%Single image mode
-if strcmpi('off', SnglImgProofMd);
+if strcmpi('off', SnglImgProofMd); %Single image mode
     FldMax=length(DateFldrNms); FldStart=1;
 else %single image on
     FldStart=FldMax;
 end
 
-%for fldr=FldStart:FldMax; %loop single images%loop folders
-
-%%
 for W=FldStart:FldMax; %loop folders
     %% new directory for each video
     %% Make new directories
     RUNfinalDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'RUNfinal'];
     ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'ErrorDir'];
     mkdir(RUNfinalDir);
-    mkdir(ErrorDir)
-    
-    
+    mkdir(ErrorDir);
     
     %New Partilce parameters
     load([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'])
-   
-        
+    
     %update filter values
     LowLim=FltrParams.ParticleFilt.LowLim;
     UpLim=FltrParams.ParticleFilt.UpLim;
     MajAxL=FltrParams.ParticleFilt.MajAxL;
-    MajAxU=FltrParams.ParticleFilt.MajAxU; 
+    MajAxU=FltrParams.ParticleFilt.MajAxU;
     MinAxL=FltrParams.ParticleFilt.MinAxL;
     MinAxU=FltrParams.ParticleFilt.MinAxU+(MinAxU*.8);  %<<<raised to avoud dropping
     TotAxU=FltrParams.TotAxU;
@@ -163,7 +143,6 @@ for W=FldStart:FldMax; %loop folders
     centrSmthY=[];
     
     dirOutput2 = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
-    
     if size(dirOutput2 ,1) < 1
         error('I can not find any images')
     end
@@ -181,10 +160,10 @@ for W=FldStart:FldMax; %loop folders
     Images=[];
     poshead=[];
     for ImN=1:size(DateFldrNms2,1);
-       
-       varStruct=[] ;
-       CropPar=load([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat']);%reload each time  
-       mask =CropPar.mask; posctr=CropPar.posctr;
+        
+        varStruct=[] ;
+        CropPar=load([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat']);%reload each time
+        mask =CropPar.mask; posctr=CropPar.posctr;
         if strcmpi('off', SnglImgProofMd); % switch for single pairmode
             ImgNmMax=size(DateFldrNms2,1)-1;
             ImgStrt=1;
@@ -250,7 +229,7 @@ for W=FldStart:FldMax; %loop folders
             img=(img.*BBmask); %% pass the masked image into the particle analysis to avoit off target particles.
             if (strcmpi (allow_img, 'y'))
                 figure; imshow(uint8(img));
-                PlotBoundBox(img, boundingBox) % to check..
+                PlotBoundBox(img, boundingBox); % to check..
             end
             %stoppt=input('next step?', 's')
             %clear ('PaddedBox', 'boundingBox')
@@ -295,8 +274,8 @@ for W=FldStart:FldMax; %loop folders
         img=double(img);
         MasImg=(img.*Mask);
         if (strcmpi (allow_img, 'y'))
-            figure; imagesc(MasImg); title ('MasImg')
-            figure; imagesc(Mask); title ('Mask')
+            figure; imagesc(MasImg); title ('MasImg');
+            figure; imagesc(Mask); title ('Mask');
             figure ('position', scrsz); subplot (2,2,1); imagesc(subimg); title ('original image'); colorbar; subplot (2,2,2); imagesc(Mask);title ('Mask image'); colorbar; subplot (2,2,3); imagesc(MasImg); title ('MasImg image'); colorbar;
         end
         
@@ -324,7 +303,7 @@ for W=FldStart:FldMax; %loop folders
             imgBW=im2bw(img1,thresh_hold);% apply threshold
             %figure; imagesc(imgBW);
         end
-
+        
         if strcmpi(allow_img, 'y'); figure; imagesc(imgBW); end
         
         Image_PropertiesAll=[]; F=[]; AlabeldAll=[]; gnumAll=[]; yy=[]; yyy=[]; xx=[]; xxx=[]; ym=[];xm=[];mask=[];
@@ -341,59 +320,80 @@ for W=FldStart:FldMax; %loop folders
         if strcmpi ('y', allow_img); figure ; imshow(imgBWL); end
         Img_Propfilt=[];
         
-        AppFltsAug11 %needs to add fliter on bounding box BndBxFlt4L.* BndBxFlt4U.*
+        
+        %% AppFlts
+        %needs to add fliter on bounding box BndBxFlt4L.* BndBxFlt4U.*
+        
+        %set up filters to identify worms - logical matricies of ones and zeros...
+        szFltL= double(Image_PropertiesAll(:,10)>LowLim); %make size filter
+        szFltU= double(Image_PropertiesAll (:,10)<UpLim);
+        EccFltL= double(Image_PropertiesAll (:,5)>eccL); %rows less than 1280 are in chanel 1
+        EccFltU= double(Image_PropertiesAll (:,5)<eccU);% the eccentricity of the spot should be less than .8 (usually ~.5)
+        MajAxFltL= double(Image_PropertiesAll (:,8)>MajAxL); %rows less than 1280 are in chanel 1
+        MajAxFltU= double(Image_PropertiesAll (:,8)<MajAxU);% the eccentricity of the spot should be less than .8 (usually ~.5)
+        MinAxFltL= double(Image_PropertiesAll (:,9)>MinAxL); %rows less than 1280 are in chanel 1
+        MinAxFltU= double(Image_PropertiesAll (:,9)<MinAxU);% the eccentricity of the spot should be less than .8 (usually ~.5)
+        ExtFltL= double(Image_PropertiesAll (:,15)>ExtL); %rows less than 1280 are in chanel 1
+        ExtFltU= double(Image_PropertiesAll (:,15)<ExtU);
+        TotAxFltU = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))<TotAxU;
+        TotAxFltL = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))>TotAxL;
+        
+        
+        
+        
+        
         FltrandDisp4OneWorm
         %% COUNT ERROR-  Too many particles, then SKIP THE PAIR
         if strcmpi('n', countgood)
-        varStruct.filters.filtVal=filtVal;
-        varStruct.images.img=img;
-        varStruct.images.img1=img1;
-        varStruct.analysis.F=F;
-        varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
-        varStruct.filters.szFltL= szFltL;
-        varStruct.filters.szFltU= szFltU;
-        varStruct.filters.MajAxFltL= MajAxFltL; %rows less than 1280 are in chanel 1
-        varStruct.filters.MajAxFltU= MajAxFltU;% the eccentricity of the spot should be less than .8 (usually ~.5)
-        varStruct.filters.MinAxFltL= MinAxFltL; %rows less than 1280 are in chanel 1
-        varStruct.filters.MinAxFltU=MinAxFltU;
-  
+            varStruct.filters.filtVal=filtVal;
+            varStruct.images.img=img;
+            varStruct.images.img1=img1;
+            varStruct.analysis.F=F;
+            varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
+            varStruct.filters.szFltL= szFltL;
+            varStruct.filters.szFltU= szFltU;
+            varStruct.filters.MajAxFltL= MajAxFltL; %rows less than 1280 are in chanel 1
+            varStruct.filters.MajAxFltU= MajAxFltU;% the eccentricity of the spot should be less than .8 (usually ~.5)
+            varStruct.filters.MinAxFltL= MinAxFltL; %rows less than 1280 are in chanel 1
+            varStruct.filters.MinAxFltU=MinAxFltU;
+            
             saveThis([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], varStruct)
             continue
         end
         
-%% get head position for first worm
-
-    [WmImgPad]=GetPadImg (pad, Imagesfilt) ;
-    %WmImgPad=imresize(logical(WmImgPad), 2);
-    
-    if isempty(poshead)
-    %display a few images to tell which part is the head
-    Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
-    %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,) 
-    [poshead]=GetHead (poshead, WmImgPad); 
-    varStruct.Pos.poshead=poshead;
-    close all
-    end
-%% spine worm
-        figure; subplot(1,2,1); imshow(img1); subplot(1,2,2);  imshow(WmImgPad);                                 
-    
-        [SpineData, poshead2] = SpineWorm (WmImgPad, img1, allow_img, stoppoint, poshead, numpts);   
-       %
+        %% get head position for first worm
+        
+        [WmImgPad]=GetPadImg (pad, Imagesfilt) ;
+        %WmImgPad=imresize(logical(WmImgPad), 2);
+        
+        if isempty(poshead)
+            %display a few images to tell which part is the head
+            Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
+            %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,)
+            [poshead]=GetHead (poshead, WmImgPad);
+            varStruct.Pos.poshead=poshead;
+            close all
+        end
+        %% spine worm
+        figure; subplot(1,2,1); imshow(img1); subplot(1,2,2);  imshow(WmImgPad);
+        
+        [SpineData, poshead2] = SpineWorm (WmImgPad, img1, allow_img, stoppoint, poshead, numpts);
+        %
         [poshead]=updatePoshead (poshead2, poshead);
         close all
         
-%% BADSPINE DUMP        
+        %% BADSPINE DUMP
         %check for errors
         if strcmpi('n', SpineData.spinegood)
-                varStruct.filters.filtVal=filtVal;
-                varStruct.images.img=img;
-                varStruct.images.img1=img1;
-                varStruct.analysis.F=F;
-                varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
-                varStruct.analysis.Img_Propfilt=Img_Propfilt;
-
+            varStruct.filters.filtVal=filtVal;
+            varStruct.images.img=img;
+            varStruct.images.img1=img1;
+            varStruct.analysis.F=F;
+            varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
+            varStruct.analysis.Img_Propfilt=Img_Propfilt;
+            
             saveThis ([ErrorDir filesep imageName(1:end-4), 'SpineError.mat'],varStruct);
-
+            
             continue
         end
         
@@ -423,8 +423,8 @@ for W=FldStart:FldMax; %loop folders
         % date indicated
         %cd(Alldata);
         
-%% PREPARE for separate save function (required for parallel processing)        
-
+        %% PREPARE for separate save function (required for parallel processing)
+        
         varStruct.filters.filtVal=filtVal;
         varStruct.filters.FltNm2= FltNm2;
         varStruct.images.imgBWL=imgBWL;
@@ -436,11 +436,11 @@ for W=FldStart:FldMax; %loop folders
         varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
         varStruct.analysis.Img_Propfilt=Img_Propfilt;
         varStruct.SpineData=SpineData;
-
-        SaveImNm=imageName(1:end-4)
+        
+        SaveImNm=imageName(1:end-4);
         saveThis([RUNfinalDir filesep SaveImNm, 'final.mat'], varStruct);%'ProcessDate'
         
- 
+        
         majAx_minAx = (Img_Propfilt(1,20));
         majA_minAx_extent = (Img_Propfilt(1,21));
         CentrX = (Img_Propfilt(1,1));
@@ -466,7 +466,7 @@ for W=FldStart:FldMax; %loop folders
     
     save ([RUNfinalDir, filesep ,DateFldrNms{W},'_',DateFldrNms2{ImN}, 'AllData.mat']) % OutDir
     save([RUNfinalDir, filesep ,DateFldrNms{W} 'OneWormdata.mat'], 'OneWorm_DataHeaders', 'OneWorm_Data')
-end % FOLDERS LOOP
+end % FOLDERS LOO P
 end %end main function
 
 %% make sure you have a good head position
@@ -485,7 +485,6 @@ for W=1:length(DateFldrNms)
     dirOutputCropPar = dir(fullfile([Alldata filesep DateFldrNms{W}], 'CropParam.mat')); %list the images
     if size( dirOutputCropPar,1) < 1 % if there are no crop parameters, then get them
         DateFldrNms2 = {dirOutputCropPar.name}';
-        
         dirOutputtif = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
         if size(dirOutputtif,1) < 1
             dirOutputtif = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
@@ -496,13 +495,9 @@ for W=1:length(DateFldrNms)
         if isrgb(imgtmp)
             imgtmp=rgb2gray(imgtmp);
         end
-        %clear ('posctr'); clear ('posedge');clear('xctr');
         CropRectOneWorm; % collects elipse object in posctr
-       save ([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat'], 'mask', 'posctr'); %save parm -posctr s ellipse
+        save ([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat'], 'mask', 'posctr'); %save parm -posctr s ellipse
         close all %clean up
-        %else
-        %cd([Alldata, '/',DateFldrNms{W}]);
-        %    load([Alldata filesep DateFldrNms{W} filesep dirOutputCropPar.name]);
     end
 end
 
@@ -524,23 +519,23 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
             if isrgb(imgtmp); imgtmp=rgb2gray(imgtmp); end
             
             if strcmpi(dynamicTH, 'y')
-            thresh_hold = graythresh(imgtmp);% dynamically determine threshold
+                thresh_hold = graythresh(imgtmp);% dynamically determine threshold
             end
             
-%% allow threshold adjustment in first image
+            %% allow threshold adjustment in first image
             if imgnm==1
-            TH = 'y'
-            while strcmpi (TH, 'n') == 0
-                imgBW=imcomplement(im2bw(imgtmp,thresh_hold));% apply threshold
-                figure; imagesc(imgBW)
-                display(thresh_hold)
-                TH=input('rethreshold? - value or "n"','s')
-                if strcmpi(TH, 'n')==0
-                thresh_hold=str2num(TH)%=input('new value')
-                dynamicTH = 'n'
+                TH = 'y';
+                while strcmpi (TH, 'n') == 0
+                    imgBW=imcomplement(im2bw(imgtmp,thresh_hold));% apply threshold
+                    figure; imagesc(imgBW);
+                    display(thresh_hold)
+                    TH=input('rethreshold? - value or "n"','s');
+                    if strcmpi(TH, 'n')==0
+                        thresh_hold=str2num(TH);%=input('new value')
+                        dynamicTH = 'n';
+                    end
                 end
-            end
-            display(thresh_hold)
+                display(thresh_hold)
             end
             
             %find particles and get partilce properties
@@ -566,7 +561,7 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         FltrParams.ParticleFilt.UpLim=upper;  %col10 <<NEEDED TO RAise AREA TO <85 for clump; <5 for smallest only
         
         %MAJOR and MINOR AXIS NEED TO BE MORE PERMISSIVE
-        [upper, lower, stats]= GetParamLimits(WormProps(:,8), .8); 
+        [upper, lower, stats]= GetParamLimits(WormProps(:,8), .8);
         FltrParams.ParticleFilt.MajAxL=lower;
         FltrParams.ParticleFilt.MajAxU=upper; %col 8   <<NEEDED TO RAise AREA TO >24 for clump;  <3.3 for smallest only
         
@@ -576,7 +571,7 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         
         FltrParams.TotAxL=FltrParams.ParticleFilt.MinAxL+FltrParams.ParticleFilt.MajAxL;
         FltrParams.TotAxU=FltrParams.ParticleFilt.MinAxU+FltrParams.ParticleFilt.MajAxU;
-        %% filters 
+        %% filters
         FiltApp='SZ_Ax_BB';%'all'
         
         save ([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'], 'FltrParams', 'pos'); %save parm -posctr s ellipse
@@ -628,24 +623,24 @@ dirOutput2 = dirOutput2(order);
 end
 
 
-function [poshead]=GetHead (poshead, WmImgPad) 
-     if isempty(poshead)
-        [poshead] = GetPoint(WmImgPad, [ceil(size(WmImgPad (:,:,1), 2)*.85), ceil(size(WmImgPad (:,:,1), 1)*.85)]);
-     end
+function [poshead]=GetHead (poshead, WmImgPad)
+if isempty(poshead)
+    [poshead] = GetPoint(WmImgPad, [ceil(size(WmImgPad (:,:,1), 2)*.85), ceil(size(WmImgPad (:,:,1), 1)*.85)]);
+end
 end
 
 
-function [WmImgPad]=GetPadImg (pad, Imagesfilt) 
-    if iscell(Imagesfilt)
+function [WmImgPad]=GetPadImg (pad, Imagesfilt)
+if iscell(Imagesfilt)
     WmImg=Imagesfilt{1,1};
-    else
+else
     WmImg=Imagesfilt;
-    end
-    %pad image
-    [WmImgPad] = padImg (WmImg, pad);
+end
+%pad image
+[WmImgPad] = padImg (WmImg, pad);
 end
 
-     %%>>>In Progress<<<
+%%>>>In Progress<<<
 %>>function [Struct]=MakeStruct(varargin)
 
 %>>p = inputParser;
@@ -665,10 +660,9 @@ end
 
 %>>Struct.(Element)=item
 
-    
-    
-%>>end 
+
+
+%>>end
 %>>end
 
-    
-    
+

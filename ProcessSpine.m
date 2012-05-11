@@ -56,10 +56,11 @@ for y=1:length(namedate(:,2));%cycle folders
 %preallocate Matricies
 for w=1:length(DateFileNms); %cycle data files
     %load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
+    
     RUNfinalDir = [DataDir filesep RecentFldr filesep DateFileNms{w,1}];
    % RUNfinalDir = [Alldata, filesep, RecentFldr, filesep, DateFileNms{w}];
     load([DataDir filesep RecentFldr filesep DateFileNms{w,1}]);
-    
+    w
     % get spine angles
     varStruct.SpineData.AngleLs=GetAngles(varStruct.SpineData.Pointlist, allow_img);
     varStruct.SpineData.AngleLs
