@@ -158,11 +158,16 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
     SpineList=[SpineList;anchor];
     
     %% get pointdistances and N points along spine
+    %preallocate matricies
+    
+    Distlist=zeros(numpts,2);
+    Pointlist=zeros(numpts,2);
     
     SegmtLn=Lengthls(end)/(numpts-1);
-    Pointlist=[SpineList(1,:)]; %start at the beginning
+    Pointlist(1,:)=[SpineList(1,:)]; %start at the beginning
     %Pointlist=[pointloc]
-    Distlist=[Distlist;0, Lengthls(1, :) ];
+    Distlist(1,:)=[0, Lengthls(1, :)];
+    
     for SpPt=1:numpts-2 %-2,  first & last points added outside loop
         Ptpointdist=SpPt*SegmtLn;
         %get point coord at the point before the segment exceedes the
@@ -172,12 +177,12 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
         %reduce wiggle with sliding window for point
         PointLoc=median(SpineList((RowHit-2:RowHit+2), :));
         
-        Pointlist=[Pointlist; PointLoc]; %concatente
-        Distlist=[Distlist;Ptpointdist, Lengthls(RowHit, :) ];% list target and realized distances
+        Pointlist(SpPt+1,:)=PointLoc; %concatente
+        Distlist(SpPt+1,:)=[Ptpointdist, Lengthls(RowHit, :) ];% list target and realized distances
     end
     %capture the final point.
-    Pointlist=[Pointlist;SpineList(end,:)];
-    Distlist=[Distlist;(numpts-1)*SegmtLn, Lengthls(end, :) ];% list target and realized distances
+    Pointlist(end,:)=SpineList(end,:);
+    Distlist(end, :)=[(numpts-1)*SegmtLn, Lengthls(end, :) ];% list target and realized distances
     
     %% IMAGE verification
     

@@ -88,6 +88,9 @@ for y=1:length(namedate(:,2));%cycle folders
 %%
     for w=1:length(DateFileNms);
         %load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
+        %w=30
+        w
+        DateFileNms{w,1}
         load([DataDir filesep RecentFldr filesep DateFileNms{w,1}]);
         img1=varStruct.images.img1;
         [CurrCent]=FindCentr(varStruct.analysis.Img_Propfilt, 'CtrMass'); %CtrMass
