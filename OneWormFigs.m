@@ -164,7 +164,7 @@ for y=1:length(namedate(:,2));%cycle folders
     mkdir(outputDir);
     NameOut=[outputDir filesep RecentFldr(1:end-8)];
     
-    save ([DataDir RecentFldr 'SummData'], 'centroid', 'imgs', 'CurveMtx', 'SpineList', 'Pointlist', 'distanceMv', 'time', 'img1'); %does not save sub structure
+    save ([NameOut 'SummData'], 'centroid', 'imgs', 'CurveMtx', 'SpineList', 'Pointlist', 'distanceMv', 'time', 'img1'); %does not save sub structure
     TrialData=dataset(centroid (:,1), centroid (:,2), distanceMv, time, 'VarNames', {'X','Y','Dist','time (sec)'});
     %export(TrialData, 'XLSfile', [DataDir RecentFldr 'movedata']);
     export(TrialData, 'XLSfile', [NameOut '_movedata']);

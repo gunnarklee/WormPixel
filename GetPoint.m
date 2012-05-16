@@ -1,4 +1,4 @@
-function [HeadPos] = GetPoint (img, startpos)
+function [HeadPos] = GetPoint (img, startpos, mssg)
 % INPUT = img, startpos
 %   img = Image used to position crop ellipse
 %   startpos = start position of the crop ellipse [x, y, w, h]
@@ -10,7 +10,7 @@ function [HeadPos] = GetPoint (img, startpos)
 %version 3 adds optional image supression
 %Circular masking to select 4 regions
 
-disp('move dot to head, double click');
+disp(mssg);
 done = 0;
 while ~done;
     
