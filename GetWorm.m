@@ -370,7 +370,8 @@ for W=FldStart:FldMax; %loop folders
             %display a few images to tell which part is the head
             Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
             %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,)
-            [poshead]=GetHead (poshead, WmImgPad);
+            mssg='drag point to head and double click';
+            [poshead]=GetHead (poshead, WmImgPad, mssg);
             varStruct.Pos.poshead=poshead;
             close all
         end
@@ -513,7 +514,11 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
     if size( dirOutputCropPar,1) < 1 % if there are no filter params, then get them
         %>DateFldrNms2 = {dirOutputCropPar.name}'; % get image list
         dirOutputtif = dir(fullfile([Alldata, '/',DateFldrNms{W}], imgfmt)); %list the images
-        for imgnm=1:5 %load 5 images to choose particles
+        
+        %Get 5 images at equal intervals across iamge set
+        
+       QueryImgs=[1:ceil(size(dirOutputtif,1)/6):ceil(size(dirOutputtif,1))]
+       for imgnm=QueryImgs %load 5 images to choose particles
             imgtmp=imread([Alldata filesep DateFldrNms{W} filesep dirOutputtif(imgnm).name]); %load the first image in the folder
             imgtmp=imresize(imgtmp, 2);
             if isrgb(imgtmp); imgtmp=rgb2gray(imgtmp); end
@@ -522,7 +527,8 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
                 thresh_hold = graythresh(imgtmp);% dynamically determine threshold
             end
             
-            %% allow threshold adjustment in first image
+       %% Get thresholded image
+            % allow threshold adjustment in first image
             if imgnm==1
                 TH = 'y';
                 while strcmpi (TH, 'n') == 0
@@ -536,6 +542,8 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
                     end
                 end
                 display(thresh_hold)
+            else 
+                imgBW=imcomplement(im2bw(imgtmp,thresh_hold));% apply threshold  
             end
             
             %find particles and get partilce properties
@@ -543,8 +551,8 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
             if imgnm==1; StartPos=[ceil(size(imgBWL(:,:,1), 2)*.5), ceil(size(imgBWL (:,:,1), 1)*.5)]; end
             
             %identify the worm
-            disp('Double click on the worm centorid')
-            [pos] = GetPoint(imgBWL, StartPos);
+            mssg='Double click on the worm centorid'
+            [pos] = GetPoint(imgBWL, StartPos, mssg);
             StartPos=pos;
             %get the particle with the closest centroid to the selected location
             [row, mindiff]=CloseCentr(pos, Image_PropertiesAll);
@@ -623,9 +631,9 @@ dirOutput2 = dirOutput2(order);
 end
 
 
-function [poshead]=GetHead (poshead, WmImgPad)
+function [poshead]=GetHead (poshead, WmImgPad, mssg)
 if isempty(poshead)
-    [poshead] = GetPoint(WmImgPad, [ceil(size(WmImgPad (:,:,1), 2)*.85), ceil(size(WmImgPad (:,:,1), 1)*.85)]);
+    [poshead] = GetPoint(WmImgPad, [ceil(size(WmImgPad (:,:,1), 2)*.85), ceil(size(WmImgPad (:,:,1), 1)*.85)], mssg);
 end
 end
 

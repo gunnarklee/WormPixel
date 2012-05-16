@@ -6,6 +6,7 @@ xx=1:size(WmImgPad, 2);
 size(WmImgPad)
 
 %%
+WmImgPad=imfill(WmImgPad, 'holes')
 skele=bwmorph(WmImgPad, 'skel', Inf);
 %figure; imshow(imoverlay (mat2gray(WmImgPad), skele,  [255, 0, 0]), 'InitialMagnification', 400); title ('skele-original');
 %%
