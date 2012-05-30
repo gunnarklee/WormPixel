@@ -3,10 +3,9 @@ function [SpineData, poshead] = SpineWorm (WmImgPad, img1, allow_img, stoppoint,
 
 %% GET SPINE
 xx=1:size(WmImgPad, 2);
-size(WmImgPad)
 
 %%
-WmImgPad=imfill(WmImgPad, 'holes')
+WmImgPad=imfill(WmImgPad, 'holes');
 skele=bwmorph(WmImgPad, 'skel', Inf);
 %figure; imshow(imoverlay (mat2gray(WmImgPad), skele,  [255, 0, 0]), 'InitialMagnification', 400); title ('skele-original');
 %%
@@ -49,8 +48,6 @@ if (strcmpi (allow_img, 'y'));
     figure; imshow(imoverlay (mat2gray(WmImgPad), skeleSH,  [0, 0, 255]), 'InitialMagnification', 400);title ('skeleSH-shrunk');
 end
 %Losing worm ends
-%May need to minimize srinking or add back ends to get full worm
-
 
 %% Endpoint ERRORS - fix or catch them
 skeleEND=bwmorph(skeleSH, 'endpoints');
@@ -65,16 +62,18 @@ if (size (x, 1) == 2) == 0 %if it does not equal 2 as expected
         %find thinnest point on worm body and delete the connecting pixel
         %******** threeconnected point deletion ?
     end
-    
+
     %if the fixes did not create two endpoints save particle for later
+    %abnd mark as bad spine
     if (size (x, 1) == 2) == 0; SpineData.spinegood ='n'; end
+    SpineData.FailPt= 'endpoints';
 else
-    SpineData.spinegood ='y';
+    SpineData.spinegood ='y'; % if there are no errors the spine is good
 end
 
 
 %% Order the spine points
-if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
+if strcmpi (SpineData.spinegood, 'n') == 0 % if the spine is good, proceede
     SpineList=[];
     Distlist=[];
     %select spine to use
@@ -158,9 +157,19 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
     Lengthls=[Lengthls; pointdist+Lengthls(end)];
     SpineList=[SpineList;anchor];
     
+   
     %% get pointdistances and N points along spine
-    %preallocate matricies
+    avgwin=3; %rounds decimals down so flank for 2=1  & flank for 3=1 
+    flank=floor(avgwin/2);
     
+    %ERROR CHECK - short spines will not work dump to "spine error"
+    if numpts*avgwin > length(SpineList)
+    SpineData.spinegood = 'n';
+    SpineData.endpoints = size(x, 1);
+    return
+    end
+    
+    %preallocate matricies
     Distlist=zeros(numpts,2);
     Pointlist=zeros(numpts,2);
     
@@ -168,17 +177,34 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
     Pointlist(1,:)=[SpineList(1,:)]; %start at the beginning
     %Pointlist=[pointloc]
     Distlist(1,:)=[0, Lengthls(1, :)];
+    %Determine window size for point averaging
+    %win=(ceil((size(SpineList, 1)/(size(Pointlist,1)-1))*2-1)/2)
     
     for SpPt=1:numpts-2 %-2,  first & last points added outside loop
         Ptpointdist=SpPt*SegmtLn;
         %get point coord at the point before the segment exceedes the
         %desired size
-        RowHit=min(find(Lengthls >Ptpointdist))-1;
+        RowHit=find(Lengthls >Ptpointdist, 1 )-1;
         
         %reduce wiggle with sliding window for point
-        PointLoc=median(SpineList((RowHit-2:RowHit+2), :));
+        try %this step fails sometime 
+        PointLoc=median(SpineList((RowHit-flank:RowHit+flank), :));
+        catch 
+            SpineData.spinegood = 'n';
+            SpineData.endpoints = size(x, 1); 
+            SpineData.FailPt= 'pointloc';
+           return%save('SpineFailLn179')  
+        end
         
+        try 
         Pointlist(SpPt+1,:)=PointLoc; %concatente
+        catch 
+            SpineData.spinegood = 'n';
+            SpineData.endpoints = size(x, 1);
+            SpineData.FailPt= 'pointlist'
+           return%save('SpineFailLn179')  
+        end
+        
         Distlist(SpPt+1,:)=[Ptpointdist, Lengthls(RowHit, :) ];% list target and realized distances
     end
     %capture the final point.
@@ -186,8 +212,6 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
     Distlist(end, :)=[(numpts-1)*SegmtLn, Lengthls(end, :) ];% list target and realized distances
     
     %% IMAGE verification
-    
-    
     %WmImgPadcolor=(imoverlay (WmImgPadcolor, pointloc,  [0,0,255]));
     if strcmpi (allow_img, 'y')
         figure; imshow(WmImgPadcolor, 'InitialMagnification', 800);
@@ -206,9 +230,8 @@ if strcmpi (SpineData.spinegood, 'n')  == 0 % if the spine is good, proceede
     SpineData.endpoints = size(x, 1);
     SpineData.poshead=poshead;
     SpineData.padimg=WmImgPad;
-else  % end good spine process
-    
-    % bad spine case
+else   %bad spine case
+       %end good spine process and mark as bad spine
     SpineData.spinegood = 'n';
     SpineData.endpoints = size(x, 1);
 end

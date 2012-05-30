@@ -221,8 +221,26 @@ for W=FldStart:FldMax; %loop folders
             
             BBmask = zeros(size(img));
             %Be sure that padded BB does not stretch the mask beyond the edges of img
-            BBmask (boundingBox(2)-boundingBox(4).*PadPrc:boundingBox(2)+boundingBox(4).*2.*PadPrc,...
-                boundingBox(1)-boundingBox(3).*PadPrc:boundingBox(1)+boundingBox(3).*2.*PadPrc)= ones;
+            
+            try % this fails somtimes
+                
+                a=ceil(boundingBox(2)-boundingBox(4).*PadPrc);
+                b=ceil(boundingBox(2)+boundingBox(4).*2.*PadPrc);
+                c=ceil(boundingBox(1)-boundingBox(3).*PadPrc);
+                d=ceil(boundingBox(1)+boundingBox(3).*2.*PadPrc);
+                
+                [a,b,c,d]=limit2Bounds(a,b,c,d,size(img,1),size(img,2));
+                
+            BBmask(a:b,c:d)= ones;
+            catch e1
+               %  exception = MException(...
+               % 'twoimageDropCHR7_3Robot:arglist',...
+               % 'Error in input argument list');
+               %  exception = addCause(exception, e1);
+              %   throw(exception)
+            SpineData.FailPt= 'BBmask'
+            end
+            
             %Be sure that padded BB does not stretch the mask beyond the edges of img
             BBmask=BBmask(1:size(img,1), 1:size(img,2));
             
@@ -337,10 +355,6 @@ for W=FldStart:FldMax; %loop folders
         ExtFltU= double(Image_PropertiesAll (:,15)<ExtU);
         TotAxFltU = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))<TotAxU;
         TotAxFltL = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))>TotAxL;
-        
-        
-        
-        
         
         FltrandDisp4OneWorm
         %% COUNT ERROR-  Too many particles, then SKIP THE PAIR
@@ -467,7 +481,7 @@ for W=FldStart:FldMax; %loop folders
     
     save ([RUNfinalDir, filesep ,DateFldrNms{W},'_',DateFldrNms2{ImN}, 'AllData.mat']) % OutDir
     save([RUNfinalDir, filesep ,DateFldrNms{W} 'OneWormdata.mat'], 'OneWorm_DataHeaders', 'OneWorm_Data')
-end % FOLDERS LOO P
+end % FOLDERS LOOP
 end %end main function
 
 %% make sure you have a good head position
@@ -517,8 +531,8 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         
         %Get 5 images at equal intervals across iamge set
         
-       QueryImgs=[1:ceil(size(dirOutputtif,1)/6):ceil(size(dirOutputtif,1))]
-       for imgnm=QueryImgs %load 5 images to choose particles
+        QueryImgs=[1:ceil(size(dirOutputtif,1)/6):ceil(size(dirOutputtif,1))];
+        for imgnm=QueryImgs %load 5 images to choose particles
             imgtmp=imread([Alldata filesep DateFldrNms{W} filesep dirOutputtif(imgnm).name]); %load the first image in the folder
             imgtmp=imresize(imgtmp, 2);
             if isrgb(imgtmp); imgtmp=rgb2gray(imgtmp); end
@@ -527,7 +541,7 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
                 thresh_hold = graythresh(imgtmp);% dynamically determine threshold
             end
             
-       %% Get thresholded image
+            %% Get thresholded image
             % allow threshold adjustment in first image
             if imgnm==1
                 TH = 'y';
@@ -542,8 +556,8 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
                     end
                 end
                 display(thresh_hold)
-            else 
-                imgBW=imcomplement(im2bw(imgtmp,thresh_hold));% apply threshold  
+            else
+                imgBW=imcomplement(im2bw(imgtmp,thresh_hold));% apply threshold
             end
             
             %find particles and get partilce properties
@@ -648,6 +662,14 @@ end
 [WmImgPad] = padImg (WmImg, pad);
 end
 
+function  [a,b,c,d]=limit2Bounds(a,b,c,d,ht,wd)
+
+if a<0; a = 1; end
+if c<0; c = 1; end
+if b>ht; b = ht; end
+if d>wd; d = wd; end
+
+end
 %%>>>In Progress<<<
 %>>function [Struct]=MakeStruct(varargin)
 
