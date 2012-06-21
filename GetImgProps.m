@@ -6,6 +6,7 @@ function [imgBWL, F, Image_PropertiesAll] = GetImgProps (BW, allow_img)
 %% use BW label to get objects
 
 %BW=imcomplement(BW);
+%[AlabeldAll]=bwconncomp(BW,4); %faster
 [AlabeldAll,gnumAll]=bwlabel(BW,4);
 imgBWL=label2rgb(AlabeldAll, @jet, 'k', 'shuffle');
 

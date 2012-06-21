@@ -1,4 +1,4 @@
-function [SpineData, poshead] = SpineWorm (WmImgPad, img1, allow_img, stoppoint, poshead, numpts)
+function [SpineData, poshead] = SpineWorm (WmImgPad,allow_img, poshead, numpts)
 %Single worm is input, get SPINE characteristics
 
 %% GET SPINE
@@ -15,7 +15,7 @@ skeleSH=bwmorph(skele, 'shrink');
 endpoints = bwmorph(skeleSH, 'endpoints');
 while sum(endpoints(:)) > 2
     skeleSH=bwmorph(skele, 'shrink');
-    sum(endpoints(:))%
+    sum(endpoints(:)); %remove  will report
     skele=bwmorph(skeleSH, 'spur');
     endpoints = bwmorph(skeleSH, 'endpoints');
 end
@@ -75,7 +75,7 @@ end
 %% Order the spine points
 if strcmpi (SpineData.spinegood, 'n') == 0 % if the spine is good, proceede
     SpineList=[];
-    Distlist=[];
+    %Distlist=[];
     %select spine to use
     WorkSpine=skeleSH;
     [wkSpnX,wkspnY]=ind2sub(size(WorkSpine), find(WorkSpine));
@@ -201,7 +201,7 @@ if strcmpi (SpineData.spinegood, 'n') == 0 % if the spine is good, proceede
         catch 
             SpineData.spinegood = 'n';
             SpineData.endpoints = size(x, 1);
-            SpineData.FailPt= 'pointlist'
+            SpineData.FailPt= 'pointlist';
            return%save('SpineFailLn179')  
         end
         

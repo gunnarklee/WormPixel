@@ -18,17 +18,17 @@
 %Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_CL2120 A1 11RUNfinal'
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
-InputDir='\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld4';
-%InputDir='\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld1RESULTS\TestDS1_12_12test2'
+InputDir='\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\control_RNAi';
 Outputdir=InputDir;
-trialName='TestDS1_12_12test2';
+trialName='6_1_12Analysis';
 GetWorm(InputDir, Outputdir, trialName);
 %%
-InputDir='\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld4RESULTS\TestDS1_12_12test2';
+InputDir=['\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\control_RNAiRESULTS\' trialName];
 Outputdir=InputDir;
-ProcessSpine(InputDir, Outputdir, trialName);
+%ProcessSpine(InputDir, Outputdir, trialName);
 OneWormFigs(InputDir, Outputdir, trialName);
-
+%FancyFIGs
+%OneWormAnalysis
 %% Final file checker
 
 %FinalFile =

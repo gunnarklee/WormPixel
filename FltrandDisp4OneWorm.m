@@ -8,8 +8,8 @@
 %% Apply any of the filters and display the results...Integrate a quesiton with a switch statement for testing
 %you can combine filters by multipling them
 
-countgood = 'n'
-FiltersTried=1
+countgood = 'n';
+FiltersTried=1;
 
 while strcmpi('n', countgood)
     
@@ -46,7 +46,7 @@ while strcmpi('n', countgood)
     elseif and (~size(Img_Propfilt, 1) == MinWorms*MaxWormFactor, FiltersTried == MaxFilt);
         % if you have tried all the filters and htere are still too many
         % worms, discard the time point
-        countgood = 'n' %skip image display and mark for continue when out of loop
+        countgood = 'n'; %skip image display and mark for continue when out of loop
         Skiplog={Skiplog; imageName};
         
         break % next iteration without saving in data
@@ -57,15 +57,15 @@ end
 
 if strcmpi('y', countgood)
     %% COLLECT DATA
-    centroidLs= [centroidLs; Img_Propfilt(1,1:2)]% add a centroid
-    centrSmthY=smooth(centroidLs, SmoothInt, SmoothMeth) % smooth in one set
-    centrSmthY=reshape(centrSmthY, size( centroidLs, 1), size( centroidLs, 2))
+    centroidLs= [centroidLs; Img_Propfilt(1,1:2)];% add a centroid
+    centrSmthY=smooth(centroidLs, SmoothInt, SmoothMeth); % smooth in one set
+    centrSmthY=reshape(centrSmthY, size( centroidLs, 1), size( centroidLs, 2));
         
         if length(centrSmthY) == size(centroidLs, 1)-1; 
-        centrSmthY=[centroidLs(1,:);centrSmthY] % need to add a spacer.
+        centrSmthY=[centroidLs(1,:);centrSmthY]; % need to add a spacer.
         end
         
-    CentrComp= [centroidLs, centrSmthY] % rebuilding CentrComp each time
+    CentrComp= [centroidLs, centrSmthY]; % rebuilding CentrComp each time
     %headposn
     
     Imagesfilt={};
@@ -83,19 +83,19 @@ if strcmpi('y', countgood)
     
     
 %% extract partilce params
-    areaboundingBox= boundingBox(3)* boundingBox(4)
+    areaboundingBox= boundingBox(3)* boundingBox(4);
     ImgCellNoZero=ImgCell(ImgCell~=0);
-    areacell = (Img_Propfilt(1,3))
+    areacell = (Img_Propfilt(1,3));
 
         %major/minor axis
-        if boundingBox(3)> boundingBox(4) 
-        MajvsMin=boundingBox(3)/ boundingBox(4)
+        if boundingBox(3)> boundingBox(4) ;
+        MajvsMin=boundingBox(3)/ boundingBox(4);
         else
-        MajvsMin=boundingBox(4)/ boundingBox(3)
+        MajvsMin=boundingBox(4)/ boundingBox(3);
         end
-        BBratio=[BBratio; MajvsMin, imageCt]
+        BBratio=[BBratio; MajvsMin, imageCt];
 
-    numObj=length (Img_Propfilt (:,1))
+    numObj=length (Img_Propfilt (:,1));
     
     %% results
     
@@ -116,11 +116,11 @@ if strcmpi('y', countgood)
         
         % DISPLAY RESULTS
         close all
-        figure; imshow(imgdsp2); %axis equal;
+        figure; imshow(imgBW); %axis equal;
         hold on;
         plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'w*')
         
-        figure ('position', scrsz); imagesc(imgdsp); %axis equal;
+        figure ('position', scrsz); imagesc(img1); %axis equal;
         hold on;
         plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*')
         
@@ -132,7 +132,7 @@ if strcmpi('y', countgood)
         end
         
         %
-        figure ('position', scrsz); imagesc(imgdsp); %axis equal;
+        figure ('position', scrsz); imagesc(img-2); %axis equal;
         hold on;
         plot (Image_PropertiesAll(:,6), Image_PropertiesAll(:,7),'wO')
         %plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'b*')
@@ -150,31 +150,18 @@ if strcmpi('y', countgood)
     %% FILTERED FIGURE FOR SCORING DIAGNOSIS
     
     if strcmpi(ProofingImgs, 'y')
-        
-        %SCORED OBJECTS MULTIPLE VIEWS
-        figure ('position', scrsz);
-        subplot(2,2,1); imshow(uint8(img1))
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*', 'MarkerSize', 5)
-        subplot(2,2,3); imagesc(img); title('subtracted images scaled '); colorbar
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*', 'MarkerSize', 2)
-        subplot(2,2,4); imshow(img); title('subtracted images unscaled '); colorbar
-        hold on;
-        plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*', 'MarkerSize', 2);...
-            title (['FilterNumber_',num2str(FiltersTried)])
-        saveas (gcf, [DateFldrNms{W},'MultView',imageName,'.pdf'])% save as PDF   
+        nameProof= [DateFldrNms{W},'MultView',imageName,'.pdf'];
+        ProofImages(scrsz, img1, Img_Propfilt, img, nameProof) %make function
     end %end proofing images loop
-    
-   
+      
     %% CAPTURE AS STACKED TIFF
     if strcmpi(DataCapMode, 'StackGiff')
         
           % Append to stack of images
        %Filename = [RUNfiltDir, filesep, DateFileNms{Pair}(1:end-9), 'stack.gif'];
-        Filename = [RUNfinalDir filesep DateFldrNms{W},'stack.gif']
-        measure = ['BB-ratio',num2str(MajvsMin)]%
-        textls={'Thrashing in Buffer'; imageName; [num2str(timeintv), 'secs']; measure}
+        Filename = [RUNfinalDir filesep DateFldrNms{W},'stack.gif'];
+        measure = ['BB-ratio',num2str(MajvsMin)];%
+        textls={'Thrashing in Buffer'; imageName; [num2str(timeintv), 'secs']; measure};
         Nm2=strrep(Filename, '_', '-');
         saveImageToStack(uint8(img1), Filename, ...
             'title', 'Image', ...
@@ -189,3 +176,6 @@ if strcmpi('y', countgood)
 end
 
 close all
+
+
+ 
