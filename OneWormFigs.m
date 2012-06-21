@@ -85,12 +85,13 @@ for y=1:length(namedate(:,2));%cycle folders
     Pointlist=cell(leng, 2);   %Pointlist=[Pointlist,SpineData.Pointlist];
     time=zeros(leng, 1);   %time=[time;insttime+time(end,:)];
     
-%%
-    for w=1:length(DateFileNms);
-        %load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
-        %w=30
+%% check order, sort and add spacers for skipped or missing fra
+
+[NameList]= GetImgNumOrdr(DateFileNms, '-', 'final')
+ 
+for w=1:length(NameList);
         w
-        DateFileNms{w,1}
+        NameList{w,1}
         load([DataDir filesep RecentFldr filesep DateFileNms{w,1}]);
         img1=varStruct.images.img1;
         [CurrCent]=FindCentr(varStruct.analysis.Img_Propfilt, 'CtrMass'); %CtrMass
@@ -283,3 +284,33 @@ switch mode
         CurrCent=[(uplfX+(Xwid/2)),(uplfY-(yhgt/2))];
 end
 end
+
+function [NameLst]= GetImgNumOrdr(DateFileNms, Prfx, Sufx)
+%extract image number
+%get proper image order and iser spacers for missing  images
+    
+    NumLs=[] %get mage numbers from name
+    for im=1:length(DateFileNms)
+    ImgNum=str2num(DateFileNms{im,1}(max(strfind(DateFileNms{im,1}, Prfx)+1):strfind(DateFileNms{im,1}, Sufx)-1));
+    NumLs=[NumLs; ImgNum];
+    end
+    
+    %generate full list
+    %%FullLS=(1:max(NumLs))';  
+    
+    %for each item on list find a row match
+    %[B,IX] = sort(NumLs);
+    %make a new list Plaing either 'X' or a image name if it exists
+    
+    NameLst={};  %make a new list with spacers
+    for LsItm=(1:max(NumLs));
+    NameLst=[NameLst;'X'];
+    end
+    
+    for Nm=1:size(DateFileNms,1)
+    NameLst(NumLs(Nm))= DateFileNms(Nm);
+    end
+end
+    
+    
+ 

@@ -4,7 +4,7 @@ vers='chronos7INTENSITY(8_9_11)- single cell flouresence'
 %% ImageAnalysisMode
 framerate=29
 MicroM_Pixel=1
-
+resz = 2; %resizing factor
 EvenImgBgSub= 'single'
 imgfmt='*jpg'
 %path smoothng options
@@ -18,7 +18,7 @@ poshead=[]
 pad=20
 numpts=13 %number of spine points
 
-%Visulization modes
+%% Visulization modes
 SnglImgProofMd = 'off';  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
 DataCapMode = 'Simple'%^'StackGiff' %'StackTiff','Simple'
 allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
@@ -27,10 +27,10 @@ ProofingImgs = 'n' % extra proofing images
 stoppoint='n'
 SortByName= 'n' %sort in ASCII order. pad your numeric indees with zeros
 %date stammp can introudce errors when date stamp is wrong dont use unless files are ordered wrong to start
-
+PadPrc=2.5;
  App='New'
  FntSz = 14;
-invertImage= 'y'
+invertImage= 'n'
 
 %% more parameters - DEACTIVATED OPTIONS
 IsolatePlate = 'N' %for standard chronos Apps this will be 'Y', Need a plate in img1 and img2    
@@ -38,7 +38,7 @@ AlignImMod='n'
 StringentFilter = 'n'%** STARTS OFF AS NOto run first filter the stringent filter will kick in if you get < 2.1* MaxWorms (2 points for each moving worm)
 %>startdate=datenum('16-Jun-2011 12:00:00')
 halveimage= 'n' %use to avoid before after worm fusion, and check for robutness of timepoiints
-CropEdge = 'n' % turn this on if edges are giving you a hard time > there is a crop Manually
+CropEdge = 'n' % turn this on if edges are givifng you a hard time > there is a crop Manually
 
 %% PARTICLE COUNT filters -Lenient variable set
 MaxFilt=2  %number of filters tried before continuing
@@ -46,7 +46,9 @@ MaxWormFactor=1 %skips if MaxWorms * MaxWormFactor is exceeded
 MaxWorms=1 % MAXIMUM PARTICLES COUNTED
 MinWorms=1
 %% THRESHOLDING FILTERS value -OR use graythesh to dynamically determine     
-dynamicTH = 'y-ShortCircuit' %'y', n , y, y-ShortCircuit (LOW CONTRAST IMGS)
+dynamicTH = 'n' %'y-ShortCircuit' %'y', n , 
+%n - should be standard
+%y-ShortCircuit (LOW CONTRAST IMGS) overrides set thresholds. 
 
 %when set to automatic seems to switch between .0001 (bad) and .49 (ok)
 thresh_hold=.49; % dynamicTH deactivates this one .25
@@ -55,8 +57,8 @@ dynamicBndLim = 'prc' %'stdv', 'prc''static'
 BndLim=0;  % PRC MODE- dynamicBndLim deactivates this one .25
 %>>Minbnd=-20% STATIC MODE- specifically remove the middle 'bnd' % of colors
 %>>Maxbnd=20 
-smoothbkg='y'
-
+smoothbkg='n' % works but SLOW 
+intenseMsk ='n' % clean images dont seem to need intensity mask
 %% PARTICLE FILTERS
 FiltApp='SZ_Ax_BB'%'all'
 LowLim=500; UpLim=1200; % AREA %col10 <<NEEDED TO 
