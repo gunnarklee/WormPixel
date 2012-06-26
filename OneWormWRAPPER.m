@@ -18,7 +18,7 @@
 %Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_CL2120 A1 11RUNfinal'
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
-InputDir='\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\control_RNAi';
+InputDir='\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\control_RNAi';dd
 Outputdir=InputDir;
 trialName='6_1_12Analysis';
 GetWorm(InputDir, Outputdir, trialName);
