@@ -77,11 +77,9 @@ ProcessDate=(date);
 %OPTIONAL Filter Param Specification OR revert to defaults
 %thresh_hold=.0001; %BW threshold value -OR use graythesh to dynamically determine
 %BndLim=.25; LowLim=8; UpLim=35; eccL=.2; eccU=1; MajAxL=5; MajAxU=200; MinAxL=0; MinAxU=20; ExtL=0; ExtU=1; % optional parameter input, OTHERWISE USE DEFAULTS
-
 OneWorm_CHR7Params  % load parameters an prefs
 
-
-%% Setup variables
+%% Setup variables / matricies
 scrsz = get(0,'ScreenSize');
 AliveData={};
 ImPrProcTm=[];
@@ -100,7 +98,6 @@ ImgPropHeaders =...
     'EquivalentDiameter'; 'EulerNumber'; 'Perimeter'; 'perim/area'; 'majAx/minAx';...
     '(majAx/minAx)/extent'};
 
-
 %% GET folder Names
 dirOutput = dir(fullfile(Alldata, 'PIC_*')); %specifiy source folder
 DateFldrNms = {dirOutput.name}';
@@ -113,25 +110,15 @@ CheckGetCrop(Alldata, DateFldrNms, imgfmt)
 % If filter params are missing, have user identify 5 worms and get params
 Particleparams (resz, Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold)
 
-%% get head position
-
-if strcmpi('off', SnglImgProofMd); %Single image mode
-    FldMax=length(DateFldrNms); FldStart=1;
-else %single image on
-    FldStart=FldMax;
-end
-
-for W=FldStart:FldMax; %loop folders
-    %% new directory for each video
-    %% Make new directories
+%% loop folders
+for W=1:length(DateFldrNms)
+    %% settup
     RUNfinalDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'RUNfinal'];
     ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'ErrorDir'];
     mkdir(RUNfinalDir);
     mkdir(ErrorDir);
-    
-    %New Partilce parameters
+    %folder specicic partilce parameters
     load([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'])
-    
     %update filter values
     LowLim=FltrParams.ParticleFilt.LowLim;
     UpLim=FltrParams.ParticleFilt.UpLim;
@@ -153,181 +140,251 @@ for W=FldStart:FldMax; %loop folders
     end
     
     
-    %% sort the structure into dates order from time stamp
-    %if strcmpi(SortByName, 'y')
-    %    [dirOutput2] = SortByName (dirOutput2)
-    % sometimes this mis-orders files if the time stamp is wrong
-    %end
-    
     DateFldrNms2 = {dirOutput2.name}'; % cell array to matrix
     CropPar=load([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat']);%reload each time
     mask =CropPar.mask; posctr=CropPar.posctr;
-    
     close all
     Images=[];
     poshead=[];
-    %OneWorm_Data = 
-    for ImN=1:size(DateFldrNms2,1);
+    
+    for ImN=1:size(DateFldrNms2,1); % image loop
         varStruct=[] ;
-        if strcmpi('off', SnglImgProofMd); % switch for single pairmode
-            ImgNmMax=size(DateFldrNms2,1)-1;
-            ImgStrt=1;
-        else
-            ImgStrt=ImgNmMax;
-        end
-        
+        % get image and image characteristics
         startimageName=[DateFldrNms2{1}];
         imageName=[DateFldrNms2{ImN}];
         suffix=DateFldrNms{W}(findstr('_',DateFldrNms{W})+1:end);
-        startImgCt=str2num(startimageName(findstr(suffix, startimageName)+length(suffix):findstr('.', startimageName)-1));
-        CurrimageCt=str2num(imageName(findstr(suffix, imageName)+length(suffix):findstr('.', imageName)-1));
+        startImgCt=str2double(startimageName(findstr(suffix, startimageName)+length(suffix):findstr('.', startimageName)-1));
+        CurrimageCt=str2double(imageName(findstr(suffix, imageName)+length(suffix):findstr('.', imageName)-1));
         imageCt=CurrimageCt-startImgCt+1;
-        
         timeintv =imageCt/framerate;
         img=imread([Alldata filesep DateFldrNms{W} filesep DateFldrNms2{ImN}]);
         if size(img,3)>2; img=rgb2gray(img); end
         %% Remove blotchy background %works but takes a lot of time
-        if strcmpi (smoothbkg, 'y') 
+        if strcmpi (smoothbkg, 'y')
             SE=strel('disk',10);
             imgTH=imbothat(img, SE); %works but takes a lot of time
             imgTH=imcomplement(imgTH);
             imgAdj=adapthisteq(imgTH); %Opt?
-            if (strcmpi (allow_img, 'y'))
-                figure; imshow(imgTH)
-                figure; imshow(img1)
-                figure; imshow(imgAdj)
-            end
-            %img1=double(imgAdj);
+            if (strcmpi (allow_img, 'y')); figure; imshow(imgTH); figure; imshow(img1); figure; imshow(imgAdj); end
             img1=uint8(imgAdj);
         else
-        %>    img1=double(img1);
-              img1=uint8(img);
+            img1=uint8(img);
         end
         img1=imresize(img1, resz); %resize after smoothing to save time
         close all
         
-%%MASK OFF THE PERIMITER  
+        %% MASK OFF THE PERIMITER
         mask=uint8(mask);
         img1=(img1.*mask);
         lng1=length(img1(1,:)); lng2=length(img1(:,1));
-        
-        %% limit search neighborhood to
-        %LAST WORM BOUNDING BOX
-        if ImN > 2
-%% Search only in a padded region boinding the last worm
-
-            if exist('boundingBox')==0;  boundingBox=[1  1 size(img1,2) size(img1,1)]; end
-            % boundingBox=[1  1 size(img,2) size(img,1)]
-            BBmask = zeros(size(img1));
-            %Be sure that padded BB does not stretch the mask beyond the edges of img
-            try % this fails somtimes
-                
-                a=ceil(boundingBox(2)-boundingBox(4).*PadPrc);
-                b=ceil(boundingBox(2)+boundingBox(4).*2.*PadPrc);
-                c=ceil(boundingBox(1)-boundingBox(3).*PadPrc);
-                d=ceil(boundingBox(1)+boundingBox(3).*2.*PadPrc);
-                [a,b,c,d]=limit2Bounds(a,b,c,d,size(img1,1),size(img1,2));
-                BBmask(a:b,c:d)= ones;
-            catch e1
-                SpineData.FailPt= 'BBmask';
-                saveThis([ErrorDir filesep imageName(1:end-4), 'BBmaskError.mat'], varStruct)
-                continue
+        %% Check for particles until you get a good worm or a failure
+        %if masked image fails will recheck unmasked image
+        particleCheck = 'in_progress'; %is switched off after second pass
+        MaskImage = 'y'; %is switched off in second pass
+        if exist('boundingBox')==0;  boundingBox=[1  1 size(img1,2) size(img1,1)]; end
+        while strcmpi(particleCheck, 'in_progress')
+            %% Area restricted search for worm uses LAST WORM BOUNDING BOX
+            [img1Masked] = AdaptBoundBox(boundingBox, PadPrc, MaskImage, img1, allow_img);
+            %% MASK BY Intensity ** removing middle tones %can lead to washing out image
+            close all
+            if strcmpi (intenseMsk, 'y')
+                [img1Masked]=IntenseMask (img1Masked, dynamicBndLim, Val, EvenImgBgSub, allow_img);
+            end
+            %% IDENTIFY OBJECTS and FILTER DATA
+            if strcmpi(invertImage, 'y'); img1Masked=imcomplement(img1Masked); end
+            if (strcmpi(dynamicTH, 'y'));
+                imgBW=abs(double(img1Masked));
+                thresh_hold = graythresh(imgBW);% dynamically determine threshold
+                imgBW=imcomplement(im2bw(imgBW,thresh_hold));% apply threshold
+            elseif (strcmpi(dynamicTH, 'y-ShortCircuit'));
+                imgBW=abs(img1Masked); %SKIPS OVER INTENSITY AND DOUBLE opreations
+                thresh_hold = graythresh(imgBW);% dynamically determine threshold
+                imgBW=im2bw(imgBW,thresh_hold);% apply threshold
+            elseif (strcmpi(dynamicTH, 'n'))
+                imgBW=abs(img1Masked);%imgBW=abs(double(MasImg));
+                imgBW=imcomplement(im2bw(imgBW,FltrParams.threshold));% apply threshold
             end
             
-% Be sure that padded BB does not stretch the mask beyond the edges of img
-            BBmask=uint8(BBmask(1:size(img1,1), 1:size(img1,2)));
-            img1=(img1.*BBmask); %% pass the masked image into the particle analysis to avoit off target particles.
-            %if (strcmpi (allow_img, 'y'))
-                figure; imagesc(uint8(BBmask));
-                figure; imshow(uint8(img1));
-                PlotBoundBox(img1, boundingBox); % to check..
-            %end
-            %stoppt=input('next step?', 's')
-            %clear ('PaddedBox', 'boundingBox')
+            if strcmpi(allow_img, 'y'); figure; imagesc(imgBW); end
+            Image_PropertiesAll=[]; F=[]; AlabeldAll=[]; gnumAll=[]; yy=[]; yyy=[]; xx=[]; xxx=[]; ym=[];xm=[];%mask=[];
+            [imgBWL, F, Image_PropertiesAll] = GetImgProps (imgBW, allow_img);
+            
+            %values absent - make one dummy line
+            if size(Image_PropertiesAll, 1) < 1; Image_PropertiesAll= ones(1,21); end
+            
+            %% Filter and present data.
+            Img_Propfilt=[];
+            if strcmpi ('y', allow_img); figure ; imshow(imgBWL); end
+            
+            %% AppFlts
+            %needs to add fliter on bounding box BndBxFlt4L.* BndBxFlt4U.*
+            %set up filters to identify worms - logical matricies of ones and zeros...
+            szFltL= double(Image_PropertiesAll(:,10)>LowLim); %make size filter
+            szFltU= double(Image_PropertiesAll (:,10)<UpLim);
+            EccFltL= double(Image_PropertiesAll (:,5)>eccL); %rows less than 1280 are in chanel 1
+            EccFltU= double(Image_PropertiesAll (:,5)<eccU);% the eccentricity of the spot should be less than .8 (usually ~.5)
+            MajAxFltL= double(Image_PropertiesAll (:,8)>MajAxL); %rows less than 1280 are in chanel 1
+            MajAxFltU= double(Image_PropertiesAll (:,8)<MajAxU);% the eccentricity of the spot should be less than .8 (usually ~.5)
+            MinAxFltL= double(Image_PropertiesAll (:,9)>MinAxL); %rows less than 1280 are in chanel 1
+            MinAxFltU= double(Image_PropertiesAll (:,9)<MinAxU);% the eccentricity of the spot should be less than .8 (usually ~.5)
+            ExtFltL= double(Image_PropertiesAll (:,15)>ExtL); %rows less than 1280 are in chanel 1
+            ExtFltU= double(Image_PropertiesAll (:,15)<ExtU);
+            TotAxFltU = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))<TotAxU;
+            TotAxFltL = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))>TotAxL;
+            
+            %% APPLY FILTERS
+            countgood = 'n';
+            FiltersTried=1;
+            while strcmpi('n', countgood) %apply different filters to try to get a "good count"
+                switch FiltApp
+                    case 'all'
+                        filter= [BndBxFlt4L.* BndBxFlt4U.* szFltU.* szFltL.*EccFltU.* EccFltL.*MajAxFltU.* MajAxFltL.*MinAxFltU.* MinAxFltL.*ExtFltL.*ExtFltU];
+                    case 'SZ_Ax_BB'
+                        filter= [szFltU.* szFltL.*MajAxFltU.* MajAxFltL.*MinAxFltU.* MinAxFltL.*TotAxFltU.*TotAxFltL];    %BndBxFlt4L.* BndBxFlt4U.*
+                    case 'uin'
+                        filter= filter; %specified as filter by callng program
+                end
+                clear ('filtVal')
+                filtVal=find(filter); %finds row addresses of values
+                Img_Propfilt=Image_PropertiesAll(filtVal,:); %new matrix with 0s filtered out
+                
+                %finally find the closest particle to the last worm identifed
+                if ImN == 1; postn=FltrParams.StartPos; else postn=poshead; end
+                [row,mindiff]=CloseCentr(postn,Img_Propfilt);
+                Img_Propfilt=Img_Propfilt(row, :);
+                
+                %% CLASSIFY PROBELM CASES, redo or discard image
+                %too many worms, have not refiltered, then refilter.
+                if and(size(Img_Propfilt, 1) > MinWorms*MaxWormFactor, FiltersTried < MaxFilt);
+                    countgood = 'n';
+                    StringentFilter = 'y';
+                    FiltersTried=FiltersTried+1;
+                    particleCheck = 'in_progress';
+                    %too many worms, have refiltered, then reject.
+                elseif and (size(Img_Propfilt, 1)> MinWorms*MaxWormFactor, FiltersTried == MaxFilt);
+                    % if you have tried all the filters and there are still too many
+                    % worms, discard the time point
+                    countgood = 'n'; %skip image display and mark for continue when out of loop
+                    Skiplog={Skiplog; imageName} %IS THIS POPULATED? DOES IT REALLY AVOID SAVING?
+                    particleCheck = 'Done';
+                     display (['done   ', num2str(ImN) 'count error'];
+                    break % next iteration without saving in data
+                elseif size(Img_Propfilt, 1)== 0;%No Particles, rerun without masking
+                    particleCheck = 'in_progress' %is switched off after second pass
+                    MaskImage = 'n';
+                    countgood = 'y'; %count is not good BUT, this allow escape from REFILTERING LOOP
+                     display (['unmask ', num2str(ImN)];
+                else %OK GOOD proceede to next step
+                    countgood = 'y';
+                    particleCheck = 'Done';
+                    display (['done   ', num2str(ImN)];
+                end
+            end
         end
         
-%% MASK BY INTensity ** removing middle tones
-        %be careful this can lead to rescaling and washing
+        %% if you have a good count then proceede
+        if strcmpi('y', countgood)
+            %% COLLECT DATA
+            centroidLs= [centroidLs; Img_Propfilt(1,1:2)];% add a centroid
+            centrSmthY=smooth(centroidLs, SmoothInt, SmoothMeth); % smooth in one set
+            centrSmthY=reshape(centrSmthY, size( centroidLs, 1), size( centroidLs, 2));
+            
+            if length(centrSmthY) == size(centroidLs, 1)-1;
+                centrSmthY=[centroidLs(1,:);centrSmthY]; % need to add a spacer.
+            end
+            
+            CentrComp= [centroidLs, centrSmthY]; % rebuilding CentrComp each time
+            Imagesfilt={};
+            for ChosenIMAGE=1:length(filtVal);
+                Imagesfilt = [Imagesfilt; F(filtVal(ChosenIMAGE,1)).Image];
+            end
+            
+            %% EXTRACT THE object parameters OF INTEREST
+            
+            boundingBox=Img_Propfilt (1, 11:14);
+            boundingBox(3)= boundingBox(3)-1;
+            boundingBox(4)= boundingBox(4)-1;
+            ImgCellPic=double(imcrop(img1, boundingBox));
+            ImgCellmsk=double(Imagesfilt{1,1});
+            ImgCell=(ImgCellmsk.*ImgCellPic);
+            %% extract partilce params
+            areaboundingBox= boundingBox(3)* boundingBox(4);
+            ImgCellNoZero=ImgCell(ImgCell~=0);
+            areacell = (Img_Propfilt(1,3));
+            %major/minor axis
+            if boundingBox(3)> boundingBox(4) ;
+                MajvsMin=boundingBox(3)/ boundingBox(4);
+            else
+                MajvsMin=boundingBox(4)/ boundingBox(3);
+            end
+            BBratio=[BBratio; MajvsMin, imageCt];
+            numObj=length (Img_Propfilt (:,1));
+            
+            %% DISPLAY results
+            if strcmpi(allow_img, 'y')
+                figure; %HISTOGRAM filtered values
+                title ('all filters applied')
+                subplot (3,4,1); hist (Img_Propfilt  (:,5)); title ('Eccentr 1=straight')
+                subplot (3,4,2); hist (Img_Propfilt  (:,8)); title ('MajAxis')
+                subplot (3,4,3); hist (Img_Propfilt (:,9)); title ('MinAxis')
+                subplot (3,4,4); hist (Img_Propfilt (:,10)); title ('Area')
+                subplot (3,4,5); hist (Img_Propfilt  (:,15)); title ('Extent')
+                subplot (3,4,6); hist (Img_Propfilt (:,16)); title ('equivalentDiameter')
+                subplot (3,4,7); hist (Img_Propfilt  (:,14)); title ('EulerNumber')
+                subplot (3,4,8); hist (Img_Propfilt (:,18)); title ('Perimiter/area')
+                subplot (3,4,9); hist (Img_Propfilt  (:,20)); title ('maj_min_extnt')
+                subplot (3,4,10); hist (Img_Propfilt  (:,14)); title ('BOundingBox4(col-14')
+                %DISPLAY RESULTS
+                close all
+                figure; imshow(imgBW); %axis equal;
+                hold on; plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'w*')
+                figure ('position', scrsz); imagesc(img1); %axis equal;
+                hold on; plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*')
+                %ADD PARTICLE NUMBER
+                for rowN = 1:length(Img_Propfilt(:,1))
+                    text(Img_Propfilt(rowN,6),...
+                        Img_Propfilt(rowN,7),...
+                        num2str(Img_Propfilt(rowN,4)),'Color', 'r', 'FontSize', 12)
+                end
+                figure ('position', scrsz); imagesc(img-2); %axis equal;
+                hold on; plot (Image_PropertiesAll(:,6), Image_PropertiesAll(:,7),'wO')
+            end
+            Image_PropertiesList = Image_PropertiesAll; ctX = 6; ctY = 7; TxtCol = 4; NumCol = 'r'; FntSz = 6;
+            if strcmpi ('y', allow_img); PrintObjParamsAug11; end
+            %% FILTERED FIGURE FOR SCORING DIAGNOSIS
+            if strcmpi(ProofingImgs, 'y')
+                nameProof= [DateFldrNms{W},'MultView',imageName,'.pdf'];
+                ProofImages(scrsz, img1, Img_Propfilt, img, nameProof) %make function
+            end %end proofing images loop
+            %% CAPTURE AS STACKED TIFF
+            if strcmpi(DataCapMode, 'StackGiff') % Append to stack of images
+                Filename = [RUNfinalDir filesep DateFldrNms{W},'stack.gif'];
+                measure = ['BB-ratio',num2str(MajvsMin)];%
+                textls={'Thrashing in Buffer'; imageName; [num2str(timeintv), 'secs']; measure};
+                Nm2=strrep(Filename, '_', '-');
+                saveImageToStack(uint8(img1), Filename, ...
+                    'title', 'Image', ...
+                    'image_name', Nm2, ...
+                    'scale_image', false, ...
+                    'display_image', 'on',...
+                    'CentrComp', CentrComp,...
+                    'boundingBox', boundingBox,...
+                    'plotcol',[1,2,3,4]); %proofingImgVIS
+            end
+        end
         close all
-        
-        if strcmpi (intenseMsk, 'y') 
-        [img1]=IntenseMask (img1, dynamicBndLim, Val, EvenImgBgSub, allow_img);
-        end
-        %% IDENTIFY OBJECTS and FILTER DATA
-        %%BW THRESHLDING - the boundlimit subtraction above takes care of
-        %%the thresholding
-        if strcmpi(invertImage, 'y'); img1=imcomplement(img1); end
-        % thresh_hold=.0001 - thresholding from .0001 -.999 is
-        % making no differnece!
-        
-        if (strcmpi(dynamicTH, 'y'));
-            imgBW=abs(double(img1));
-            thresh_hold = graythresh(imgBW);% dynamically determine threshold
-            imgBW=imcomplement(im2bw(imgBW,thresh_hold));% apply threshold
-            %figure; imagesc(imgBW);
-        elseif (strcmpi(dynamicTH, 'y-ShortCircuit'));
-            imgBW=abs(img1); %SKIPS OVER INTENSITY AND DOUBLE opreations
-            thresh_hold = graythresh(imgBW);% dynamically determine threshold
-            imgBW=im2bw(imgBW,thresh_hold);% apply threshold
-            %figure; imagesc(imgBW);
-        else
-            imgBW=abs(img1);
-            %imgBW=abs(double(MasImg));
-            imgBW=imcomplement(im2bw(imgBW,FltrParams.threshold));% apply threshold
-            %figure; imagesc(imgBW);
-        end
-        
-        if strcmpi(allow_img, 'y'); figure; imagesc(imgBW); end
-        Image_PropertiesAll=[]; F=[]; AlabeldAll=[]; gnumAll=[]; yy=[]; yyy=[]; xx=[]; xxx=[]; ym=[];xm=[];%mask=[];
-        [imgBWL, F, Image_PropertiesAll] = GetImgProps (imgBW, allow_img);
-        
-        if size(Image_PropertiesAll, 1) < 1 %values absent - make one dummy line
-            Image_PropertiesAll= ones(1,21);
-        end
-        
-        %% Filter and present data. >>** expand this ti include separate filtering
-        %% and tabulaiton for before/ afterlists
-
-        if strcmpi ('y', allow_img); figure ; imshow(imgBWL); end
-        Img_Propfilt=[];
-        
-        
-        %% AppFlts
-        %needs to add fliter on bounding box BndBxFlt4L.* BndBxFlt4U.*
-        %set up filters to identify worms - logical matricies of ones and zeros...
-        szFltL= double(Image_PropertiesAll(:,10)>LowLim); %make size filter
-        szFltU= double(Image_PropertiesAll (:,10)<UpLim);
-        EccFltL= double(Image_PropertiesAll (:,5)>eccL); %rows less than 1280 are in chanel 1
-        EccFltU= double(Image_PropertiesAll (:,5)<eccU);% the eccentricity of the spot should be less than .8 (usually ~.5)
-        MajAxFltL= double(Image_PropertiesAll (:,8)>MajAxL); %rows less than 1280 are in chanel 1
-        MajAxFltU= double(Image_PropertiesAll (:,8)<MajAxU);% the eccentricity of the spot should be less than .8 (usually ~.5)
-        MinAxFltL= double(Image_PropertiesAll (:,9)>MinAxL); %rows less than 1280 are in chanel 1
-        MinAxFltU= double(Image_PropertiesAll (:,9)<MinAxU);% the eccentricity of the spot should be less than .8 (usually ~.5)
-        ExtFltL= double(Image_PropertiesAll (:,15)>ExtL); %rows less than 1280 are in chanel 1
-        ExtFltU= double(Image_PropertiesAll (:,15)<ExtU);
-        TotAxFltU = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))<TotAxU;
-        TotAxFltL = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))>TotAxL;
-        
-        FltrandDisp4OneWorm
-        
-        % reduce image sizes and compile data
-        %>img=uint8(img);
+        %% COMPILE DATA, reduce image sizes
         img=imresize(img, .25); %shrink
         img1=imresize(img1, .25);
         imgBWL=imresize(imgBWL, .25);
-
         varStruct.filters.filtVal=filtVal;
         varStruct.images.imgBWL=imgBWL;
-        %varStruct.images.img=img; %fully processed image don't use
         varStruct.images.img1=img1; %original image
         varStruct.analysis.ImgPropHeaders=ImgPropHeaders;
         varStruct.analysis.Image_PropertiesAll=Image_PropertiesAll;
-     
-        
         
         %% COUNT ERROR-  Too many particles, then SKIP THE PAIR
         if strcmpi('n', countgood)
-            
             varStruct.filters.szFltL= szFltL;
             varStruct.filters.szFltU= szFltU;
             varStruct.filters.MajAxFltL= MajAxFltL; %rows less than 1280 are in chanel 1
@@ -338,56 +395,39 @@ for W=FldStart:FldMax; %loop folders
             saveThis([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], varStruct)
             continue
         end
-        
         %% get head position for first worm
-        %if there is more than 1 image choose the closest to the start
-        %position
-        [row,mindiff]=CloseCentr(FltrParams.StartPos,Img_Propfilt);
-        %Img_Propfilt(:,1:2)
-        
+        %if there is more than 1 image choose the closest to the point
+        %last head
+        %>[row,mindiff]=CloseCentr(FltrParams.StartPos,Img_Propfilt);
         [WmImgPad]=GetPadImg (pad, (Imagesfilt{row,:}));
-        %WmImgPad=imresize(logical(WmImgPad), 2);
-        
         if isempty(poshead)
             %display a few images to tell which part is the head
             Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
             %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,)
             mssg='drag point to head and double click';
             [poshead]=GetHead (poshead, WmImgPad, mssg);
-            varStruct.Pos.poshead=poshead;
-            close all
+            varStruct.Pos.poshead=poshead; close all;
         end
         %% spine worm
-        figure; subplot(1,2,1); imshow(img1); subplot(1,2,2);  imshow(WmImgPad); 
+        figure; subplot(1,2,1); imshow(img1); subplot(1,2,2);  imshow(WmImgPad);
         [SpineData, poshead2] = SpineWorm (WmImgPad, allow_img, poshead, numpts);
         [poshead]=updatePoshead (poshead2, poshead);
         close all
         
-        %% BADSPINE DUMP
-        %check for errors
+        %% BADSPINE DUMP - check for errors
         if strcmpi('n', SpineData.spinegood)
             saveThis ([ErrorDir filesep imageName(1:end-4), 'SpineError.mat'],varStruct);
             continue
         end
-        
-        FltNm2={};
-        FltNm2= ['sze'; 'ecc'; 'mjx'; 'mnx'; 'ext'];
+        FltNm2={}; FltNm2= ['sze'; 'ecc'; 'mjx'; 'mnx'; 'ext'];
         FltPram2= [LowLim UpLim; eccL eccU; MajAxL MajAxU; MinAxL MinAxU; ExtL ExtU];
         
         % list of image attributes
         if strcmpi ('y', allow_img); figure; imagesc(imgBWL); end
-        
         numObj=length (Img_Propfilt (:,1));
-        
-        %these are graphed in "GetImgPropsDrop.m"
-        %for a description of a specific measure look up "regionprops" in
-        %help
-        Allsizes = Img_Propfilt(:,3);
+        Allsizes = Img_Propfilt(:,3); %look up "regionprops" in
         sizesScored = Image_PropertiesAll(:,3);
         
-        % Output work to .matfile put these in a single large floder with the run
-        % date indicated
-        %cd(Alldata);
         %% PREPARE for separate save function (required for parallel processing)
         %Flesh out varStruct
         varStruct.images.Imagesfilt=Imagesfilt;
@@ -397,7 +437,7 @@ for W=FldStart:FldMax; %loop folders
         SaveImNm=imageName(1:end-4);
         saveThis([RUNfinalDir filesep SaveImNm, 'final.mat'], varStruct);%'ProcessDate'
         
-        %create OneWormData
+        %create OneWormData - for CLOSEST worm (row)
         majAx_minAx = (Img_Propfilt(row,20));
         majA_minAx_extent = (Img_Propfilt(row,21));
         CentrX = (Img_Propfilt(row,1));
@@ -409,9 +449,7 @@ for W=FldStart:FldMax; %loop folders
             CentrX, CentrY}];
         %AliveData={AbsTimeDays, timeintv, DateFldrNms{W}, numObj}
         %cellwrite(DataDir/, AliveData, 2)
-        %
     end % IMAGES LOOP
-    
     
     OneWorm_DataHeaders =  ['filename',',', 'ObjecCount',',',...
         'areacell',',','areaboundingBox',',','majAx_minAx',',', 'majA_minAx_extent',...
@@ -421,6 +459,7 @@ for W=FldStart:FldMax; %loop folders
     save([RUNfinalDir, filesep ,DateFldrNms{W} 'OneWormdata.mat'], 'OneWorm_DataHeaders', 'OneWorm_Data')
 end % FOLDERS LOOP
 end %end main function
+
 %% make sure you have a good head position
 function [poshead]=updatePoshead (poshead2, poshead)
 if isempty(poshead2)
@@ -471,13 +510,11 @@ end
 dirOutput2 = dirOutput2(order);
 end
 
-
 function [poshead]=GetHead (poshead, WmImgPad, mssg)
 if isempty(poshead)
     [poshead] = GetPoint(WmImgPad, [ceil(size(WmImgPad (:,:,1), 2)*.85), ceil(size(WmImgPad (:,:,1), 1)*.85)], mssg);
 end
 end
-
 
 function [WmImgPad]=GetPadImg (pad, Imagesfilt)
 if iscell(Imagesfilt)
@@ -489,14 +526,6 @@ end
 [WmImgPad] = padImg (WmImg, pad);
 end
 
-function  [a,b,c,d]=limit2Bounds(a,b,c,d,ht,wd)
-
-if a<0; a = 1; end
-if c<0; c = 1; end
-if b>ht; b = ht; end
-if d>wd; d = wd; end
-
-end
 
 function ProofImages(scrsz, img1, Img_Propfilt, img, nameProof) %make function
 %SCORED OBJECTS MULTIPLE VIEWS
@@ -516,49 +545,46 @@ end
 
 function [MasImg]=IntenseMask (img, dynamicBndLim, Val, EvenImgBgSub, allow_img)
 % for 'static' dynamicBndLim optio, Val is a matrix [high, low]
-% for 'prc' and 'stdv' options Val is  BndLim and NumStd for 
-
+% for 'prc' and 'stdv' options Val is  BndLim and NumStd for
 % dynamically determine bound limits from image characteristics
-        switch dynamicBndLim;
-            case 'stdv'
-                Minbnd=Val*(std2(img));  %3 std is not nearly enough
-                Maxbnd=Val*(std2(img));
-            case 'prc'
-                Minbnd=Val*(min(min(img))); %specifically remove the middle 'bnd' % of colors
-                Maxbnd=Val*(max(max(img)));
-            case 'static'
-                Minbnd=Val(1,2); %specifically remove the middle 'bnd' % of colors
-                Maxbnd=Val(1,1);
-        end
-        avg=mean(img(:));
-        Mask=(img < (Minbnd) | img > (Maxbnd)); %threshold set as bounds around AVERAGE
-       
-        
-        if strcmpi(EvenImgBgSub, 'y');% only for non-simple mode
-            Mask=imcomplement(Mask); % off for straight subtract ON for adjusted subtract
-        end
-        % get STATS for the mask
-        imgRange=[(max(max(img))); min(min(img)); range(range(img));avg; BndLim];
-        RangeRmvd=[Minbnd;Maxbnd];
-        totPixels= size(Mask, 1) *size(Mask, 2);
-        %Mask=(img > (avg+bnd)| img < (avg-bnd)); % perhaps substiute 0 for (avg-bnd) here?
-        pxlmsk=totPixels-sum(sum(Mask));
-        PrcMasked=(pxlmsk./totPixels).*100;
-        %Mask=Mask-1; % masked values come in as ones so change them to zeros
-        if (strcmpi (allow_img, 'y'));
-            figure;imagesc(Mask); title ('Mask image');
-        end
-        Mask=double(Mask);
-        img=double(img);
-        MasImg=(img.*Mask);
-        if (strcmpi (allow_img, 'y'))
-            figure; imagesc(MasImg); title ('MasImg');
-            figure; imagesc(Mask); title ('Mask');
-            figure ('position', scrsz); subplot (2,2,1); imagesc(subimg); title ('original image'); colorbar; subplot (2,2,2); imagesc(Mask);title ('Mask image'); colorbar; subplot (2,2,3); imagesc(MasImg); title ('MasImg image'); colorbar;
-        end
+switch dynamicBndLim;
+    case 'stdv'
+        Minbnd=Val*(std2(img));  %3 std is not nearly enough
+        Maxbnd=Val*(std2(img));
+    case 'prc'
+        Minbnd=Val*(min(min(img))); %specifically remove the middle 'bnd' % of colors
+        Maxbnd=Val*(max(max(img)));
+    case 'static'
+        Minbnd=Val(1,2); %specifically remove the middle 'bnd' % of colors
+        Maxbnd=Val(1,1);
+end
+avg=mean(img(:));
+Mask=(img < (Minbnd) | img > (Maxbnd)); %threshold set as bounds around AVERAGE
 
-        close all
-        end
+if strcmpi(EvenImgBgSub, 'y');% only for non-simple mode
+    Mask=imcomplement(Mask); % off for straight subtract ON for adjusted subtract
+end
+%% get STATS for the mask
+imgRange=[(max(max(img))); min(min(img)); range(range(img));avg; BndLim];
+RangeRmvd=[Minbnd;Maxbnd];
+totPixels= size(Mask, 1) *size(Mask, 2);%Mask=(img > (avg+bnd)| img < (avg-bnd)); % perhaps substiute 0 for (avg-bnd) here?
+pxlmsk=totPixels-sum(sum(Mask));
+PrcMasked=(pxlmsk./totPixels).*100; %Mask=Mask-1; % masked values come in as ones so change them to zeros
+
+if (strcmpi (allow_img, 'y'));
+    figure;imagesc(Mask); title ('Mask image');
+end
+Mask=double(Mask);
+img=double(img);
+MasImg=(img.*Mask);
+
+if (strcmpi (allow_img, 'y'))
+    figure; imagesc(MasImg); title ('MasImg');
+    figure; imagesc(Mask); title ('Mask');
+    figure ('position', scrsz); subplot (2,2,1); imagesc(subimg); title ('original image'); colorbar; subplot (2,2,2); imagesc(Mask);title ('Mask image'); colorbar; subplot (2,2,3); imagesc(MasImg); title ('MasImg image'); colorbar;
+end
+close all
+end
 %%>>>In Progress<<<
 %>>function [Struct]=MakeStruct(varargin)
 
