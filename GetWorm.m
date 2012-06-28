@@ -110,6 +110,7 @@ CheckGetCrop(Alldata, DateFldrNms, imgfmt)
 % If filter params are missing, have user identify 5 worms and get params
 Particleparams (resz, Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold)
 
+tic
 %% loop folders
 for W=1:length(DateFldrNms)
     %% settup
@@ -184,7 +185,7 @@ for W=1:length(DateFldrNms)
         if exist('boundingBox')==0;  boundingBox=[1  1 size(img1,2) size(img1,1)]; end
         while strcmpi(particleCheck, 'in_progress')
             %% Area restricted search for worm uses LAST WORM BOUNDING BOX
-            [img1Masked] = AdaptBoundBox(boundingBox, PadPrc, MaskImage, img1, allow_img);
+            [img1Masked] = AdaptBoundBox(boundingBox, PadPrc, MaskImage, img1, allow_img);%allow_img
             %% MASK BY Intensity ** removing middle tones %can lead to washing out image
             close all
             if strcmpi (intenseMsk, 'y')
@@ -260,24 +261,38 @@ for W=1:length(DateFldrNms)
                     StringentFilter = 'y';
                     FiltersTried=FiltersTried+1;
                     particleCheck = 'in_progress';
-                    %too many worms, have refiltered, then reject.
+                 %too many worms, have refiltered, then reject.
                 elseif and (size(Img_Propfilt, 1)> MinWorms*MaxWormFactor, FiltersTried == MaxFilt);
                     % if you have tried all the filters and there are still too many
                     % worms, discard the time point
                     countgood = 'n'; %skip image display and mark for continue when out of loop
                     Skiplog={Skiplog; imageName} %IS THIS POPULATED? DOES IT REALLY AVOID SAVING?
                     particleCheck = 'Done';
-                     display (['done   ', num2str(ImN) 'count error'];
+                    display (['done   ', num2str(ImN) 'count error']);toc
                     break % next iteration without saving in data
-                elseif size(Img_Propfilt, 1)== 0;%No Particles, rerun without masking
-                    particleCheck = 'in_progress' %is switched off after second pass
-                    MaskImage = 'n';
-                    countgood = 'y'; %count is not good BUT, this allow escape from REFILTERING LOOP
-                     display (['unmask ', num2str(ImN)];
+               elseif size(Img_Propfilt, 1)== 0;%No Particles, rerun without masking
+                    switch MaskImage
+                        case 'y'
+                        particleCheck = 'in_progress' %is switched off after second pass
+                        MaskImage = 'n';
+                        countgood = 'y'; %count is not good BUT, this allow escape from REFILTERING LOOP
+                        display (['unmask ', num2str(ImN)]);
+                       
+                        %already unmasked still no particles, REJECT
+                        case'n'
+                        particleCheck = '' %is switched off after second pass
+                        MaskImage = 'n';
+                        toc
+                        display (['unmask ', num2str(ImN)]);
+                        countgood = 'n'; %skip image display and mark for continue when out of loop
+                        particleCheck = 'Done';
+                        display (['done   ', num2str(ImN) 'ZeroCounterror']);
+                        break % next iteration without saving in data
+                    end
                 else %OK GOOD proceede to next step
                     countgood = 'y';
-                    particleCheck = 'Done';
-                    display (['done   ', num2str(ImN)];
+                    particleCheck = 'Done';toc
+                    display (['done   ', num2str(ImN)]);
                 end
             end
         end

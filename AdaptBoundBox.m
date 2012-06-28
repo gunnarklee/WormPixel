@@ -6,9 +6,9 @@ function [img1Masked] = AdaptBoundBox(boundingBox, PadPrc, MaskImage, img1, allo
                     %Be sure that padded BB does not stretch the mask beyond the edges of img
                     %try % this fails somtimes
                         a=ceil(boundingBox(2)-boundingBox(4).*PadPrc);
-                        b=ceil(boundingBox(2)+boundingBox(4).*2.*PadPrc);
+                        b=ceil(boundingBox(2)+boundingBox(4).*PadPrc);
                         c=ceil(boundingBox(1)-boundingBox(3).*PadPrc);
-                        d=ceil(boundingBox(1)+boundingBox(3).*2.*PadPrc);
+                        d=ceil(boundingBox(1)+boundingBox(3).*PadPrc);
                         [a,b,c,d]=limit2Bounds(a,b,c,d,size(img1,1),size(img1,2));
                         BBmask(a:b,c:d)= ones;
                         [a,b,c,d, boundingBox];
@@ -25,7 +25,7 @@ function [img1Masked] = AdaptBoundBox(boundingBox, PadPrc, MaskImage, img1, allo
                     end
                 case 'n'  %SECOND TRY, leave image UNMASKED
                     img1Masked=img1;
-                    figure; imshow(uint8(img1Masked));
+                    if (strcmpi (allow_img, 'y')); figure; imshow(uint8(img1Masked)); end
             end
 end
     
