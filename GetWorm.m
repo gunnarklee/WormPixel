@@ -251,8 +251,10 @@ for W=1:length(DateFldrNms)
                 
                 %finally find the closest particle to the last worm identifed
                 if ImN == 1; postn=FltrParams.StartPos; else postn=poshead; end
-                [row,mindiff]=CloseCentr(postn,Img_Propfilt);
-                Img_Propfilt=Img_Propfilt(row, :);
+                [row,mindiff]=CloseCentr(postn,Img_Propfilt); 
+                Img_Propfilt=Img_Propfilt(row, :); %select the "worm" closest to the last worm
+                    % this forces a single worm thus subverting the
+                    % refiltering routines below
                 
                 %% CLASSIFY PROBELM CASES, redo or discard image
                 %too many worms, have not refiltered, then refilter.
@@ -320,9 +322,9 @@ for W=1:length(DateFldrNms)
             boundingBox(3)= boundingBox(3)-1;
             boundingBox(4)= boundingBox(4)-1;
             ImgCellPic=double(imcrop(img1, boundingBox));
-            ImgCellmsk=double(Imagesfilt{1,1});
+            ImgCellmsk=double(Imagesfilt{row,1});
             ImgCell=(ImgCellmsk.*ImgCellPic);
-            %% extract partilce params
+            %% extract particle params
             areaboundingBox= boundingBox(3)* boundingBox(4);
             ImgCellNoZero=ImgCell(ImgCell~=0);
             areacell = (Img_Propfilt(1,3));
@@ -452,13 +454,13 @@ for W=1:length(DateFldrNms)
         SaveImNm=imageName(1:end-4);
         saveThis([RUNfinalDir filesep SaveImNm, 'final.mat'], varStruct);%'ProcessDate'
         
-        %create OneWormData - for CLOSEST worm (row)
-        majAx_minAx = (Img_Propfilt(row,20));
-        majA_minAx_extent = (Img_Propfilt(row,21));
-        CentrX = (Img_Propfilt(row,1));
-        CentrY = (Img_Propfilt(row,2));
-        areacell = (Img_Propfilt(row,3));
-        boundingBox=Img_Propfilt(row,11:14);
+        %create OneWormData - for CLOSEST worm (row=1; only one row left)
+        majAx_minAx = (Img_Propfilt(1,20));
+        majA_minAx_extent = (Img_Propfilt(1,21));
+        CentrX = (Img_Propfilt(1,1));
+        CentrY = (Img_Propfilt(1,2));
+        areacell = (Img_Propfilt(1,3));
+        boundingBox=Img_Propfilt (1,11:14);
         OneWorm_Data = [OneWorm_Data;  {DateFldrNms{W}, ceil(numObj),...
             areacell, areaboundingBox, majAx_minAx, majA_minAx_extent,...
             CentrX, CentrY}];
