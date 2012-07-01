@@ -18,12 +18,25 @@
 %Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_CL2120 A1 11RUNfinal'
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
+<<<<<<< local
+InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\with_RNAi_CL2122\InProgress';
+=======
 InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\Control_RNAi_CL2122-2'
+>>>>>>> other
 Outputdir=InputDir;
+<<<<<<< local
+trialName='6_29_12Analysis';
+=======
 trialName='6_28_12Analysis';
+>>>>>>> other
 GetWorm(InputDir, Outputdir, trialName);
+<<<<<<< local
+InputDir2=InputDir
+InputDir=[InputDir2 'RESULTS' trialName];
+=======
 %%
 InputDir=[InputDir filesep trialName];
+>>>>>>> other
 Outputdir=InputDir;
 ProcessSpine(InputDir, Outputdir, trialName);
 %OneWormFigs(InputDir, Outputdir, trialName);

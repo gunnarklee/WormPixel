@@ -1,5 +1,6 @@
 %% LENIENT VARIABLES TO BE SPECIFIED  - modifiy these to fit your application
-vers='chronos7INTENSITY(8_9_11)- single cell flouresence'
+%G. Kleemann 6/30/12
+vers='FROMchronos7INTENSITY(8_9_11)- single cell flouresence'
 
 %% ImageAnalysisMode
 framerate=29
@@ -30,7 +31,7 @@ SortByName= 'n' %sort in ASCII order. pad your numeric indees with zeros
 PadPrc=2.5;
  App='New'
  FntSz = 14;
-invertImage= 'n'
+invertImage= 'y'
 
 %% more parameters - DEACTIVATED OPTIONS
 IsolatePlate = 'N' %for standard chronos Apps this will be 'Y', Need a plate in img1 and img2    
@@ -39,6 +40,8 @@ StringentFilter = 'n'%** STARTS OFF AS NOto run first filter the stringent filte
 %>startdate=datenum('16-Jun-2011 12:00:00')
 halveimage= 'n' %use to avoid before after worm fusion, and check for robutness of timepoiints
 CropEdge = 'n' % turn this on if edges are givifng you a hard time > there is a crop Manually
+saveimgs = 'n'% ouput files wont save images, saves time and space - refer to original files (or rerun for analysis)
+
 
 %% PARTICLE COUNT filters -Lenient variable set
 MaxFilt=2  %number of filters tried before continuing

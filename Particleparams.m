@@ -85,7 +85,6 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         
         %% filters
         FiltApp='SZ_Ax_BB';%'all'
-        
         save ([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'], 'FltrParams', 'pos'); %save parm -posctr s ellipse
         close all %clean up
     end
