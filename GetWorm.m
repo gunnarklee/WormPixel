@@ -103,8 +103,8 @@ ImgPropHeaders =...
 mkdir([AlldataTop, 'Problems']);
 mkdir([AlldataTop, 'ProblemsRESULTS']);
 
-FinFolderDir = [AlldataTop, filesep, 'Done']; mkdir(FinFolderDir);
-FinFolderDirRes = [AlldataTop, filesep, 'DoneRESULTS']; mkdir(FinFolderDirRes);
+FinFolderDir = [AlldataTop, 'Done']; mkdir(FinFolderDir);
+FinFolderDirRes = [AlldataTop, 'DoneRESULTS']; mkdir(FinFolderDirRes);
 
 %% GET folder Names
 dirOutput = dir(fullfile(Alldata, 'PIC_*')); %specifiy source folder
@@ -179,11 +179,8 @@ for W=1:length(DateFldrNms)
         if exist('boundingBox')==0;  boundingBox=[1  1 size(img1,2) size(img1,1)]; end
         while strcmpi(particleCheck, 'in_progress')
             %% Area restricted search for worm uses LAST WORM BOUNDING BOX
-            try 
             [img1Masked] = AdaptBoundBox(boundingBox, PadPrc, MaskImage, img1, allow_img);%allow_img
-            catch
-            %fails here often     
-            end    
+            
             %% MASK BY Intensity ** removing middle tones %can lead to washing out image
             close all
             if strcmpi (intenseMsk, 'y')
@@ -198,28 +195,18 @@ for W=1:length(DateFldrNms)
             
             %values absent - make one dummy line
             if size(Image_PropertiesAll, 1) < 1; Image_PropertiesAll= ones(1,21); end
-
+            
             countgood = 'n'; FiltersTried=1;
             while strcmpi('n', countgood) %apply different filters to try to get a "good count"
                 %% Filter and present data.
                 Img_Propfilt=[];
                 if strcmpi ('y', allow_img); figure ; imshow(imgBWL); end
-
+                
                 %% Apply Filters
                 %needs to add fliter on bounding box BndBxFlt4L.* BndBxFlt4U.*
                 %set up filters to identify worms - logical matricies of ones and zeros...
                 [filt, filtVal] = ApplyFilters (filt, Image_PropertiesAll);
-
-                %  switch FiltApp
-                %    case 'all'
-                %      filter= [BndBxFlt4L.* BndBxFlt4U.* szFltU.* szFltL.*EccFltU.* EccFltL.*MajAxFltU.* MajAxFltL.*MinAxFltU.* MinAxFltL.*ExtFltL.*ExtFltU];
-                % case 'SZ_Ax_BB'
-                %     filter= [szFltU.* szFltL.*MajAxFltU.* MajAxFltL.*MinAxFltU.* MinAxFltL.*TotAxFltU.*TotAxFltL];    %BndBxFlt4L.* BndBxFlt4U.*
-                %  case 'uin'
-                %          filter= filter; %specified as filter by callng program
-                %   end
-                %    clear ('filtVal')
-                %     filtVal=find(filter); %finds row addresses of values
+               
                 Img_Propfilt=Image_PropertiesAll(filtVal,:); %new matrix with 0s filtered out
                 
                 %finally find the closest particle to the last worm identifed
@@ -313,57 +300,8 @@ for W=1:length(DateFldrNms)
             BBratio=[BBratio; MajvsMin, imageCt];
             numObj=length (Img_Propfilt (:,1));
             
-            %% DISPLAY results
-            if strcmpi(allow_img, 'y')
-                figure; %HISTOGRAM filtered values
-                title ('all filters applied')
-                subplot (3,4,1); hist (Img_Propfilt  (:,5)); title ('Eccentr 1=straight')
-                subplot (3,4,2); hist (Img_Propfilt  (:,8)); title ('MajAxis')
-                subplot (3,4,3); hist (Img_Propfilt (:,9)); title ('MinAxis')
-                subplot (3,4,4); hist (Img_Propfilt (:,10)); title ('Area')
-                subplot (3,4,5); hist (Img_Propfilt  (:,15)); title ('Extent')
-                subplot (3,4,6); hist (Img_Propfilt (:,16)); title ('equivalentDiameter')
-                subplot (3,4,7); hist (Img_Propfilt  (:,14)); title ('EulerNumber')
-                subplot (3,4,8); hist (Img_Propfilt (:,18)); title ('Perimiter/area')
-                subplot (3,4,9); hist (Img_Propfilt  (:,20)); title ('maj_min_extnt')
-                subplot (3,4,10); hist (Img_Propfilt  (:,14)); title ('BOundingBox4(col-14')
-                %DISPLAY RESULTS
-                close all
-                figure; imshow(imgBW); %axis equal;
-                hold on; plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'w*')
-                figure ('position', scrsz); imagesc(img1); %axis equal;
-                hold on; plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*')
-                %ADD PARTICLE NUMBER
-                for rowN = 1:length(Img_Propfilt(:,1))
-                    text(Img_Propfilt(rowN,6),...
-                        Img_Propfilt(rowN,7),...
-                        num2str(Img_Propfilt(rowN,4)),'Color', 'r', 'FontSize', 12)
-                end
-                figure ('position', scrsz); imagesc(img-2); %axis equal;
-                hold on; plot (Image_PropertiesAll(:,6), Image_PropertiesAll(:,7),'wO')
-            end
             Image_PropertiesList = Image_PropertiesAll; ctX = 6; ctY = 7; TxtCol = 4; NumCol = 'r'; FntSz = 6;
-            if strcmpi ('y', allow_img); PrintObjParamsAug11; end
-            %% FILTERED FIGURE FOR SCORING DIAGNOSIS
-            if strcmpi(ProofingImgs, 'y')
-                nameProof= [DateFldrNms{W},'MultView',imageName,'.pdf'];
-                ProofImages(scrsz, img1, Img_Propfilt, img, nameProof) %make function
-            end %end proofing images loop
-            %% CAPTURE AS STACKED TIFF
-            if strcmpi(DataCapMode, 'StackGiff') % Append to stack of images
-                Filename = [RUNfinalDir filesep DateFldrNms{W},'stack.gif'];
-                measure = ['BB-ratio',num2str(MajvsMin)];%
-                textls={'Thrashing in Buffer'; imageName; [num2str(timeintv), 'secs']; measure};
-                Nm2=strrep(Filename, '_', '-');
-                saveImageToStack(uint8(img1), Filename, ...
-                    'title', 'Image', ...
-                    'image_name', Nm2, ...
-                    'scale_image', false, ...
-                    'display_image', 'on',...
-                    'CentrComp', CentrComp,...
-                    'boundingBox', boundingBox,...
-                    'plotcol',[1,2,3,4]); %proofingImgVIS
-            end
+            
         end
         close all
         %% COMPILE DATA, reduce image sizes
@@ -380,30 +318,17 @@ for W=1:length(DateFldrNms)
         
         %% COUNT ERROR-  Too many particles, then SKIP THE PAIR
         if strcmpi('n', countgood)
-            varStruct.filters.szFltL= szFltL;
-            varStruct.filters.szFltU= szFltU;
-            varStruct.filters.MajAxFltL= MajAxFltL; %rows less than 1280 are in chanel 1
-            varStruct.filters.MajAxFltU= MajAxFltU;% the eccentricity of the spot should be less than .8 (usually ~.5)
-            varStruct.filters.MinAxFltL= MinAxFltL; %rows less than 1280 are in chanel 1
-            varStruct.filters.MinAxFltU=MinAxFltU;
+            varStruct.filters.szFltL= filt.szFltL;
+            varStruct.filters.szFltU= filt.szFltU;
+            varStruct.filters.MajAxFltL= filt.MajAxFltL; %rows less than 1280 are in chanel 1
+            varStruct.filters.MajAxFltU= filt.MajAxFltU;% the eccentricity of the spot should be less than .8 (usually ~.5)
+            varStruct.filters.MinAxFltL= filt.MinAxFltL; %rows less than 1280 are in chanel 1
+            varStruct.filters.MinAxFltU=filt.MinAxFltU;
             varStruct.analysis.F=F;
             saveThis([ErrorDir filesep imageName(1:end-4), 'CountError.mat'], varStruct)
             continue
         end
         
-        %         %% get head position for first worm
-        %         %if there is more than 1 image choose the closest to the point
-        %         %last head
-        %         %>[row,mindiff]=CloseCentr(FltrParams.StartPos,Img_Propfilt);
-        
-        %         if isempty(poshead)
-        %             %display a few images to tell which part is the head
-        %             Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:10));
-        %             %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,)
-        %             mssg='drag point to head and double click';
-        %             [poshead]=GetHead (poshead, WmImgPad, mssg);
-        %             varStruct.Pos.poshead=poshead; close all;
-        %         end
         %% spine worm
         figure; subplot(1,2,1); imshow(img1); subplot(1,2,2);  imshow(WmImgPad);
         [SpineData, poshead2] = SpineWorm (WmImgPad, allow_img, poshead, numpts);
@@ -426,7 +351,6 @@ for W=1:length(DateFldrNms)
         
         %% COMPILE GOOD DATA
         %PREPARE for separate save function (required for parallel processing)
-        
         %Flesh out varStruct
         varStruct.images.Imagesfilt=Imagesfilt;
         varStruct.filters.FltNm2= FltNm2;
@@ -435,7 +359,7 @@ for W=1:length(DateFldrNms)
         SaveImNm=imageName(1:end-4);
         saveThis([RUNfinalDir filesep SaveImNm, 'final.mat'], varStruct);%'ProcessDate'
         %move the sucessfully porcesed original file to the done folder
-        movefile ([Alldata filesep DateFldrNms{W} filesep DateFldrNms2{ImN}], FinshedFileDir);
+        movefile ([Alldata filesep DateFldrNms{W} filesep DateFldrNms2{ImN}], [FinshedFileDir filesep DateFldrNms2{ImN}]);
         
         %create OneWormData - for CLOSEST worm (row=1; only one row left)
         majAx_minAx = (Img_Propfilt(1,20));
@@ -452,9 +376,9 @@ for W=1:length(DateFldrNms)
     end % IMAGES LOOP
     
     %% MOVE completed folder and results into the FINISHED folder
-    movefile ([Alldata filesep DateFldrNms{W}], FinshedFolderDir);
-    movefile (ErrorDir, FinshedFolderDirRes);
-    movefile (RUNfinalDir, FinshedFolderDirRes);
+    movefile ([Alldata filesep DateFldrNms{W}], [FinFolderDir filesep DateFldrNms{W}]);
+    movefile (ErrorDir, FinFolderDirRes);
+    movefile (RUNfinalDir, FinFolderDirRes);
     
     OneWorm_DataHeaders =  ['filename',',', 'ObjecCount',',',...
         'areacell',',','areaboundingBox',',','majAx_minAx',',', 'majA_minAx_extent',...
@@ -707,6 +631,8 @@ for W=1:length(DateFldrNms)
         if size(Image_PropertiesAll, 1) < 1;
             disp ('did not find any particles');
             ImN=ImN+1; wormfound='no';
+            DateFldrNms{W}
+            DateFldrNms2{ImN}
             continue
         end;
         
@@ -719,6 +645,8 @@ for W=1:length(DateFldrNms)
         if size(Img_Propfilt, 1) < 1;
             disp ('did not find any particles');
             ImN=ImN+1; wormfound='no'; %try the next image
+            DateFldrNms{W}
+            DateFldrNms2{ImN}
             continue
         else
             wormfound='yes'
@@ -750,6 +678,60 @@ for W=1:length(DateFldrNms)
 end
 end
 
+function VisualizeProc () %<<<<in Progress>>> addd to code
+%% DISPLAY results
+if strcmpi ('y', allow_img); PrintObjParamsAug11; end
+%% FILTERED FIGURE FOR SCORING DIAGNOSIS
+if strcmpi(ProofingImgs, 'y')
+    nameProof= [DateFldrNms{W},'MultView',imageName,'.pdf'];
+    ProofImages(scrsz, img1, Img_Propfilt, img, nameProof) %make function
+end %end proofing images loop
+
+if strcmpi(allow_img, 'y')
+    figure; %HISTOGRAM filtered values
+    title ('all filters applied')
+    subplot (3,4,1); hist (Img_Propfilt  (:,5)); title ('Eccentr 1=straight')
+    subplot (3,4,2); hist (Img_Propfilt  (:,8)); title ('MajAxis')
+    subplot (3,4,3); hist (Img_Propfilt (:,9)); title ('MinAxis')
+    subplot (3,4,4); hist (Img_Propfilt (:,10)); title ('Area')
+    subplot (3,4,5); hist (Img_Propfilt  (:,15)); title ('Extent')
+    subplot (3,4,6); hist (Img_Propfilt (:,16)); title ('equivalentDiameter')
+    subplot (3,4,7); hist (Img_Propfilt  (:,14)); title ('EulerNumber')
+    subplot (3,4,8); hist (Img_Propfilt (:,18)); title ('Perimiter/area')
+    subplot (3,4,9); hist (Img_Propfilt  (:,20)); title ('maj_min_extnt')
+    subplot (3,4,10); hist (Img_Propfilt  (:,14)); title ('BOundingBox4(col-14')
+    %DISPLAY RESULTS
+    close all
+    figure; imshow(imgBW); %axis equal;
+    hold on; plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'w*')
+    figure ('position', scrsz); imagesc(img1); %axis equal;
+    hold on; plot (Img_Propfilt(:,6), Img_Propfilt(:,7),'r*')
+    %ADD PARTICLE NUMBER
+    for rowN = 1:length(Img_Propfilt(:,1))
+        text(Img_Propfilt(rowN,6),...
+            Img_Propfilt(rowN,7),...
+            num2str(Img_Propfilt(rowN,4)),'Color', 'r', 'FontSize', 12)
+    end
+    figure ('position', scrsz); imagesc(img-2); %axis equal;
+    hold on; plot (Image_PropertiesAll(:,6), Image_PropertiesAll(:,7),'wO')
+end
+%% CAPTURE AS STACKED TIFF
+if strcmpi(DataCapMode, 'StackGiff') % Append to stack of images
+    Filename = [RUNfinalDir filesep DateFldrNms{W},'stack.gif'];
+    measure = ['BB-ratio',num2str(MajvsMin)];%
+    textls={'Thrashing in Buffer'; imageName; [num2str(timeintv), 'secs']; measure};
+    Nm2=strrep(Filename, '_', '-');
+    saveImageToStack(uint8(img1), Filename, ...
+        'title', 'Image', ...
+        'image_name', Nm2, ...
+        'scale_image', false, ...
+        'display_image', 'on',...
+        'CentrComp', CentrComp,...
+        'boundingBox', boundingBox,...
+        'plotcol',[1,2,3,4]); %proofingImgVIS
+end
+
+end
 %%>>>In Progress<<<
 %>>function [Struct]=MakeStruct(varargin)
 
