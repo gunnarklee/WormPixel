@@ -179,7 +179,11 @@ for W=1:length(DateFldrNms)
         if exist('boundingBox')==0;  boundingBox=[1  1 size(img1,2) size(img1,1)]; end
         while strcmpi(particleCheck, 'in_progress')
             %% Area restricted search for worm uses LAST WORM BOUNDING BOX
+            try 
             [img1Masked] = AdaptBoundBox(boundingBox, PadPrc, MaskImage, img1, allow_img);%allow_img
+            catch
+            %fails here often     
+            end    
             %% MASK BY Intensity ** removing middle tones %can lead to washing out image
             close all
             if strcmpi (intenseMsk, 'y')
