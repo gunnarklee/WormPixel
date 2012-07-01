@@ -229,8 +229,8 @@ for W=1:length(DateFldrNms)
                 end
                 
                 %% FORCE A SINGLE WORM, For multiple "worms" found,
+                [row,mindiff]=CloseCentr(FltrParams.StartPos,Img_Propfilt);
                 if size(Img_Propfilt, 1) > 1
-                    [row,mindiff]=CloseCentr(FltrParams.StartPos,Img_Propfilt);
                     Img_Propfilt=Img_Propfilt(row, :); %select the "worm" closest to the last worm
                 end
                 %% CLASSIFY PROBELM CASES, redo or discard image
@@ -725,8 +725,8 @@ for W=1:length(DateFldrNms)
         end
     end
     %% FORCE A SINGLE WORM, For multiple "worms" found,
+    [row,mindiff]=CloseCentr(FltrParams.StartPos,Img_Propfilt);
     if size(Img_Propfilt, 1) > 1
-        [row,mindiff]=CloseCentr(FltrParams.StartPos,Img_Propfilt);
         Img_Propfilt=Img_Propfilt(row, :); %select the "worm" closest to the last worm
     end
     
