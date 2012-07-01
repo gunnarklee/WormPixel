@@ -19,8 +19,8 @@
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
 
-InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\with_RNAi_CL2122\InProgress';
-
+InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\Control_RNAi_CL2122\InProgress';
+trialName= '6_25_12run' 
 Outputdir=InputDir;
 GetWorm(InputDir, Outputdir, trialName);
 InputDir2=InputDir
