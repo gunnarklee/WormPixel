@@ -9,8 +9,14 @@ function [img1Masked] = AdaptBoundBox(boundingBox, PadPrc, MaskImage, img1, allo
                         b=ceil(boundingBox(2)+boundingBox(4).*PadPrc);
                         c=ceil(boundingBox(1)-boundingBox(3).*PadPrc);
                         d=ceil(boundingBox(1)+boundingBox(3).*PadPrc);
-                        [a,b,c,d]=limit2Bounds(a,b,c,d,size(img1,1),size(img1,2));
-                        BBmask(a:b,c:d)= ones;
+                        
+                            [a,b,c,d]=limit2Bounds(a,b,c,d,size(img1,1),size(img1,2));
+                        
+                        try
+                            BBmask(a:b,c:d)= ones;
+                        catch
+                            [a,b,c,d]
+                        end    
                         [a,b,c,d, boundingBox];
                     %catch e1
                         %SpineData.FailPt= 'BBmask';
