@@ -2,7 +2,6 @@
 % specify your path in input directory. On a PC
 % always specify a trialName
 
-
 %InputDir='C:\Documents and Settings\mlab\Desktop\reproductive_span_robot\10_28_11_Cheng_Repx1Mated',
 %InputDir='C:\Documents and Settings\mlab\Desktop\reproductive_span_robot\RS-Batch1screen1Verif_Prs';
 %InputDir='E:\22-Dec-2011-RSrapidVerif'
@@ -19,14 +18,14 @@
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
 
-InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/OnewormTest6_28_12';
+InputDir='/Volumes/data/shared/CL2122_Adult_24h_March_6/with_RNAi_CL2122';
 trialName= '6_25_12run' 
 Outputdir=InputDir;
 %>GetWorm(InputDir, Outputdir, trialName);
 %...InputDir2=InputDir
-InputDir=[InputDir filesep];
+InputDir=[InputDir filesep 'DoneResults'];
 Outputdir=InputDir;
-%>ProcessSpine(InputDir, Outputdir, trialName);
+ProcessSpine(InputDir, Outputdir, trialName);
 OneWormFigs(InputDir, Outputdir, trialName);
 %>FancyFIGs
 %>OneWormAnalysis
