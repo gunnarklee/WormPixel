@@ -4,7 +4,7 @@ vers='FROMchronos7INTENSITY(8_9_11)- single cell flouresence'
 
 %% ImageAnalysisMode
 framerate=29
-MicroM_Pixel=1
+MicroM_Pixel=1 %default to make it go
 resz = 2; %resizing factor
 EvenImgBgSub= 'single'
 imgfmt='*jpg'
