@@ -42,7 +42,7 @@ function GetWorm(varargin)
 
 % Parser for case when inputdir and outputdir are specified
 p = inputParser;
-p.addRequired('inputdir', @isdir);
+%p.addRequired('inputdir', @isdir);
 p.addRequired('outputdir', @isdir);
 p.addOptional('trialname', 'trialname', @ischar);
 
@@ -51,9 +51,9 @@ try
     p.parse(varargin{:})
 catch e1
     try
-        inputdir = uigetdir('choose the "Source" folder');
+        %inputdir = uigetdir('choose the "Source" folder');
         outputdir = uigetdir('choose the "Destination" folder');
-        p.parse(inputdir, outputdir, varargin{:})
+        p.parse(outputdir, varargin{:})
     catch e2
         exception = MException(...
             'twoimageDropCHR7_3Robot:arglist',...
@@ -63,12 +63,12 @@ catch e1
         throw(exception)
     end
 end
-DataDir = p.Results.inputdir;
+%DataDir = p.Results.inputdir;
 Alldata = p.Results.outputdir;
 TrialName = p.Results.trialname;
 AlldataTop = Alldata(1:max(findstr(Alldata, filesep)))
 
-disp(['Input directory: ' DataDir]);
+%disp(['Input directory: ' DataDir]);
 disp(['Output directory: ' Alldata]);
 disp(['Trial name: ' TrialName]);
 
@@ -118,7 +118,7 @@ CheckGetCrop(Alldata, DateFldrNms, imgfmt)
 % If filter params are missing, have user identify 5 worms and get params
 Particleparams (resz, Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold)
 
-HeadID (Alldata, DateFldrNms, imgfmt)
+HeadID (Alldata, DateFldrNms, imgfmt);
 %% loop folders
 for W=1:length(DateFldrNms)
     %% settup
@@ -189,9 +189,14 @@ for W=1:length(DateFldrNms)
             %% IDENTIFY OBJECTS and FILTER DATA
             imgBW=makeimgBW(img1Masked,dynamicTH,invertImage, FltrParams.threshold);
             
-            if strcmpi(allow_img, 'y'); figure; imagesc(imgBW); end
+            %if strcmpi(allow_img, 'y'); 
+                figure; imagesc(img1Masked);
+                figure; imagesc(imgBW);
+            %end
+            
             Image_PropertiesAll=[]; F=[]; AlabeldAll=[]; gnumAll=[]; yy=[]; yyy=[]; xx=[]; xxx=[]; ym=[];xm=[];%mask=[];
-            [imgBWL, F, Image_PropertiesAll] = GetImgProps (imgBW, allow_img);
+
+            [imgBWL, F, Image_PropertiesAll] = GetImgPropsSHORT (imgBW, allow_img);
             
             %values absent - make one dummy line
             if size(Image_PropertiesAll, 1) < 1; Image_PropertiesAll= ones(1,21); end
@@ -372,20 +377,18 @@ for W=1:length(DateFldrNms)
             areacell, areaboundingBox, majAx_minAx, majA_minAx_extent,...
             CentrX, CentrY}];
         %AliveData={AbsTimeDays, timeintv, DateFldrNms{W}, numObj}
-        %cellwrite(DataDir/, AliveData, 2)
+        %cellwrite(Alldata/, AliveData, 2)
     end % IMAGES LOOP
-    
-    %% MOVE completed folder and results into the FINISHED folder
-    movefile ([Alldata filesep DateFldrNms{W}], [FinFolderDir filesep DateFldrNms{W}]);
-    movefile (ErrorDir, FinFolderDirRes);
-    movefile (RUNfinalDir, FinFolderDirRes);
-    
     OneWorm_DataHeaders =  ['filename',',', 'ObjecCount',',',...
         'areacell',',','areaboundingBox',',','majAx_minAx',',', 'majA_minAx_extent',...
         ',','CentrX',',', 'CentrY'];
     
     save ([RUNfinalDir, filesep ,DateFldrNms{W},'_',DateFldrNms2{ImN}, 'AllData.mat']) % OutDir
     save([RUNfinalDir, filesep ,DateFldrNms{W} 'OneWormdata.mat'], 'OneWorm_DataHeaders', 'OneWorm_Data')
+  %% MOVE completed folder and results into the FINISHED folder
+    movefile ([Alldata filesep DateFldrNms{W}], [FinFolderDir filesep DateFldrNms{W}]);
+    movefile (ErrorDir, FinFolderDirRes);
+    movefile (RUNfinalDir, FinFolderDirRes);
 end % FOLDERS LOOP
 end %end main function
 
@@ -626,7 +629,7 @@ for W=1:length(DateFldrNms)
         end
         %% IDENTIFY OBJECTS and FILTER DATA
         imgBW= makeimgBW(img1Masked,dynamicTH,invertImage, FltrParams.threshold);
-        [imgBWL, F, Image_PropertiesAll] = GetImgProps (imgBW, allow_img);
+        [imgBWL, F, Image_PropertiesAll] = GetImgPropsSHORT (imgBW, allow_img);
         %%    Error check
         if size(Image_PropertiesAll, 1) < 1;
             disp ('did not find any particles');

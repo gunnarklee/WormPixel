@@ -1,8 +1,6 @@
 %% WORKFLOW for OneWorm.
-%G. Kleemann 6/30/12
 % specify your path in input directory. On a PC
 % always specify a trialName
-
 
 %InputDir='C:\Documents and Settings\mlab\Desktop\reproductive_span_robot\10_28_11_Cheng_Repx1Mated',
 %InputDir='C:\Documents and Settings\mlab\Desktop\reproductive_span_robot\RS-Batch1screen1Verif_Prs';
@@ -20,20 +18,37 @@
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
 
-InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\with_RNAi_CL2122\InProgress';
+<<<<<<< local
+InputDir='\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\with_RNAi\InProgress';
+=======
+%InputDir='/Volumes/data/shared/CL2122_Adult_24h_March_6/with_RNAi_CL2122';
+InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/OnewormTest6_28_12'
+
+
+>>>>>>> other
+trialName= '6_25_12run' 
 Outputdir=InputDir;
-
-trialName='6_29_12Analysis';
-
+<<<<<<< local
 GetWorm(InputDir, Outputdir, trialName);
-InputDir2=InputDir
+InputDir2=InputDir;
 InputDir=[InputDir2 'RESULTS' trialName];
-
 Outputdir=InputDir;
 ProcessSpine(InputDir, Outputdir, trialName);
 %OneWormFigs(InputDir, Outputdir, trialName);
 %FancyFIGs
 %OneWormAnalysis
+=======
+%>GetWorm(InputDir, Outputdir, trialName);
+%...InputDir2=InputDir
+InputDir=[InputDir filesep 'DoneResults'];
+
+%ProcessSpine(InputDir, Outputdir, trialName);
+
+InputDir=[Outputdir filesep];
+OneWormFigs(InputDir, Outputdir, trialName);
+%>FancyFIGs
+%>OneWormAnalysis
+>>>>>>> other
 %% Final file checker
 
 %FinalFile =
@@ -41,4 +56,7 @@ ProcessSpine(InputDir, Outputdir, trialName);
 %FinalFile = '/Users/budoday/Desktop/SwimData/fld4RESULTS/TestDS1_12_12test2/PIC_CL2120 A1 5RUNfinal/CL2120 A1 5_frame_0001final'
 
 %FinalFile = '\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_N2_24hRUNfinal\N2 A1 1_frame_0041final'
+<<<<<<< local
+%OutputChecker(FinalFile)7=======
 %OutputChecker(FinalFile)
+>>>>>>> other

@@ -39,7 +39,7 @@ disp(['Output directory: ' Alldata]);
 disp(['Trial name: ' TrialName]);
 
 %update directories to find the results file
-DataDir= [DataDir 'DoneRESULTS']
+DataDir= [DataDir filesep 'DoneRESULTS']
 
 %% Make new directories
 ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, 'ErrorDir'];
@@ -53,8 +53,8 @@ OneWorm_CHR7Params
 %% get OIXEL/MM CALIBRATION
 calib= input ('Is there a claibration image? (y/n)', 's');
 if strcmpi(calib, 'y');
-    ScaleImage=uigetfile({'*.jpg;*.tif;*.png;*.gif','All Image Files'}, 'select the scale Image stretch the line to 1mM', Alldata)%InputDir
-    ScaleIM=imread([Alldata filesep ScaleImage]);
+    [ScaleImage, path, ~]=uigetfile({'*.jpg;*.tif;*.png;*.gif','All Image Files'}, 'select the scale Image stretch the line to 1mM', Alldata)%InputDir
+    ScaleIM=imread([path filesep ScaleImage]);
     ScaleIM=imresize(ScaleIM, resz);
     figure; imshow(ScaleIM);
     h = imline;
@@ -140,12 +140,12 @@ for y=1:length(namedate(:,2));%cycle folders
         load([DataDir filesep RecentFldr filesep NameList{PaddedList_Count,1}]);
         
         
-        img1=varStruct.images.img1;
+        %>img1=varStruct.images.img1;
         [CurrCent]=FindCentr(varStruct.analysis.Img_Propfilt, 'CtrMass'); %CtrMass
         
         %% cocatenate the order corrected matricies
         centroid(DateFileNms_Count,1:2)=CurrCent;
-        imgs{DateFileNms_Count}=varStruct.images.imgBWL;%not sure if necc
+        %>imgs{DateFileNms_Count}=varStruct.images.imgBWL;%not sure if necc
         CurveMtx(:,DateFileNms_Count)=varStruct.SpineData.AngleLs;
         SpineList{DateFileNms_Count}=varStruct.SpineData.SpineList;
         Pointlist{DateFileNms_Count}=varStruct.SpineData.Pointlist;
