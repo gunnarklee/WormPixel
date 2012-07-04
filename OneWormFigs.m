@@ -82,8 +82,6 @@ time=[];
 %% update directories to find the results file
 [~, RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', 'recent')
 
-
-
 for y=1:length(namedate(:,2));%cycle folders
     %% GET list of "final.mat" files in folder for looping
     [DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', namedate(y,2));
@@ -172,9 +170,7 @@ for y=1:length(namedate(:,2));%cycle folders
         %%PLACE VUSIALIZE FUNCITON HERE
         
         close all
-    end
-end
-
+    end %Image loop- all images from one folder processed at this point
 %% GET DERIVED PARAMETERS
 %these include path traveled (smoothed displacemnt)
 %and reset time for head subcycles (passed 0 degrees)
@@ -463,8 +459,11 @@ saveas (gcf, [NameOut 'Neck MovementFullRun'], 'pdf')
 %     WmImgPadcolor=(imoverlay (mat2gray(WmImgPadcolor), skeleEND, cmap(Pt,:)));
 
 close all
-end
 
+    end %Folder loop
+end % end main function 
+
+    
 function [CurrCent]=FindCentr(Img_Propfilt, mode) %CtrMass
 
 switch mode
