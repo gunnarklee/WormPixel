@@ -2,7 +2,7 @@ function [AngleLs]=GetAngles(Pointlist, allow_img)
 
 %% Pierce-Shimomoura's "curvature column"
     %% use the law of cosines to get angles between points
-    load 
+    %load 
     AngleLs=[];
     for Pair=1:size(Pointlist, 1)-2
         
@@ -99,7 +99,7 @@ function [AngleLs]=GetAngles(Pointlist, allow_img)
             %x = xCenter + radius * cos(angle)
             %y = yCenter + radius * sin(angle)
             
-                stopPt= input ('next image?', 's')
+                stopPt= input ('next image?', 's');
             end
         end %end DIAGNOSTIC SECTION
     end

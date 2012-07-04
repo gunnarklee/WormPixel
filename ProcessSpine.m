@@ -49,10 +49,9 @@ OneWorm_CHR7Params
 [DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', 'recent')
 
 for y=1:length(namedate(:,2));%cycle folders
-    
+  namedate{1,2}
 %% GET list of "final.mat" files in folder for looping
-[DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', namedate(y,2));
-
+[DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', namedate(y,2))
 %preallocate Matricies
 for w=1:length(DateFileNms); %cycle data files
     %load([DataDir filesep 'RESULTS' filesep RecentFldr filesep DateFileNms{w,1}]);
@@ -63,12 +62,12 @@ for w=1:length(DateFileNms); %cycle data files
    
     % get spine angles
     varStruct.SpineData.AngleLs=GetAngles(varStruct.SpineData.Pointlist, allow_img);
-    varStruct.SpineData.AngleLs
+    varStruct.SpineData.AngleLs;
     
 %saveThis([RUNfinalDir filesep DateFileNms{w,1}, 'final.mat'], varStruct);%'ProcessDate'
 %save([RUNfinalDir filesep DateFileNms{w,1}, 'final.mat'], 'varStruct', '-append');%'ProcessDate'
 save([RUNfinalDir], 'varStruct', '-append');%'ProcessDate'
-
+display (['saved' RUNfinalDir(55:end)])
 end 
 
 end

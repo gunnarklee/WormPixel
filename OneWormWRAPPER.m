@@ -18,27 +18,21 @@
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
 
-%InputDir='/Volumes/data/shared/CL2122_Adult_24h_March_6/with_RNAi_CL2122';
-InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/OnewormTest6_28_12'
-
-
-trialName= '6_25_12run' 
-Outputdir=InputDir;
-%>GetWorm(InputDir, Outputdir, trialName);
-%...InputDir2=InputDir
-InputDir=[InputDir filesep 'DoneResults'];
-
-%ProcessSpine(InputDir, Outputdir, trialName);
-
-InputDir=[Outputdir filesep];
+InputDir='\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\with_RNAi';
+Outputdir=InputDir
+trialName='7_4_12Run'
+%>GetWorm([InputDir filesep 'InProgress'], trialName);
+ProcessSpine([InputDir filesep 'DoneRESULTS'], Outputdir, trialName);
 OneWormFigs(InputDir, Outputdir, trialName);
 %>FancyFIGs
 %>OneWormAnalysis
-%% Final file checker
 
+%% Final file checker
 %FinalFile =
 %'/Users/budoday/Desktop/DATA/Geneva-N2thrash/RESULTS/TestDS1_12_12test2RUNfinal/N2_frame_0179final.mat'
 %FinalFile = '/Users/budoday/Desktop/SwimData/fld4RESULTS/TestDS1_12_12test2/PIC_CL2120 A1 5RUNfinal/CL2120 A1 5_frame_0001final'
 
 %FinalFile = '\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_N2_24hRUNfinal\N2 A1 1_frame_0041final'
+%OutputChecker(FinalFile)7=======
 %OutputChecker(FinalFile)
+
