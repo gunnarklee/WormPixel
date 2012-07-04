@@ -310,7 +310,7 @@ Strokedata=dataset(InterStrokeTime, AmplStroke, StrokeMk,...
 
 %export(TrialData, 'XLSfile', [DataDir RecentFldr 'movedata']);
 if ispc
-    export(TrialData, 'XLSfile', [NameOut 'SwimStrokedata']);
+    export(Strokedata, 'XLSfile', [NameOut 'SwimStrokedata']);
 else
     export(Strokedata,'file', [NameOut 'SwimStrokedata'],'Delimiter',',');
 end
@@ -319,9 +319,9 @@ end
 CurveData=dataset(time, CurveMtx');
 %export(CurveData, 'XLSfile', [DataDir RecentFldr 'curvedata']);
 if ispc
-    export(TrialData, 'XLSfile', [NameOut 'curvedata']);
+    export(CurveData, 'XLSfile', [NameOut 'curvedata']);
 else
-    export(TrialData,'file', [NameOut 'curvedata'],'Delimiter',',')
+    export(CurveData,'file', [NameOut 'curvedata'],'Delimiter',',')
 end
 
 %% PLOT FIGURES
