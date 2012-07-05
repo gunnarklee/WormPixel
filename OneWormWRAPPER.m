@@ -21,8 +21,10 @@
 InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/OnewormTest6_28_12';
 Outputdir=InputDir
 trialName='7_4_12Run'
-GetWorm([InputDir filesep 'InProgress'], trialName);
-ProcessSpine([InputDir filesep 'DoneRESULTS'], Outputdir, trialName);
+
+%>GetWorm([InputDir filesep 'InProgress'], trialName);
+%>ProcessSpine([InputDir filesep 'DoneRESULTS'], Outputdir, trialName);
+
 OneWormFigs(InputDir, Outputdir, trialName);
 %>FancyFIGs
 %>OneWormAnalysis
