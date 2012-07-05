@@ -18,45 +18,26 @@
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
 
+InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/OnewormTest6_28_12';
+Outputdir=InputDir
+trialName='7_4_12Run'
 <<<<<<< local
-InputDir='\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\with_RNAi\InProgress';
+%>GetWorm([InputDir filesep 'InProgress'], trialName);
+%>ProcessSpine([InputDir filesep 'DoneRESULTS'], Outputdir, trialName);
 =======
-%InputDir='/Volumes/data/shared/CL2122_Adult_24h_March_6/with_RNAi_CL2122';
-InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/OnewormTest6_28_12'
-
-
+GetWorm([InputDir filesep 'InProgress'], trialName);
+ProcessSpine([InputDir filesep 'DoneRESULTS'], Outputdir, trialName);
 >>>>>>> other
-trialName= '6_25_12run' 
-Outputdir=InputDir;
-<<<<<<< local
-GetWorm(InputDir, Outputdir, trialName);
-InputDir2=InputDir;
-InputDir=[InputDir2 'RESULTS' trialName];
-Outputdir=InputDir;
-ProcessSpine(InputDir, Outputdir, trialName);
-%OneWormFigs(InputDir, Outputdir, trialName);
-%FancyFIGs
-%OneWormAnalysis
-=======
-%>GetWorm(InputDir, Outputdir, trialName);
-%...InputDir2=InputDir
-InputDir=[InputDir filesep 'DoneResults'];
-
-%ProcessSpine(InputDir, Outputdir, trialName);
-
-InputDir=[Outputdir filesep];
 OneWormFigs(InputDir, Outputdir, trialName);
 %>FancyFIGs
 %>OneWormAnalysis
->>>>>>> other
-%% Final file checker
 
+%% Final file checker
 %FinalFile =
 %'/Users/budoday/Desktop/DATA/Geneva-N2thrash/RESULTS/TestDS1_12_12test2RUNfinal/N2_frame_0179final.mat'
 %FinalFile = '/Users/budoday/Desktop/SwimData/fld4RESULTS/TestDS1_12_12test2/PIC_CL2120 A1 5RUNfinal/CL2120 A1 5_frame_0001final'
 
 %FinalFile = '\\murphylab.princeton.edu\data\people\kleemann\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_N2_24hRUNfinal\N2 A1 1_frame_0041final'
-<<<<<<< local
 %OutputChecker(FinalFile)7=======
 %OutputChecker(FinalFile)
->>>>>>> other
+
