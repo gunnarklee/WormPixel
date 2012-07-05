@@ -189,10 +189,10 @@ for W=1:length(DateFldrNms)
             %% IDENTIFY OBJECTS and FILTER DATA
             imgBW=makeimgBW(img1Masked,dynamicTH,invertImage, FltrParams.threshold);
             
-            %if strcmpi(allow_img, 'y'); 
+            if strcmpi(allow_img, 'y'); 
                 figure; imagesc(img1Masked);
                 figure; imagesc(imgBW);
-            %end
+            end
             
             Image_PropertiesAll=[]; F=[]; AlabeldAll=[]; gnumAll=[]; yy=[]; yyy=[]; xx=[]; xxx=[]; ym=[];xm=[];%mask=[];
 
@@ -590,10 +590,12 @@ for W=1:length(DateFldrNms)
     %get names filter values and parameters
     load([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'])
     CropPar=load([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat']);%reload each time
+    mask=CropPar.mask;
+    
     OneWorm_CHR7Params  % load parameters an prefs
     
     [filt]=UpdateFilt(FltrParams)%update filter values
-    mask =CropPar.mask;
+    %>>mask =imresize(CropPar.mask, resz);
     posctr=CropPar.posctr;
     
     %initialize matricies
@@ -603,14 +605,14 @@ for W=1:length(DateFldrNms)
     if size(dirOutput2 ,1) < 1; error('I can not find any images');end %no image error
     %blank image error HERE
     
-    %% locate worm
+    %% locate worm - start with no worm found
     ImN=1
-    wormfound='no'
+    wormfound='no';
     while strcmpi(wormfound, 'no')
         % for imN=1:ImN=1:size(DateFldrNms2,1);
         img=imread([Alldata filesep DateFldrNms{W} filesep DateFldrNms2{ImN}]);
-        varStruct.Pos.imgName=DateFldrNms2{ImN} % Store image name
-        varStruct.Pos.Number=ImN % Store image number
+        varStruct.Pos.imgName=DateFldrNms2{ImN}; % Store image name
+        varStruct.Pos.Number=ImN; % Store image number
         
         if size(img,3)>2; img=rgb2gray(img); end
         %% Remove blotchy background %works but takes a lot of time
@@ -620,6 +622,7 @@ for W=1:length(DateFldrNms)
         else img1=uint8(img);
         end
         img1=imresize(img1, resz); %resize after smoothing to save time
+        
         
         %% MASK OFF THE PERIMITER
         mask=uint8(mask); img1Masked=(img1.*mask);
@@ -636,7 +639,7 @@ for W=1:length(DateFldrNms)
             ImN=ImN+1; wormfound='no';
             DateFldrNms{W}
             DateFldrNms2{ImN}
-            continue
+            %continue
         end;
         
         %% Filter objects to find owrm

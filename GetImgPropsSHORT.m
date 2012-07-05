@@ -35,27 +35,33 @@ F=regionprops(AlabeldAll,'Area','MajorAxisLength','MinorAxisLength','centroid','
 %cd(Programs)
 %>ip=input_points;
 %>bp=base_points;
-
+Image_PropertiesAll=zeros(size(cat(1,F.Area),1), 21);
 %Make matrix of eccentricity and certroid values (EccMtx), this should be concatenated to Image_properties for filtering!
 %fortunately both lists are in the object numnber order, so they can be
 %concatinated   - compare centroid columns 1,2 to 6,7 
-Ecc = cat(1, []);
-Ctrd = cat(1, F.Centroid);
-Area= cat(1, F.Area);
-MajAx= cat(1, F.MajorAxisLength);
-MinAx= cat(1, F.MinorAxisLength);
+%Ecc = cat(1, []);
+Image_PropertiesAll(:,1:2) = cat(1, F.Centroid); %Ctrd =
+Image_PropertiesAll(:,6:7) = cat(1, F.Centroid); %Ctrd =
+Image_PropertiesAll(:,3)= cat(1, F.Area);% = Area
+Image_PropertiesAll(:,10)= cat(1, F.Area);% = Area
+Image_PropertiesAll(:,8)=cat(1, F.MajorAxisLength); %MajAx=
+Image_PropertiesAll(:,9)=cat(1, F.MinorAxisLength); %MinAx= 
 %MajtoMinAx= cat(1, (F.MajorAxisLength/F.MinorAxisLength)); % this may be a worm typical #, but curled worm will throw this off
-BB= cat(1, F.BoundingBox);
-Ext= cat(1, []); % of bounding box filled, perhaps combine with mintomaxratio
-EqD= cat(1, []);
-EuN= cat(1, []);
-Perim= cat(1, []);
-objnum=[1:gnumAll]';
-perim_area=[];%Perim./Area;
-majAx_minAx=MajAx./MinAx;
-majAx_minAx_ext=[];%(MajAx./MinAx)./Ext;
+Image_PropertiesAll(:,11:14)=cat(1, F.BoundingBox);
+%Ext= cat(1, []); % of bounding box filled, perhaps combine with mintomaxratio
+%EqD= cat(1, []);
+%EuN= cat(1, []);
+%Perim= cat(1, []);
+%objnum=[1:gnumAll]';
+%perim_area=[];%Perim./Area;
 
-Image_PropertiesAll = cat(2, Ctrd, Area, objnum, Ecc, Ctrd, MajAx, MinAx, Area, BB, Ext, EqD, EuN, Perim, perim_area, majAx_minAx, majAx_minAx_ext);
+MajAx=cat(1, F.MajorAxisLength);
+MinAx=cat(1, F.MinorAxisLength);
+Image_PropertiesAll(:,20) = MajAx./MinAx; %=majAx_minAx
+%majAx_minAx_ext=[];%(MajAx./MinAx)./Ext;
+%%
+%Image_PropertiesAll = cat(2, Ctrd, Area, objnum, Ecc, Ctrd, MajAx, MinAx, Area, BB, Ext, EqD, EuN, Perim, perim_area, majAx_minAx, majAx_minAx_ext)
+%%
 %first two items (three columns) are to retain spacing
 
 if (strcmpi (allow_img, 'y'))

@@ -18,10 +18,10 @@
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
 
-InputDir='\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\with_RNAi';
+InputDir='/Users/budoday/Desktop/DATA/AdulanteSwimming/OnewormTest6_28_12';
 Outputdir=InputDir
 trialName='7_4_12Run'
-%>GetWorm([InputDir filesep 'InProgress'], trialName);
+GetWorm([InputDir filesep 'InProgress'], trialName);
 ProcessSpine([InputDir filesep 'DoneRESULTS'], Outputdir, trialName);
 OneWormFigs(InputDir, Outputdir, trialName);
 %>FancyFIGs
