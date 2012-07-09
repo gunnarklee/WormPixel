@@ -652,7 +652,7 @@ for W=1:length(DateFldrNms)
             disp ('did not find any particles');
             ImN=ImN+1; wormfound='no'; %try the next image
             DateFldrNms{W}
-            DateFldrNms2{ImN}
+            DateFldrNms2{ImN};
             continue
         else
             wormfound='yes'
