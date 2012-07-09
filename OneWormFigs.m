@@ -50,19 +50,8 @@ pixelPERmm=1; %default
 
 %% SPECIFY PARAMETERS
 OneWorm_CHR7Params;
-%% get OIXEL/MM CALIBRATION
-calib= input ('Is there a claibration image? (y/n)', 's');
-if strcmpi(calib, 'y');
-    [ScaleImage, path, ~]=uigetfile({'*.jpg;*.tif;*.png;*.gif','All Image Files'}, 'select the scale Image stretch the line to 1mM', Alldata)%InputDir
-    ScaleIM=imread([path filesep ScaleImage]);
-    ScaleIM=imresize(ScaleIM, resz);
-    figure; imshow(ScaleIM);
-    h = imline;
-    position = wait(h);
-    SCALETYPE='(mM)';
-    %pdist2([position(1,1),position(1,2)],[position(2,1),position(2,2)])%SAME
-    pixelPERmm=sqrt((position(1,1)-position(2,1))^2 + (position(1,2)-position(2,2))^2 );
-end
+%% get PIXEL/MM CALIBRATION
+MeasureScale (resz, Alldata)
 
 %% GET THE MOST RECENT "final.mat" folder for looping
 %[DateFileNms RecentFldr namedate] = GetFolderMat (DataDir, 'final', 'final');
@@ -78,10 +67,13 @@ Pointlist={};
 poshead=[];
 velocity=[];
 time=[];
-
+close all
 %% update directories to find the results file
 [~, RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', 'recent');
 namedate
+
+load ([Alldata filesep 'Measure.mat']); %save parm -posctr s ellipse
+   
 for y=1:length(namedate(:,2));%cycle folders
     %% GET list of "final.mat" files in folder for looping
     [DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', namedate(y,2));
@@ -125,6 +117,7 @@ for y=1:length(namedate(:,2));%cycle folders
             continue;
         elseif PaddedList_Count == 1%Add actual value
             distanceMv(PaddedList_Count,1)=0;
+            distMv=0;
             time(PaddedList_Count)=0; %determined by FPS rate
             centroid(PaddedList_Count,1:2)=CurrCent;
             %>imgs{DateFileNms_Count}=varStruct.images.imgBWL;%not sure if necc
@@ -149,7 +142,10 @@ for y=1:length(namedate(:,2));%cycle folders
             if LastCentrRow > 1
                 LastCentr=centroid(LastCentrRow-1,:);
                 distMv=(pdist2(LastCentr,CurrCent))
-            elseif or(isempty(LastCentrRow),LastCentrRow <= 1) distMv = 0;
+            elseif isempty(LastCentrRow),
+                distMv = 0;
+            elseif LastCentrRow <= 1;
+                distMv = 0;
             end
         end
  
@@ -289,11 +285,11 @@ for y=1:length(namedate(:,2));%cycle folders
     TrialData=dataset(centroid (:,1), centroid (:,2), distanceMv, time,...
         'VarNames', {'X','Y','Dist','time (sec)'});
     %export(TrialData, 'XLSfile', [DataDir RecentFldr 'movedata']);
-    if ispc
-        export(TrialData, 'XLSfile', [NameOut 'movedata']);
-    else
+  %  if ispc
+   %     export(TrialData, 'XLSfile', [NameOut 'movedata']);
+   % else
         export(TrialData,'file', [NameOut 'movedata'],'Delimiter',',');
-    end
+    %end
     
     %STROKE DATA
     Strokedata=dataset(InterStrokeTime, AmplStroke, StrokeMk,...
@@ -301,20 +297,20 @@ for y=1:length(namedate(:,2));%cycle folders
         'StrokeMk', 'signlist'}); %maybe add stroke specific power...'Strokeower'
     
     %export(TrialData, 'XLSfile', [DataDir RecentFldr 'movedata']);
-    if ispc
-        export(Strokedata, 'XLSfile', [NameOut 'SwimStrokedata']);
-    else
+   %if ispc
+    %    export(Strokedata, 'XLSfile', [NameOut 'SwimStrokedata']);
+   % else
         export(Strokedata,'file', [NameOut 'SwimStrokedata'],'Delimiter',',');
-    end
+    %end
     
     %CURVE DATA
     CurveData=dataset(time, CurveMtx');
     %export(CurveData, 'XLSfile', [DataDir RecentFldr 'curvedata']);
-    if ispc
-        export(CurveData, 'XLSfile', [NameOut 'curvedata']);
-    else
+    %if ispc
+     %   export(CurveData, 'XLSfile', [NameOut 'curvedata']);
+   % else
         export(CurveData,'file', [NameOut 'curvedata'],'Delimiter',',');
-    end
+    %end
     
     %% PLOT FIGURES
     close all
@@ -326,7 +322,7 @@ for y=1:length(namedate(:,2));%cycle folders
     %% curve matricies
     %full color full scale
     figure;imagesc(CurveMtx); colorbar
-    %saveas (gcf, [NameOut 'CurveMtxrfull'], 'pdf')
+    saveas (gcf, [NameOut 'CurveMtxrfull'], 'pdf')
     
     MakeTricolMap
     
@@ -346,18 +342,44 @@ for y=1:length(namedate(:,2));%cycle folders
     title ('Tricolor Curve Matrix allframes');% xlim ([1,size(img1,1)*(resz*1.25)]); ylim([1, size(img1,2)*(resz*1.25)]);
     saveas (gcf, [NameOut 'CurveMtxallframes'], 'pdf')
     
-    %% Path traveled
-    figure;plot(centroidPlot(2:end,1),centroidPlot(2:end,2), '-b',  'MarkerSize', 2);...
-        title ('centroid position');
+    %% Path traveled - COLOR EVOLVING PATH!
+    cmapTmRG=[];
+    cmap=colormap(jet (size(centroidPlot,1))); %copper
+    cmapTime=colormap(jet (size(time,1))); %copper
+    cmapTmRGB=cat(3,cmapTime(:,1), cmapTime(:,2), cmapTime(:,3)); % for time scale
+    
+   cmapTmRGB =repmat(cmapTmRGB, length(cmapTmRGB), 10); 
+    
+   figure; imshow(cmapTmRGB);
+%% 
+    figure; plot(centroidPlot(1,1),centroidPlot(1,2), '-b',  'MarkerSize', 1);...
+    title ('centroid position');    
+    xlim ([1,4500]); ylim([1,2500]);
+    hold on
+
+    for Pt=2:length(centroidPlot)
+    p=plot(centroidPlot(Pt-1:Pt,1),centroidPlot(Pt-1:Pt,2));... 
+    set(p,'Color',cmap(Pt,:),'LineWidth',1)
+    end
+    
     %****REINSTATE***xlim ([1,size(img1,1)*(resz*1.25)]); ylim([1, size(img1,2)*(resz*1.25)]);
-    xlim ([1,2500]); ylim([1,4250]);
-    saveas (gcf, [NameOut 'centroid location per frame'], 'pdf')
+    
+    saveas (gcf, [NameOut 'Path of centroid across frames'], 'pdf')
     
     %% PLOT Smooth path -
-    figure;plot(centroidPlot(2:end,1),centroidPlot(2:end,2), '-b',  'MarkerSize', 2);...
-        hold on
+    figure; plot(centroidPlot(1,1),centroidPlot(1,2), '-b',  'MarkerSize', 2);...
+    title ('centroid position');    
+    hold on
+
+    for Pt=2:length(centroidPlot)
+    p=plot(centroidPlot(Pt-1:Pt,1),centroidPlot(Pt-1:Pt,2));... 
+    set(p,'Color',cmap(Pt,:),'LineWidth',1)
+    end    
+    
+    %figure;plot(centroidPlot(2:end,1),centroidPlot(2:end,2), '-b',  'MarkerSize', 2);...
+    %    hold on
     %plot(pathSmooth(:,1),pathSmooth(:,2), '--r',  'MarkerSize', 2);...
-    plot(pathStrgt(:,1),pathStrgt(:,2), '--r',  'MarkerSize', 2, 'lineWidth', 2);...
+    plot(pathStrgt(:,1),pathStrgt(:,2), '--k',  'MarkerSize', 2, 'lineWidth', 2);...
         legend ('centroid path', 'path traveled (smoothed)')
     title ('travel path');
     %xlim ([1,size(img1,1)*(resz*1.25)]); ylim([1, size(img1,2)*(resz*1.25)]);
@@ -402,11 +424,16 @@ for y=1:length(namedate(:,2));%cycle folders
     saveas (gcf, [NameOut 'Cuml_Travel'], 'pdf')
     
     %% plot SUBSET neck movement
+    
+    SubsetStroke=StrokeMk(find(StrokeMk< max(time(1:numFr))))
+
     figure;
     plot(time(1:numFr),OscilAngle(1:numFr),'-b');
     hold on
     plot(ZeroLine((1:numFr),2),ZeroLine((1:numFr),1),'-k')
-    %plot(StrokeMk, 0, '*r')
+    plot(SubsetStroke, 0, '*r')
+        h=legend ('head angle','stroke reset line', 'stroke marker');
+    set (h, 'Location', 'NorthEast');
     
     title (['Head oscillations' num2str(numFr) 'frames'])
     xlabel ('time (Sec)');
