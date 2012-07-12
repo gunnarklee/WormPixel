@@ -113,10 +113,10 @@ if isempty(DateFldrNms); error('No "PIC_..." folder, Check folder name and paths
 
 %% for each "PIC" folder check to see that the required files are there
 % If not already done Crop the useful area from the picture
-CheckGetCrop(Alldata, DateFldrNms, imgfmt)
+CheckGetCrop(Alldata, DateFldrNms, imgfmt, resz)
 
 % If filter params are missing, have user identify 5 worms and get params
-Particleparams (resz, Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold)
+Particleparams (resz, Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold, PRCbracketSz)
 
 HeadID (Alldata, DateFldrNms, imgfmt);
 %% loop folders
@@ -401,7 +401,7 @@ else
 end
 end
 
-function CheckGetCrop(Alldata, DateFldrNms, imgfmt)
+function CheckGetCrop(Alldata, DateFldrNms, imgfmt, resz)
 %% check each folder or crop params if absent get them
 crop_position = [75 10 425 425];
 for W=1:length(DateFldrNms)
@@ -414,7 +414,7 @@ for W=1:length(DateFldrNms)
         end
         %cd([Alldata, '/',DateFldrNms{W}]);
         imgtmp=imread([Alldata filesep DateFldrNms{W} filesep dirOutputtif(5).name]); %load the first image in the folder
-        imgtmp=imresize(imgtmp, 2);
+        imgtmp=imresize(imgtmp, resz);
         if isrgb(imgtmp)
             imgtmp=rgb2gray(imgtmp);
         end
@@ -549,9 +549,9 @@ filt.MinAxFltU= double(Image_PropertiesAll (:,9)<filt.MinAxU);% the eccentricity
 filt.TotAxFltU = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))<filt.TotAxU;
 filt.TotAxFltL = (Image_PropertiesAll (:,8))+(Image_PropertiesAll (:,9))>filt.TotAxL;
 %APPLY FILERES just using (case 'SZ_Ax_BB')
-filter= [filt.szFltU.* filt.szFltL.*filt.MajAxFltU.* filt.MajAxFltL.* filt.MinAxFltU.* filt.MinAxFltL.*filt.TotAxFltU.*filt.TotAxFltL];    %BndBxFlt4L.* BndBxFlt4U.*
+filter= (filt.szFltU.* filt.szFltL.*filt.MajAxFltU.* filt.MajAxFltL.* filt.MinAxFltU.* filt.MinAxFltL.*filt.TotAxFltU.*filt.TotAxFltL);    %BndBxFlt4L.* BndBxFlt4U.*
 filtVal=find(filter); %finds row addresses of values
-
+%filtVal=1
 end
 
 function [filt]=UpdateFilt(FltrParams)
@@ -649,7 +649,7 @@ for W=1:length(DateFldrNms)
         
         %count error check
         if size(Img_Propfilt, 1) < 1;
-            disp ('did not find any particles');
+            disp ('did not find any particles after filter');
             ImN=ImN+1; wormfound='no'; %try the next image
             DateFldrNms{W}
             DateFldrNms2{ImN};

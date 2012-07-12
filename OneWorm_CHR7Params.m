@@ -48,6 +48,9 @@ MaxFilt=2  %number of filters tried before continuing
 MaxWormFactor=1 %skips if MaxWorms * MaxWormFactor is exceeded 
 MaxWorms=1 % MAXIMUM PARTICLES COUNTED
 MinWorms=1
+PRCbracketSz=5 %relax if missing a lot of worms.
+%for worm recognition filters previously .4
+
 %% THRESHOLDING FILTERS value -OR use graythesh to dynamically determine     
 dynamicTH = 'n' %'y-ShortCircuit' %'y', n , 
 %n - should be standard
