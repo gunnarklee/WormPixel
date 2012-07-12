@@ -1,5 +1,5 @@
 %% get Param range for the worm
-function Particleparams (resz, Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold)
+function Particleparams (resz, Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold, PRCbracketSz)
 % get particle filter values by asking the user to idenfity the worm in 5 pictures.
 WormProps=[];
 
@@ -65,7 +65,7 @@ for W=1:length(DateFldrNms) % for each folder check for filter params
         
         %build and save new parameter spec sheet
         %% BUILD THE NEW PARTICLE FILTERS
-        [upper, lower, stats]= GetParamLimits(WormProps(:,3), .4);
+        [upper, lower, stats]= GetParamLimits(WormProps(:,3), PRCbracketSz);
         FltrParams.ParticleFilt.LowLim=lower;
         FltrParams.ParticleFilt.UpLim=upper;  %col10 <<NEEDED TO RAise AREA TO <85 for clump; <5 for smallest only
         

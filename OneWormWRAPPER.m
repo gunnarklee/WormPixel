@@ -18,15 +18,15 @@
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
 %'\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\Control_RNAi_CL2122';
-InputDir='\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\with_RNAi'
+%InputDir='\\Murphylab.princeton.edu\data\shared\P301L'
 %'\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\control_RNAi'
 %InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\with_RNAi_CL2122'
 
-%InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\Control_RNAi_CL2122';
+InputDir='\\Murphylab.princeton.edu\data\shared\Tau_Control_daf-2';
 Outputdir=InputDir
 trialName='7_4_12Run'
 
-%>GetWorm([InputDir filesep 'InProgress'], trialName);
+GetWorm([InputDir filesep 'InProgress'], trialName);
 ProcessSpine([InputDir filesep 'DoneRESULTS'], Outputdir, trialName);
 
 OneWormFigs(InputDir, Outputdir, trialName);
