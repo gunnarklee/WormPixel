@@ -31,6 +31,7 @@ catch e1
     end
 end
 DataDir = p.Results.inputdir;
+DataDir = [DataDir filesep 'DoneRESULTS']
 Alldata = p.Results.outputdir;
 TrialName = p.Results.trialname;
 
