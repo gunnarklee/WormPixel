@@ -100,8 +100,6 @@ ImgPropHeaders =...
     '(majAx/minAx)/extent'};
 
 %  set up new directories
-mkdir([AlldataTop, 'Problems']);
-mkdir([AlldataTop, 'ProblemsRESULTS']);
 
 FinFolderDir = [AlldataTop, 'Done']; mkdir(FinFolderDir);
 FinFolderDirRes = [AlldataTop, 'DoneRESULTS']; mkdir(FinFolderDirRes);
@@ -125,8 +123,8 @@ for W=1:length(DateFldrNms)
     tic
     %RUNfinalDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'RUNfinal'];
     %ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'ErrorDir'];
-    RUNfinalDir = [Alldata, 'RESULTS', filesep, DateFldrNms{W} 'RUNfinal'];
-    ErrorDir = [Alldata, 'RESULTS', filesep, DateFldrNms{W} 'ErrorDir'];
+    RUNfinalDir = [Alldata, filesep, 'RESULTS', filesep, DateFldrNms{W} 'RUNfinal'];
+    ErrorDir = [Alldata, filesep, 'RESULTS', filesep, DateFldrNms{W} 'ErrorDir'];
     FinshedFileDir = [Alldata, filesep DateFldrNms{W} filesep 'Finished'];
     mkdir(RUNfinalDir); mkdir(ErrorDir); mkdir(FinshedFileDir);
     

@@ -431,6 +431,7 @@ for y=1:length(namedate(:,2));%cycle folders
     plot(time(1:numFr),OscilAngle(1:numFr),'-b');
     hold on
     plot(ZeroLine((1:numFr),2),ZeroLine((1:numFr),1),'-k')
+%%>>>lengths diff here somtimes!
     plot(SubsetStroke, 0, '*r')
         h=legend ('head angle','stroke reset line', 'stroke marker');
     set (h, 'Location', 'NorthEast');

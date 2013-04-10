@@ -1,4 +1,4 @@
-%% WORKFLOW for OneWorm.
+ z%% WORKFLOW for OneWorm.
 % specify your path in input directory. On a PC
 % always specify a trialName
 
@@ -18,17 +18,16 @@
 %InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
 %InputDir='/Users/budoday/Desktop/SwimData/fld1';
 
-InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\Control_RNAi_CL2122';
+%InputDir='\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\with_RNAi';
 %'\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\with_RNAi'
 %pinceton.edu\data\shared\CL2120_Adult_24h_March_6\control_RNAi'
 %InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\with_RNAi_CL2122'
-
+InputDir='C:\Documents and Settings\mlab\My Documents\Dropbox\Analysis_Movement'
 Outputdir=InputDir
 trialName='7_4_12Run'
 
-GetWorm([InputDir, trialName);
+%GetWorm(InputDir);
 ProcessSpine(InputDir, Outputdir, trialName);
-
 OneWormFigs(InputDir, Outputdir, trialName);
 %>FancyFIGs
 %>OneWormAnalysis
