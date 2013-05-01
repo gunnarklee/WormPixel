@@ -1,35 +1,19 @@
 %% WORKFLOW for OneWorm.
-% specify your path in input directory. On a PC
-% always specify a trialName
+% specify your path to the input directory. 
 
-%InputDir='C:\Documents and Settings\mlab\Desktop\reproductive_span_robot\10_28_11_Cheng_Repx1Mated',
-%InputDir='C:\Documents and Settings\mlab\Desktop\reproductive_span_robot\RS-Batch1screen1Verif_Prs';
-%InputDir='E:\22-Dec-2011-RSrapidVerif'
 %InputDir='C:\Documents and Settings\mlab\Desktop\reproductive_span_robot\RSbatch2screen1-verify12_2011'
+%..InputDir='/Users/budoday/Dropbox/Movement/Movement_Analysis/REDO'
 
-%InputDir='/Users/budoday/Desktop/DATA/AldulanteSwimmingTest'
-%InputDir='/Users/budoday/Desktop/DATA/AldulanteSwimmingTest/N2_24hrun/';
-%InputDir='smb://murphylab.princeton.edu/data/people/kleemann/Murphylabdata/Geneva-N2thrash/PICS_A'
-%InputDir='/Users/budoday/Desktop/DATA/Geneva-N2thrash'
+% On a PC always specify a trialName
+trialName='REDOS';
 
-%InputDir='C:\Documents and Settings\mlab\My Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld2'
-
-%Documents\Dropbox\WormMovement\AdulanteSwimming\SwimData\fld2RESULTS\TestDS1_12_12test2\PIC_CL2120 A1 11RUNfinal'
-%InputDir='/Users/budoday/Dropbox/WormMovement/AdulanteSwimming/SwimData/fld2RESULTS/TestDS1_12_12test2/'
-%InputDir='/Users/budoday/Desktop/SwimData/fld1';
-
-InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\Control_RNAi_CL2122';
-%'\\murphylab.princeton.edu\data\shared\CL2120_Adult_24h_March_6\with_RNAi'
-%pinceton.edu\data\shared\CL2120_Adult_24h_March_6\control_RNAi'
-%InputDir='\\murphylab.princeton.edu\data\shared\CL2122_Adult_24h_March_6\with_RNAi_CL2122'
-
-Outputdir=InputDir
-trialName='7_4_12Run'
-
-GetWorm([InputDir, trialName);
-ProcessSpine(InputDir, Outputdir, trialName);
-
-OneWormFigs(InputDir, Outputdir, trialName);
+[InputDir]=GetWorm()%(InputDir); % 'trialName', trialName
+%[InputDir]=ProcessSpine
+Outputdir=InputDir;
+[InputDir]=ProcessSpine(InputDir, Outputdir);%(InputDir);
+OneWormFigs(InputDir, Outputdir);
+%MAybe dont use - fix in process spine %%ErrorFixer(InputDir, Outputdir, trialName)
+    
 %>FancyFIGs
 %>OneWormAnalysis
 

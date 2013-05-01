@@ -1,5 +1,4 @@
 function OneWormFigs(varargin)
-
 %G. Kleemann - 10/27/11
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
@@ -80,8 +79,10 @@ for y=1:length(namedate(:,2));%cycle folders
     
     %% check order, sort and add spacers for skipped or missing fra
     %Namelist has spacers, DateFileNmsDoes not
-    [NameList]= GetImgNumOrdr(DateFileNms, '-', 'final');
-    
+    try [NameList]= GetImgNumOrdr(DateFileNms, '-', 'final');
+    catch
+        [NameList]= GetImgNumOrdr(DateFileNms, '_', 'final');
+    end
     %% stack the data from "final.mat" files
     %preallocate Matricies
     leng=length(DateFileNms);  %UnPadded count
@@ -350,7 +351,7 @@ for y=1:length(namedate(:,2));%cycle folders
     
    cmapTmRGB =repmat(cmapTmRGB, length(cmapTmRGB), 10); 
     
-   figure; imshow(cmapTmRGB);
+  % figure; imshow(cmapTmRGB);
 %% 
     figure; plot(centroidPlot(1,1),centroidPlot(1,2), '-b',  'MarkerSize', 1);...
     title ('centroid position');    
