@@ -1,4 +1,5 @@
-function GetWorm(varargin)
+function [outputdir]=GetWorm(varargin)
+% history
 %G. Kleemannn 6/30/12
 %OneWorm_CHRONOS7.m
 %GetWorm - start point for One Worm analysis pipeline
@@ -44,7 +45,7 @@ function GetWorm(varargin)
 p = inputParser;
 %p.addRequired('inputdir', @isdir);
 p.addRequired('outputdir', @isdir);
-p.addOptional('trialname', 'trialname', @ischar);
+p.addParamValue('trialname', 'trialname', @ischar);
 
 % Parse Inputs
 try
@@ -56,7 +57,7 @@ catch e1
         p.parse(outputdir, varargin{:})
     catch e2
         exception = MException(...
-            'twoimageDropCHR7_3Robot:arglist',...
+            'GetWorm:arglist',...
             'Error in input argument list');
         exception = addCause(exception, e1);
         exception = addCause(exception, e2);
@@ -91,6 +92,7 @@ OneWorm_Data={};
 Image_PropertiesAll={};
 SpineStack=[];
 CurveMtx=[];
+flipbookFrames=[1:10]
 
 ImgPropHeaders =...
     {'Centroid'; 'Centroid'; 'Area'; 'objectnumber'; 'Eccentricity';...
@@ -100,33 +102,31 @@ ImgPropHeaders =...
     '(majAx/minAx)/extent'};
 
 %  set up new directories
-mkdir([AlldataTop, 'Problems']);
-mkdir([AlldataTop, 'ProblemsRESULTS']);
+%mkdir([Alldata, filesep,'Problems']);
+%mkdir([Alldata, filesep,'ProblemsRESULTS']);
 
-FinFolderDir = [AlldataTop, 'Done']; mkdir(FinFolderDir);
-FinFolderDirRes = [AlldataTop, 'DoneRESULTS']; mkdir(FinFolderDirRes);
+FinFolderDir = [Alldata, filesep,'Done']; mkdir(FinFolderDir);
+FinFolderDirRes = [Alldata, filesep,'DoneRESULTS']; mkdir(FinFolderDirRes);
 
 %% GET folder Names
 dirOutput = dir(fullfile(Alldata, 'PIC_*')); %specifiy source folder
 DateFldrNms = {dirOutput.name}';
 if isempty(DateFldrNms); error('No "PIC_..." folder, Check folder name and paths'); end
 
-%% for each "PIC" folder check to see that the required files are there
+%% SET UP REQUIRED PARAMETERS - for each "PIC" folder
 % If not already done Crop the useful area from the picture
 CheckGetCrop(Alldata, DateFldrNms, imgfmt, resz)
 
 % If filter params are missing, have user identify 5 worms and get params
 Particleparams (resz, Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold, PRCbracketSz)
 
-HeadID (Alldata, DateFldrNms, imgfmt);
+HeadID (Alldata, DateFldrNms, imgfmt, flipbookFrames);
 %% loop folders
 for W=1:length(DateFldrNms)
     %% settup
     tic
-    %RUNfinalDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'RUNfinal'];
-    %ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, filesep, DateFldrNms{W} 'ErrorDir'];
-    RUNfinalDir = [Alldata, 'RESULTS', filesep, DateFldrNms{W} 'RUNfinal'];
-    ErrorDir = [Alldata, 'RESULTS', filesep, DateFldrNms{W} 'ErrorDir'];
+    RUNfinalDir = [Alldata, filesep, 'RESULTS', filesep, DateFldrNms{W} 'RUNfinal'];
+    ErrorDir = [Alldata, filesep,'RESULTS', filesep, DateFldrNms{W} 'ErrorDir'];
     FinshedFileDir = [Alldata, filesep DateFldrNms{W} filesep 'Finished'];
     mkdir(RUNfinalDir); mkdir(ErrorDir); mkdir(FinshedFileDir);
     
@@ -135,7 +135,10 @@ for W=1:length(DateFldrNms)
     load([Alldata filesep DateFldrNms{W} filesep 'HeadParams.mat']);
     
     [filt]=UpdateFilt(FltrParams);
-    centroidLs=[];HeadPosnLs=[]; BBratio=[];centrSmthY=[]; Images=[]; poshead=[];
+    
+    %Clear Variables
+    centroidLs=[];HeadPosnLs=[];BBratio=[];
+    centrSmthY=[]; Images=[]; poshead=[];
     
     dirOutput2 = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
     if size(dirOutput2 ,1) < 1
@@ -146,6 +149,9 @@ for W=1:length(DateFldrNms)
     CropPar=load([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat']);%reload each time
     mask =CropPar.mask; posctr=CropPar.posctr;
     close all
+    
+    % Process each image
+    [DateFldrNms2] = sortfilenames(DateFldrNms2);
     
     for ImN=1:size(DateFldrNms2,1); % image loop
         %% Image NAMES and values
@@ -173,9 +179,14 @@ for W=1:length(DateFldrNms)
         img1=(img1.*mask);
         lng1=length(img1(1,:)); lng2=length(img1(:,1));
         %% Check for particles until you get a good worm or a failure
-        %if masked image fails will recheck unmasked image
+        
+        %% >>>>if masked image fails will recheck unmasked image<<<<
+        %>>> dropping away mask leads to errors. DEACTIVATE<<<<
+        % BUT VERIFY THAT THE PARTICLE IS NOT TOO FAR AWAY
+        
         particleCheck = 'in_progress'; %is switched off after second pass
         MaskImage = 'y'; %is switched off in second pass
+        % if there is no bonding box, use the whole image
         if exist('boundingBox')==0;  boundingBox=[1  1 size(img1,2) size(img1,1)]; end
         while strcmpi(particleCheck, 'in_progress')
             %% Area restricted search for worm uses LAST WORM BOUNDING BOX
@@ -189,19 +200,19 @@ for W=1:length(DateFldrNms)
             %% IDENTIFY OBJECTS and FILTER DATA
             imgBW=makeimgBW(img1Masked,dynamicTH,invertImage, FltrParams.threshold);
             
-            if strcmpi(allow_img, 'y'); 
-                figure; imagesc(img1Masked);
-                figure; imagesc(imgBW);
-            end
-            
             Image_PropertiesAll=[]; F=[]; AlabeldAll=[]; gnumAll=[]; yy=[]; yyy=[]; xx=[]; xxx=[]; ym=[];xm=[];%mask=[];
-
+            
             [imgBWL, F, Image_PropertiesAll] = GetImgPropsSHORT (imgBW, allow_img);
             
             %values absent - make one dummy line
             if size(Image_PropertiesAll, 1) < 1; Image_PropertiesAll= ones(1,21); end
             
             countgood = 'n'; FiltersTried=1;
+            
+            if strcmpi(allow_img, 'y');
+                figure; imagesc(img1Masked);
+                figure; imagesc(imgBW);
+            end
             while strcmpi('n', countgood) %apply different filters to try to get a "good count"
                 %% Filter and present data.
                 Img_Propfilt=[];
@@ -211,7 +222,7 @@ for W=1:length(DateFldrNms)
                 %needs to add fliter on bounding box BndBxFlt4L.* BndBxFlt4U.*
                 %set up filters to identify worms - logical matricies of ones and zeros...
                 [filt, filtVal] = ApplyFilters (filt, Image_PropertiesAll);
-               
+                
                 Img_Propfilt=Image_PropertiesAll(filtVal,:); %new matrix with 0s filtered out
                 
                 %finally find the closest particle to the last worm identifed
@@ -241,24 +252,30 @@ for W=1:length(DateFldrNms)
                     particleCheck = 'Done';
                     display (['done   ', num2str(ImN) 'count error']);toc
                     break % next iteration without saving in data
-                elseif size(Img_Propfilt, 1)== 0;%No Particles, rerun without masking
-                    switch MaskImage
-                        case 'y'
+                elseif size(Img_Propfilt, 1)== 0;
+                    
+                    %No Particles, rerun without masking <<Rmv RERUN STP>>
+                    
+                switch MaskImage
+                       case 'y' %IF WE DID NOT FIND IN FIRST PASS, <MODIFY CRITERIA?>
+                            %maybe relax bounding box requirement to allow
+                            % worms with circle posture.
                             particleCheck = 'in_progress' %is switched off after second pass
-                            MaskImage = 'n';
+                            MaskImage = 'n'; 
                             countgood = 'y'; %count is not good BUT, this allow escape from REFILTERING LOOP
                             display (['unmask ', num2str(ImN)]);
                             %already unmasked still no particles, REJECT
-                        case'n'
+                       case'n'
                             particleCheck = '' %is switched off after second pass
                             MaskImage = 'n';
+                            % <generates errors
                             toc
                             display (['unmask ', num2str(ImN)]);
                             countgood = 'n'; %skip image display and mark for continue when out of loop
                             particleCheck = 'Done';
                             display (['done   ', num2str(ImN) 'ZeroCounterror']);
                             break % next iteration without saving in data
-                    end
+                      end
                 else %OK GOOD proceed to next step
                     countgood = 'y';
                     particleCheck = 'Done';toc
@@ -362,6 +379,7 @@ for W=1:length(DateFldrNms)
         varStruct.SpineData=SpineData;
         varStruct.analysis.Img_Propfilt=Img_Propfilt;
         SaveImNm=imageName(1:end-4);
+        varStruct.analysis.F=F;
         saveThis([RUNfinalDir filesep SaveImNm, 'final.mat'], varStruct);%'ProcessDate'
         %move the sucessfully porcesed original file to the done folder
         movefile ([Alldata filesep DateFldrNms{W} filesep DateFldrNms2{ImN}], [FinshedFileDir filesep DateFldrNms2{ImN}]);
@@ -385,7 +403,7 @@ for W=1:length(DateFldrNms)
     
     save ([RUNfinalDir, filesep ,DateFldrNms{W},'_',DateFldrNms2{ImN}, 'AllData.mat']) % OutDir
     save([RUNfinalDir, filesep ,DateFldrNms{W} 'OneWormdata.mat'], 'OneWorm_DataHeaders', 'OneWorm_Data')
-  %% MOVE completed folder and results into the FINISHED folder
+    %% MOVE completed folder and results into the FINISHED folder
     movefile ([Alldata filesep DateFldrNms{W}], [FinFolderDir filesep DateFldrNms{W}]);
     movefile (ErrorDir, FinFolderDirRes);
     movefile (RUNfinalDir, FinFolderDirRes);
@@ -567,7 +585,7 @@ filt.TotAxU=FltrParams.TotAxU;
 filt.TotAxL=FltrParams.TotAxL;
 end
 
-function HeadID(Alldata, DateFldrNms, imgfmt)
+function HeadID(Alldata, DateFldrNms, imgfmt, flipbookFrames)
 %get starting HEAD POSITION for each folder
 for W=1:length(DateFldrNms)
     
@@ -670,10 +688,10 @@ for W=1:length(DateFldrNms)
         Imagesfilt = [Imagesfilt; F(filtVal(ChosenIMAGE,1)).Image];
     end
     
-    %% get head position for first worm
+    %% GET HEAD POSITION OF FIRST WORM
     [WmImgPad]=GetPadImg (pad, (Imagesfilt{row,:}));
     %display a few images to tell which part is the head
-    Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:5));
+    Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(flipbookFrames));
     %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,)
     mssg='drag point to head and double click';
     [varStruct.Pos.poshead]=GetHead (poshead, WmImgPad, mssg);
