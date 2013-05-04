@@ -1,4 +1,4 @@
-function [AngleLs]=GetAngles(Pointlist, allow_img)
+function [AngleLs]=GetAngles(Pointlist, allow_img, stoppoint)
 
 %% Pierce-Shimomoura's "curvature column"
     %% use the law of cosines to get angles between points
@@ -55,7 +55,7 @@ function [AngleLs]=GetAngles(Pointlist, allow_img)
             [CnewPt(1),CnewPt(2)]=pol2cart(CnewPolar(1),CnewPolar(2));
             [AnewPt(1),AnewPt(2)]=pol2cart(AnewPolar(1),AnewPolar(2));
             
-            figure; imshow(img1)
+            figure; %imshow(img1)
             hold on
             plot(PointAori(1),PointAori(2),'b+',  PointBori(1), PointBori(2), 'b*',...
                 PointCori(1), PointCori(2), 'bo')
@@ -102,6 +102,7 @@ function [AngleLs]=GetAngles(Pointlist, allow_img)
                 stopPt= input ('next image?', 's');
             end
         end %end DIAGNOSTIC SECTION
+        close all
     end
     
 end    

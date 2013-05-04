@@ -20,12 +20,12 @@ pad=20
 numpts=13 %number of spine points
 
 %% Visulization modes
-SnglImgProofMd = 'off';  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
+SnglImgProofMd = 'oN';  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
 DataCapMode = 'Simple'%^'StackGiff' %'StackTiff','Simple'
-allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
+allow_img= 'Y'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
-ProofingImgs = 'n' % extra proofing images
-stoppoint='n'
+ProofingImgs = 'Y' % extra proofing images
+stoppoint='Y'
 SortByName= 'n' %sort in ASCII order. pad your numeric indees with zeros
 %date stammp can introudce errors when date stamp is wrong dont use unless files are ordered wrong to start
 PadPrc=2.5;
@@ -38,7 +38,7 @@ IsolatePlate = 'N' %for standard chronos Apps this will be 'Y', Need a plate in 
 AlignImMod='n'
 StringentFilter = 'n'%** STARTS OFF AS NOto run first filter the stringent filter will kick in if you get < 2.1* MaxWorms (2 points for each moving worm)
 %>startdate=datenum('16-Jun-2011 12:00:00')
-halveimage= 'n' %use to avoid before after worm fusion, and check for robutness of timepoiints
+halveimage= 'n'; %use to avoid before after worm fusion, and check for robutness of timepoiints
 CropEdge = 'n' % turn this on if edges are givifng you a hard time > there is a crop Manually
 saveimgs = 'n'% ouput files wont save images, saves time and space - refer to original files (or rerun for analysis)
 
@@ -58,25 +58,25 @@ dynamicTH = 'n' %'y-ShortCircuit' %'y', n ,
 
 %when set to automatic seems to switch between .0001 (bad) and .49 (ok)
 thresh_hold=.49; % dynamicTH deactivates this one .25
-dynamicBndLim = 'prc' %'stdv', 'prc''static' 
+dynamicBndLim = 'prc'; %'stdv', 'prc''static' 
 %>>NumStd=7 %three standard deviations do not seem to do it (7 matches a .25% boundlimit (about))
 BndLim=0;  % PRC MODE- dynamicBndLim deactivates this one .25
 %>>Minbnd=-20% STATIC MODE- specifically remove the middle 'bnd' % of colors
 %>>Maxbnd=20 
-smoothbkg='n' % works but SLOW 
-intenseMsk ='n' % clean images dont seem to need intensity mask
+smoothbkg='n'; % works but SLOW 
+intenseMsk ='n'; % clean images dont seem to need intensity mask
 %% PARTICLE FILTERS
-FiltApp='SZ_Ax_BB'%'all'
+FiltApp='SZ_Ax_BB';%'all'
 LowLim=500; UpLim=1200; % AREA %col10 <<NEEDED TO 
 MajAxL=50; MajAxU=300; %col 8   <<NEEDED TO RAise 
 MinAxL=5; MinAxU=300; %col 9   <<NEEDED TO RAise <<needed to lower Min 10>5
 BndBx4L=25; BndBx4U=1000; %col14 <<NEEDED TO RAise 
-TotAxL = 85; TotAxU = 200  %(MajAxL+MinAxL)
+TotAxL = 85; TotAxU = 200;  %(MajAxL+MinAxL)
 
 %% Second pass- STRINGENT variable set
 if strcmpi('y', StringentFilter) 
 
-    dynamicTH = 'y'
+    dynamicTH = 'y';
     thresh_hold=.49; % dynamicTH deactivates this one
 
     %BW threshold value -OR use graythesh to dynamically determine
