@@ -1,4 +1,5 @@
 function OneWormFigs(varargin)
+
 %G. Kleemann - 10/27/11
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
@@ -79,10 +80,8 @@ for y=1:length(namedate(:,2));%cycle folders
     
     %% check order, sort and add spacers for skipped or missing fra
     %Namelist has spacers, DateFileNmsDoes not
-    try [NameList]= GetImgNumOrdr(DateFileNms, '-', 'final');
-    catch
-        [NameList]= GetImgNumOrdr(DateFileNms, '_', 'final');
-    end
+    [NameList]= GetImgNumOrdr(DateFileNms, '-', 'final');
+    
     %% stack the data from "final.mat" files
     %preallocate Matricies
     leng=length(DateFileNms);  %UnPadded count
@@ -432,7 +431,6 @@ for y=1:length(namedate(:,2));%cycle folders
     plot(time(1:numFr),OscilAngle(1:numFr),'-b');
     hold on
     plot(ZeroLine((1:numFr),2),ZeroLine((1:numFr),1),'-k')
-%%>>>lengths diff here somtimes!
     plot(SubsetStroke, 0, '*r')
         h=legend ('head angle','stroke reset line', 'stroke marker');
     set (h, 'Location', 'NorthEast');

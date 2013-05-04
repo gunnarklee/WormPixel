@@ -1,8 +1,8 @@
-function ProcessSpine(varargin)
+function [inputdir]=ProcessSpine(varargin)
 
 %G. Kleemann - 10/27/11
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%wrapper for getangles, gets ingles between points in a spine
+%requires  varStruct.SpineData.Pointlist residing in a series of .mat files
 
 %Version History
 
@@ -30,8 +30,8 @@ catch e1
         throw(exception)
     end
 end
-DataDir = p.Results.inputdir;
-DataDir = [DataDir filesep 'DoneRESULTS']
+inputdir = p.Results.inputdir;
+DataDir = [inputdir filesep 'DoneRESULTS']
 Alldata = p.Results.outputdir;
 TrialName = p.Results.trialname;
 
@@ -62,7 +62,7 @@ for w=1:length(DateFileNms); %cycle data files
     load([DataDir filesep RecentFldr filesep DateFileNms{w,1}]);
    
     % get spine angles
-    varStruct.SpineData.AngleLs=GetAngles(varStruct.SpineData.Pointlist, allow_img);
+    varStruct.SpineData.AngleLs=GetAngles(varStruct.SpineData.Pointlist, allow_img, stoppoint);
     varStruct.SpineData.AngleLs;
     
 %saveThis([RUNfinalDir filesep DateFileNms{w,1}, 'final.mat'], varStruct);%'ProcessDate'
