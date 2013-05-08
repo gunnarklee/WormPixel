@@ -1,4 +1,4 @@
-function GetWorm(varargin)
+function [outputdir]=GetWorm(varargin)
 %G. Kleemannn 6/30/12
 %OneWorm_CHRONOS7.m
 %GetWorm - start point for One Worm analysis pipeline
@@ -102,8 +102,11 @@ ImgPropHeaders =...
 
 %  set up new directories
 
-FinFolderDir = [AlldataTop, 'Done']; mkdir(FinFolderDir);
-FinFolderDirRes = [AlldataTop, 'DoneRESULTS']; mkdir(FinFolderDirRes);
+%FinFolderDir = [AlldataTop, 'Done']; mkdir(FinFolderDir);
+%FinFolderDirRes = [AlldataTop, 'DoneRESULTS']; mkdir(FinFolderDirRes);
+
+FinFolderDir = [Alldata, filesep, 'Done']; mkdir(FinFolderDir);
+FinFolderDirRes = [Alldata, filesep, 'DoneRESULTS']; mkdir(FinFolderDirRes);
 
 %% GET folder Names
 dirOutput = dir(fullfile(Alldata, 'PIC_*')); %specifiy source folder
@@ -414,7 +417,7 @@ for W=1:length(DateFldrNms)
         %cd([Alldata, '/',DateFldrNms{W}]);
         imgtmp=imread([Alldata filesep DateFldrNms{W} filesep dirOutputtif(5).name]); %load the first image in the folder
         imgtmp=imresize(imgtmp, resz);
-        if isrgb(imgtmp)
+        if size(imgtmp, 3)==3
             imgtmp=rgb2gray(imgtmp);
         end
         CropRectOneWorm; % collects elipse object in posctr

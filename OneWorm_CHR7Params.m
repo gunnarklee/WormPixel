@@ -20,12 +20,12 @@ pad=20
 numpts=13 %number of spine points
 
 %% Visulization modes
-SnglImgProofMd = 'oN';  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
+SnglImgProofMd = 'off';  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
 DataCapMode = 'Simple'%^'StackGiff' %'StackTiff','Simple'
-allow_img= 'Y'%allow_img= input ('Allow images? (Y/N)', 's')
+allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
-ProofingImgs = 'Y' % extra proofing images
-stoppoint='Y'
+ProofingImgs = 'n' % extra proofing images
+stoppoint='n'
 SortByName= 'n' %sort in ASCII order. pad your numeric indees with zeros
 %date stammp can introudce errors when date stamp is wrong dont use unless files are ordered wrong to start
 PadPrc=2.5;
