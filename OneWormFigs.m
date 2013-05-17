@@ -182,14 +182,18 @@ for y=1:length(namedate(:,2));%cycle folders
     
     %% smooth path with sliding window
     %STILL NEEDS WORK (run of ZEROS)
+    % ** problem: path straight becomes static in the end (eg 37/265;% #223-258, jumps at 222 and 257)
+  
     smoothWin=25;
     StraightWin=50;
     if length(centroidPlot)< smoothWin
         centroidPlot
-        error(['usable date is shorter than the sliding window.  Only ', num2str(length(centroidPlot)) 'datum.  Refilter or add more pictures'])
+        error(['usable date is shorter than the sliding window. Only ', num2str(length(centroidPlot)) ' datum in " ',namedate{y,2},' " folder. Refilter or add more pictures'])
     end    
     %Smooth forward
+    %Last 25 (SmoothWin) are same value
     pathSmooth=[SmoothData(centroidPlot(:,1), smoothWin), SmoothData(centroidPlot(:,2), smoothWin)];
+    %Last 50 (StraightWin) are same value
     pathStrgt=[SmoothData(centroidPlot(:,1), StraightWin), SmoothData(centroidPlot(:,2), StraightWin)];
     
     % % take last data point and draw a line to it with intermediate points
@@ -210,19 +214,26 @@ for y=1:length(namedate(:,2));%cycle folders
     %Stitch together
     pathStrgt=[pathStrgtStart;pathStrgtEND];
     
-    %% VISUALIZE result
+   %% VISUALIZE result
    % figure;plot(centroidPlot(2:end,1),centroidPlot(2:end,2), '-b',  'MarkerSize', 2);...
    %     hold on
     %plot(pathSmooth(:,1),pathSmooth(:,2), '--r',  'MarkerSize', 2);...
    % plot(pathStrgt(:,1),pathStrgt(:,2), '--k',  'MarkerSize', 2, 'lineWidth', 3);...
    %     pathSmooth(length(pathStrgt)-StraightWin+1:end,1)=centroidPlot(length(pathStrgt)-StraightWin+1:end, 1);
     %% TRAVEL Distance from STRAIGHTened path.
-    TravelDist=zeros(size(centroid ,1),1);   %dont use pathstraigh for size since it has NO GAPS;
-    for WmPos=2:size(pathStrgt, 1); %Put the data together
+    %% problem: the smoothing window greates a dead space where movement is inappropeately clumped at the end of the trace
+    % Solution :for now just chop off winsize portion ?check that speed calculations
+    %are accurate still
+    %slso could use actual displacement but this wil be inflated by
+    %centroid waggle (not directed movement)
+    
+    TravelDist=zeros(size(centroid ,1),1);   %dont use pathstraight for size since it has NO GAPS;
+   for WmPos=2:size(pathStrgt, 1); %Put the data together
         distmoved=pdist2(pathStrgt(WmPos-1,:), pathStrgt(WmPos,:));
         TravelDist(WmPos)=distmoved;
-    end
+   end
     
+    TravelDistTrim=TravelDist(1:(end-StraightWin-5)) % additional 5 is from top padding
     %% adjust to calibrated mm/pixel (1 if not calibrated)
     TravelDist = TravelDist/pixelPERmm;
     distanceMv = distanceMv/pixelPERmm;
@@ -402,8 +413,17 @@ for y=1:length(namedate(:,2));%cycle folders
     %>>saveas (gcf, [NameOut 'centroid movement'], 'pdf')
     
     
+    %% compensate for smoothing losses in path for plots
+    %% problem: the smoothing window greates a dead space where movement is inappropeately clumped at the end of the trace
+    % Solution :for now just chop off winsize portion ?check that speed calculations
+    %are accurate still
+    %could use actual displacement but this wil be inflated by centroid waggle (not directed movement)
+   
+    TravelDistTrim=TravelDist(1:(end-StraightWin-5)) % additional 5 is from top padding
+    timeTrim=time(1:(end-StraightWin-5))
+    
     %% plot PATH TRAVELED  displacement
-    figure;plot(time(1:end), TravelDist(1:end),'-r') ; title ('displacement between frames');
+    figure;plot(timeTrim(1:end), TravelDistTrim(1:end),'-r') ; title ('displacement between frames');
     %last frame is zero,
     %hold on
     xlabel ('time (Sec)');
@@ -413,8 +433,8 @@ for y=1:length(namedate(:,2));%cycle folders
     %saveas (gcf, [NameOut 'DIstance Traveled'], 'pdf')
     
     %% Cummulative Dist
-    CumulDist=cumsum(TravelDist);
-    figure;plot(time(1:length(CumulDist)),CumulDist,'-r');
+    CumulDist=cumsum(TravelDistTrim);
+    figure;plot(timeTrim(1:length(CumulDist)),CumulDist,'-r');
     title (['Cumlative travel (straight path)' SCALETYPE ' vs. time']);
     xlabel ('time (Sec)');
     ylabel (['Cumulative Travel distance ', SCALETYPE]);
