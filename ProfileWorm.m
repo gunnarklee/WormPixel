@@ -1,4 +1,4 @@
-function [outputdir]=GetWorm(varargin)
+function [outputdir]=ProfileWorm(varargin)
 %G. Kleemannn 6/30/12
 %OneWorm_CHRONOS7.m
 %GetWorm - start point for One Worm analysis pipeline
