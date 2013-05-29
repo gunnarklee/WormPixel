@@ -1,4 +1,4 @@
-function [outputdir]=ProfileWorm(varargin)
+function [Alldata]=ProfileWorm(varargin)
 %G. Kleemannn 6/30/12
 %OneWorm_CHRONOS7.m
 %GetWorm - start point for One Worm analysis pipeline
@@ -44,7 +44,7 @@ function [outputdir]=ProfileWorm(varargin)
 p = inputParser;
 %p.addRequired('inputdir', @isdir);
 p.addRequired('outputdir', @isdir);
-p.addOptional('trialname', 'trialname', @ischar);
+%p.addOptional('trialname', 'trialname', @ischar);
 
 % Parse Inputs
 try
@@ -65,12 +65,12 @@ catch e1
 end
 %DataDir = p.Results.inputdir;
 Alldata = p.Results.outputdir;
-TrialName = p.Results.trialname;
+%TrialName = p.Results.trialname;
 AlldataTop = Alldata(1:max(findstr(Alldata, filesep)))
 
 %disp(['Input directory: ' DataDir]);
 disp(['Output directory: ' Alldata]);
-disp(['Trial name: ' TrialName]);
+%disp(['Trial name: ' TrialName]);
 
 ProcessDate=(date);
 %% SPECIFY FILTER PARAMETERS
@@ -303,7 +303,14 @@ function HeadID(Alldata, DateFldrNms, imgfmt)
 %get starting HEAD POSITION for each folder
 for W=1:length(DateFldrNms)
     
+    FrameNum=5 %#frames to look at
+    %Check that there are enough images left
+    ImageCount = size(dir(fullfile([Alldata filesep DateFldrNms{W}], '*jpg')),1)
+    
     dirOutputHeadPar = dir(fullfile([Alldata, '/',DateFldrNms{W}], 'HeadParams.mat')); %list the images
+    
+    if size(dirOutputHeadPar ,1) < 1 % if there are no crop parameters, then get them
+   
     dirOutput2 = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
     DateFldrNms2 = {dirOutput2.name}'; % cell array to matrix
     
@@ -405,7 +412,13 @@ for W=1:length(DateFldrNms)
     %% get head position for first worm
     [WmImgPad]=GetPadImg (pad, (Imagesfilt{row,:}));
     %display a few images to tell which part is the head
-    Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:5));
+    
+    %Check that there are enough images left
+    if ImageCount<FrameNum
+        error ([DateFldrNms{W}, ' has only', ImageCount, ' images, I need more to work with'])
+    end    
+        
+    Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:FrameNum));
     %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,)
     mssg='drag point to head and double click';
     [varStruct.Pos.poshead]=GetHead (poshead, WmImgPad, mssg);
@@ -413,6 +426,7 @@ for W=1:length(DateFldrNms)
     save ([Alldata filesep DateFldrNms{W} filesep 'HeadParams.mat'], 'varStruct'); %save parm -posctr s ellipse
     close all;
     
+end
 end
 end
 

@@ -1,4 +1,4 @@
-function [inputdir]=ProcessSpine(varargin)
+function [Alldata]=ProcessSpine(varargin)
 
 %G. Kleemann - 10/27/11
 %wrapper for getangles, gets ingles between points in a spine
@@ -8,7 +8,7 @@ function [inputdir]=ProcessSpine(varargin)
 
 % Parser for case when inputdir and outputdir are specified
 p = inputParser;
-p.addRequired('inputdir', @isdir);
+%p.addRequired('inputdir', @isdir);
 p.addRequired('outputdir', @isdir);
 p.addOptional('trialname', datestr(now), @ischar);
 %p.addOptional('EventList','EventList.csv', @ischar); %CSV file plate, well, AssayStart, TimeOn, TimeOff
@@ -18,9 +18,8 @@ try
     p.parse(varargin{:})
 catch e1
     try
-        inputdir = uigetdir('choose the "Source" folder');
         outputdir = uigetdir('choose the "Destination" folder');
-        p.parse(inputdir, outputdir, varargin{:})
+        p.parse(outputdir, varargin{:})
     catch e2
         exception = MException(...
             'twoimageDropCHR7_3Robot:arglist',...
@@ -30,8 +29,8 @@ catch e1
         throw(exception)
     end
 end
-inputdir = p.Results.inputdir;
-DataDir = [inputdir filesep 'DoneRESULTS']
+%inputdir = p.Results.inputdir;
+DataDir = [p.Results.outputdir filesep 'DoneRESULTS']
 Alldata = p.Results.outputdir;
 TrialName = p.Results.trialname;
 

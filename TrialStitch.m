@@ -1,11 +1,9 @@
 function OneWormFigs(varargin)
-%G. Kleemann - 10/27/11
-%UNTITLED Summary of this function goes here
+%G. Kleemann - 5/28/13
+%stitches together individual replicate (PIC_ folders) and sumarizes data by strain 
 %   Detailed explanation goes here
 
 %Version History
-
-
 
 p = inputParser;
 %p.addRequired('inputdir', @isdir);
@@ -40,85 +38,81 @@ disp(['Output directory: ' Alldata]);
 disp(['Trial name: ' TrialName]);
 
 ProcessDate=(date);
-% 
-% % Parser for case when inputdir and outputdir are specified
-% p = inputParser;
-% p.addRequired('inputdir', @isdir);
-% p.addRequired('outputdir', @isdir);
-% p.addOptional('trialname', datestr(now), @ischar);
-% %p.addOptional('EventList','EventList.csv', @ischar); %CSV file plate, well, AssayStart, TimeOn, TimeOff
-% 
-% % Parse Inputs
-% try
-%     p.parse(varargin{:})
-% catch e1
-%     try
-%         inputdir = uigetdir('choose the "Source" folder');
-%         outputdir = uigetdir('choose the "Destination" folder');
-%         p.parse(inputdir, outputdir, varargin{:})
-%     catch e2
-%         exception = MException(...
-%             'twoimageDropCHR7_3Robot:arglist',...
-%             'Error in input argument list');
-%         exception = addCause(exception, e1);
-%         exception = addCause(exception, e2);
-%         throw(exception)
-%     end
-% end
-% DataDir = p.Results.inputdir;
-% Alldata = p.Results.outputdir;
-% TrialName = p.Results.trialname;
-% 
-% disp(['Input directory: ' DataDir]);
-% disp(['Output directory: ' Alldata]);
-% disp(['Trial name: ' TrialName]);
-
-%update directories to find the results file
 
 
 %% Make new directories
-ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, 'ErrorDir'];
-ProcessDate=(date);
-SCALETYPE='(Pixels)'; %unless calibrated to mm
-pixelPERmm=1; %default
-%SummaryFiles=[DataDir RecentFldr filesep 'SummData'],
+% ErrorDir = [Alldata, 'RESULTS', filesep, TrialName, 'ErrorDir'];
+% ProcessDate=(date);
+% SCALETYPE='(Pixels)'; %unless calibrated to mm
+% pixelPERmm=1; %default
+% %SummaryFiles=[DataDir RecentFldr filesep 'SummData'],
 
 %% SPECIFY PARAMETERS
 OneWorm_CHR7Params;
-%% get PIXEL/MM CALIBRATION
-MeasureScale (resz, Alldata)
+% %% get PIXEL/MM CALIBRATION
+% MeasureScale (resz, Alldata)
 
-%% GET THE MOST RECENT "final.mat" folder for looping
-%[DateFileNms RecentFldr namedate] = GetFolderMat (DataDir, 'final', 'final');
+%% specifiy data matricies
 scrsz = get(0,'ScreenSize');
 
-centroid=[];
-SpineCoords={};
-CurveMtx=[];
-imgs={};
-CurveMtx=[];
-SpineList={};
-Pointlist={};
-poshead=[];
-velocity=[];
-time=[];
-close all
-%% update directories to find the results file
-[~, RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', 'recent');
-namedate
+Movement=[]; 
+%Avg and variance %velocity, 
+%aceleration, 
+%Neck ampltude, 
+%neck wavelength; 
+%stroke/dist
+SpineAngles=[]; 
+%at static points on body 
 
-load ([Alldata filesep 'Measure.mat']); %save parm -posctr s ellipse
-   
-for y=1:length(namedate(:,2));%cycle folders
+%Wormimage=[]; % colect all worm images
+%Worm Movie = image of worm translocating
+%% update directories to find the results file
+% [~, RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', 'recent');
+% namedate
+
+%load ([Alldata filesep 'Measure.mat']); %save parm -posctr s ellipse
+%% get folder lists
+%dirOutput = dir(fullfile([fldrPath, filesep, RecentFldr], ['*' fileID '.mat']))
+
+%treatment names 
+dirOutput = dir(fullfile([Alldata]))
+TreatmentName = {dirOutput.name}'; 
+
+%remove any directories with a dot ( these are not treament folders)
+NoTrtm=strfind(TreatmentName, '.')
+Index = find(cellfun('isempty', NoTrtm))
+TreatmentName = TreatmentName(Index)
+
+%% Cycle treatments
+for y=1:length(TreatmentName);%cycle through treatments
+    
+%get replicate names and cycle through
+dirOutput = dir(fullfile([Alldata, filesep, TreatmentName{y}, filesep, 'Done'], 'PIC_*'))
+repName = {dirOutput.name}'; 
+
+% cycle replicates concatenate and analyze data
+for z=1:length(repName)
+    dirOutput= dir(fullfile([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}]))
+    repResult={dirOutput.name}';
+    
+    %hard code the output files > think of somthing more dynamic later
+    SummData=load([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{11}])
+     SwimStrokedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{12}])
+    curvedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{13}])
+    movedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{14}])
+
+end
+end
+
     %% GET list of "final.mat" files in folder for looping
-    [DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', namedate(y,2));
+    %[DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', namedate(y,2));
     
     %% check order, sort and add spacers for skipped or missing fra
     %Namelist has spacers, DateFileNmsDoes not
-    try [NameList]= GetImgNumOrdr(DateFileNms, '-', 'final');
-    catch
-        [NameList]= GetImgNumOrdr(DateFileNms, '_', 'final');
-    end
+ %   try [NameList]= GetImgNumOrdr(DateFileNms, '-', 'final');
+  %  catch
+  %      [NameList]= GetImgNumOrdr(DateFileNms, '_', 'final');
+   % end
     %% stack the data from "final.mat" files
     %preallocate Matricies
     leng=length(DateFileNms);  %UnPadded count
@@ -517,36 +511,8 @@ for y=1:length(namedate(:,2));%cycle folders
     
     saveas (gcf, [NameOut 'Neck MovementFullRun'], 'pdf')
     %% PLOT CYCLE (ENDS)
-    
-    
-    
-    %% CYCLES PER SECOND (Varn for crOss strain comparisons)
-    
-    
-    
-    %% distance , cycle (efffort/ work ratio)
-    
-    
-    %     plot(SpineList{W}(:,1), SpineList{W}(:,2));
-    %     hold on
-    %     %figure; imagesc(CurveMtx);
-    %
-    
-    %[wkSpnX,wkspnY]=ind2sub(size(SpineData.SpineList), find(SpineData.SpineList));
-    %cmap=colormap(jet (size(wkSpnX,1))) %copper
-    %WmImgPadcolor=mat2gray(WmImgPad)
-    
-    %WmImgPadcolor=(imoverlay (mat2gray(img1), SpineData.SpineList,  cmap(Pt,:)));
-    
-    %     figure; imshow(WmImgPadcolor, 'InitialMagnification', 400);
-    %     hold on
-    %     %addpoint to imgage with new color
-    %     WmImgPadcolor=(imoverlay (mat2gray(WmImgPadcolor), skeleEND, cmap(Pt,:)));
-    
-end %Folder loop
-end % end main function
-
-
+end %function 
+  
 function [CurrCent]=FindCentr(Img_Propfilt, mode) %CtrMass
 
 switch mode

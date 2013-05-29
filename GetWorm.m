@@ -1,4 +1,4 @@
-function [outputdir]=GetWorm(varargin)
+function [Alldata]=GetWorm(varargin)
 %G. Kleemannn 6/30/12
 %OneWorm_CHRONOS7.m
 %GetWorm - start point for One Worm analysis pipeline
@@ -113,14 +113,7 @@ dirOutput = dir(fullfile(Alldata, 'PIC_*')); %specifiy source folder
 DateFldrNms = {dirOutput.name}';
 if isempty(DateFldrNms); error('No "PIC_..." folder, Check folder name and paths'); end
 
-%% for each "PIC" folder check to see that the required files are there
-% If not already done Crop the useful area from the picture
-CheckGetCrop(Alldata, DateFldrNms, imgfmt, resz)
 
-% If filter params are missing, have user identify 5 worms and get params
-Particleparams (resz, Alldata, DateFldrNms, imgfmt, dynamicTH, thresh_hold, PRCbracketSz)
-
-HeadID (Alldata, DateFldrNms, imgfmt);
 %% loop folders
 for W=1:length(DateFldrNms)
     %% settup
@@ -569,122 +562,6 @@ filt.TotAxU=FltrParams.TotAxU;
 filt.TotAxL=FltrParams.TotAxL;
 end
 
-function HeadID(Alldata, DateFldrNms, imgfmt)
-%get starting HEAD POSITION for each folder
-for W=1:length(DateFldrNms)
-    
-    dirOutputHeadPar = dir(fullfile([Alldata, '/',DateFldrNms{W}], 'HeadParams.mat')); %list the images
-    dirOutput2 = dir(fullfile([Alldata filesep DateFldrNms{W}], imgfmt)); %list the images
-    DateFldrNms2 = {dirOutput2.name}'; % cell array to matrix
-    
-    %Skip if there is head location for an image in current folde
-    if size(dirOutputHeadPar,1) > 0
-        load([Alldata filesep DateFldrNms{W} filesep 'HeadParams.mat'])
-        if max(strcmp(DateFldrNms2, varStruct.Pos.imgName))>0;
-            continue % already have HeadLoc for image
-        else
-            %HeadCheck = 'yes'
-        end
-    else
-        %HeadCheck = 'yes' % have no HeadLoc get location for current folder
-    end
-    
-    %get names filter values and parameters
-    load([Alldata filesep DateFldrNms{W} filesep 'FltrParams.mat'])
-    CropPar=load([Alldata filesep DateFldrNms{W} filesep 'CropParam.mat']);%reload each time
-    mask=CropPar.mask;
-    
-    OneWorm_CHR7Params  % load parameters an prefs
-    
-    [filt]=UpdateFilt(FltrParams)%update filter values
-    %>>mask =imresize(CropPar.mask, resz);
-    posctr=CropPar.posctr;
-    
-    %initialize matricies
-    centroidLs=[]; HeadPosnLs=[]; BBratio=[]; centrSmthY=[]; Images=[];poshead=[]; varStruct=[];
-    
-    % Errors
-    if size(dirOutput2 ,1) < 1; error('I can not find any images');end %no image error
-    %blank image error HERE
-    
-    %% locate worm - start with no worm found
-    ImN=1
-    wormfound='no';
-    while strcmpi(wormfound, 'no')
-        % for imN=1:ImN=1:size(DateFldrNms2,1);
-        img=imread([Alldata filesep DateFldrNms{W} filesep DateFldrNms2{ImN}]);
-        varStruct.Pos.imgName=DateFldrNms2{ImN}; % Store image name
-        varStruct.Pos.Number=ImN; % Store image number
-        
-        if size(img,3)>2; img=rgb2gray(img); end
-        %% Remove blotchy background %works but takes a lot of time
-        
-        if strcmpi (smoothbkg, 'y');
-            img1=SmoothBkgd(img, 10 ,allow_img);
-        else img1=uint8(img);
-        end
-        img1=imresize(img1, resz); %resize after smoothing to save time
-        
-        
-        %% MASK OFF THE PERIMITER
-        mask=uint8(mask); img1Masked=(img1.*mask);
-        lng1=length(img1(1,:)); lng2=length(img1(:,1));
-        if strcmpi (intenseMsk, 'y')
-            [img1Masked]=IntenseMask (img1Masked, dynamicBndLim, Val, EvenImgBgSub, allow_img);
-        end
-        %% IDENTIFY OBJECTS and FILTER DATA
-        imgBW= makeimgBW(img1Masked,dynamicTH,invertImage, FltrParams.threshold);
-        [imgBWL, F, Image_PropertiesAll] = GetImgPropsSHORT (imgBW, allow_img);
-        %%    Error check
-        if size(Image_PropertiesAll, 1) < 1;
-            disp ('did not find any particles');
-            ImN=ImN+1; wormfound='no';
-            DateFldrNms{W}
-            DateFldrNms2{ImN}
-            %continue
-        end;
-        
-        %% Filter objects to find owrm
-        % Apply Filters.
-        [filt, filtVal] = ApplyFilters (filt, Image_PropertiesAll);
-        Img_Propfilt=Image_PropertiesAll(filtVal,:); %new matrix with 0s filtered out
-        
-        %count error check
-        if size(Img_Propfilt, 1) < 1;
-            disp ('did not find any particles after filter');
-            ImN=ImN+1; wormfound='no'; %try the next image
-            DateFldrNms{W}
-            DateFldrNms2{ImN};
-            continue
-        else
-            wormfound='yes'
-        end
-    end
-    %% FORCE A SINGLE WORM, For multiple "worms" found,
-    [row,mindiff]=CloseCentr(FltrParams.StartPos,Img_Propfilt);
-    if size(Img_Propfilt, 1) > 1
-        Img_Propfilt=Img_Propfilt(row, :); %select the "worm" closest to the last worm
-    end
-    
-    %% Create Imagesfilt - filtered worm images
-    Imagesfilt={};
-    for ChosenIMAGE=1:length(filtVal);
-        Imagesfilt = [Imagesfilt; F(filtVal(ChosenIMAGE,1)).Image];
-    end
-    
-    %% get head position for first worm
-    [WmImgPad]=GetPadImg (pad, (Imagesfilt{row,:}));
-    %display a few images to tell which part is the head
-    Flipbook([Alldata filesep DateFldrNms{W}], DateFldrNms2(1:5));
-    %function [poshead, WmImgPad]=GetHeadPosPad (pad, Imagesfilt,)
-    mssg='drag point to head and double click';
-    [varStruct.Pos.poshead]=GetHead (poshead, WmImgPad, mssg);
-    varStruct.Pos.WmImg=WmImgPad;
-    save ([Alldata filesep DateFldrNms{W} filesep 'HeadParams.mat'], 'varStruct'); %save parm -posctr s ellipse
-    close all;
-    
-end
-end
 
 function VisualizeProc () %<<<<in Progress>>> addd to code
 %% DISPLAY results

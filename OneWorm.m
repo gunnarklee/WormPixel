@@ -56,12 +56,12 @@ disp(['Trial name: ' TrialName]);
 %trialName='7_4_12Run'
 
 %OneWorm Pipeline
-[InputDir]=ProfileWorm(outputdir)
-Outputdir=InputDir;
-[InputDir]=GetWorm(InputDir)%(InputDir); % 'trialName', trialName
-[InputDir]=ProcessSpine(InputDir, Outputdir);%(InputDir);
-OneWormFigs(InputDir, Outputdir);
+[Alldata]=ProfileWorm(Alldata)
+[Alldata]=GetWorm(Alldata)%(InputDir); % 'trialName', trialName
+[Alldata]=ProcessSpine(Alldata);%(InputDir);
+OneWormFigs(Alldata);
 
+%%TrialStitch one level up!
 
 
 %MAybe dont use - fix in process spine %%ErrorFixer(InputDir, Outputdir, trialName)
