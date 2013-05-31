@@ -95,50 +95,21 @@ for z=1:length(repName)
     dirOutput= dir(fullfile([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}]))
     repResult={dirOutput.name}';
     
-    %hard code the output files > think of somthing more dynamic later
+    %hard coded the output files > think of somthing more dynamic later
     SummData=load([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{11}])
-     SwimStrokedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{12}])
+    SwimStrokedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{12}])
     curvedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{13}])
     movedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{14}])
 
+    SummData=load([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{11}])
+    SwimStrokedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{12}])
+    curvedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{13}])
+    movedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{14}])
+    
+    
 end
 end
-
-    %% GET list of "final.mat" files in folder for looping
-    %[DateFileNms RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', namedate(y,2));
-    
-    %% check order, sort and add spacers for skipped or missing fra
-    %Namelist has spacers, DateFileNmsDoes not
- %   try [NameList]= GetImgNumOrdr(DateFileNms, '-', 'final');
-  %  catch
-  %      [NameList]= GetImgNumOrdr(DateFileNms, '_', 'final');
-   % end
-    %% stack the data from "final.mat" files
-    %preallocate Matricies
-    leng=length(DateFileNms);  %UnPadded count
-    PaddedLeng=length(NameList); %Padded count
-    DateFileNms_Count=0%set up separate cont for UNPADEDDED LIST date file names
-    insttime=1/framerate; %seconds
-    
-    distanceMv=zeros(PaddedLeng, 1);   %velocity=[velocity;vel];
-    time=zeros(PaddedLeng, 1);   %time=[time;insttime+time(end,:)];
-    centroid=zeros(PaddedLeng, 2);   %centroid=[centroid;CurrCent];
-    %>>imgs=cell(leng, 1);  %imgs=[imgs;imgBWL];
-    CurveMtx=zeros(numpts-2, 1);%CurveMtx=[CurveMtx,SpineData.AngleLs];
-    SpineList=cell(PaddedLeng, 1);   %SpineList=[SpineList,SpineData.SpineList];
-    Pointlist=cell(PaddedLeng, 2);   %Pointlist=[Pointlist,SpineData.Pointlist];
-    
-    for PaddedList_Count=1:length(NameList); %Put the data together
-        PaddedList_Count
-        NameList{PaddedList_Count,1}
-        DateFileNms_Count=DateFileNms_Count+1;%set up separate cont for date file names
-        fileDirect=[DataDir filesep RecentFldr]
-        % check that here is a file (notspacer 'X') and it exists in a dir
-        if and(isdir(fileDirect), ~strcmpi(NameList{PaddedList_Count,1}, 'X')); 
-            load([fileDirect filesep NameList{PaddedList_Count,1}]);
-            [CurrCent]=FindCentr(varStruct.analysis.Img_Propfilt, 'CtrMass'); %CtrMass
-        end
-        
+7 
         %% Add vales to the DATA matricies
         if NameList{PaddedList_Count,1} == 'X'; %then fill a blank in some matricies
             %keep zero tto retain spacerand goto next iteration
@@ -313,7 +284,7 @@ end
     
     %% SAVE EVERYTHING
     outputDir=[Alldata filesep 'ResultsFiles'];
-    mkdir(outputDir);;
+    mkdir(outputDir);
     NameOut=[outputDir filesep RecentFldr(1:end-8) filesep];
     mkdir(NameOut);
     
