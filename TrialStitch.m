@@ -66,6 +66,37 @@ SpineAngles=[];
 
 %Wormimage=[]; % colect all worm images
 %Worm Movie = image of worm translocating
+
+%observation matricies
+    Trtm={};
+    TrtmLong={};
+    RepLong={};
+    
+%Single rep matricies 
+%- mean standard deviation and absolue value mean(avg dist from 0) across single reps
+
+    MoveDtMEAN_rep= [];
+    MoveDtSTD_rep= []; 
+    
+    StrokeDtMEAN_rep= [];
+    StrokeDtSTD_rep= [];
+    
+    CurveDtMEAN_rep= [];    
+    CurveDtSTD_rep= [];
+    CurveDtABSL_MEAN_rep=[];
+
+%average for strain "overall" matricies.    
+    MoveGrandMeans= [];
+    MoveStdofmeans= []; %mean variance across replicates within each strain 
+    MoveMeanofStd= []; %mean variance in replicates across strains
+    
+    StrokeGrandMeans= [];
+    StrokeSTDofMeans= []; %mean variance across replicates within each strain 
+    StrokeMeanofSTD= []; %mean variance in replicates across strains
+    
+    CurveGrandMeans= [];    
+    CurveSTDofMeans= []; %mean variance across replicates within each strain  
+    CurveMeanofSTD= [];  %mean variance in replicates across strains
 %% update directories to find the results file
 % [~, RecentFldr namedate] = GetTopFoldersMat (DataDir, 'final', 'final', 'recent');
 % namedate
@@ -85,101 +116,414 @@ TreatmentName = TreatmentName(Index)
 
 %% Cycle treatments
 for y=1:length(TreatmentName);%cycle through treatments
-    
+ TreatmentName{y}   
 %get replicate names and cycle through
-dirOutput = dir(fullfile([Alldata, filesep, TreatmentName{y}, filesep, 'Done'], 'PIC_*'))
+dirOutput = dir(fullfile([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles'], 'PIC_*'));
 repName = {dirOutput.name}'; 
 
 % cycle replicates concatenate and analyze data
+%these variables are reset for each strain
+    MoveDtMEANtmp= [];
+    MoveDtSTDtmp= [];
+    
+    StrokeDtMEANtmp= [];
+    StrokeDtSTDtmp= [];
+    
+    CurveDtMEANtmp= [];    
+    CurveDtSTDtmp= [];
+    CurveDtABSL_MEANtmp=[];
+
+    if size (repName, 1) == 0 ; continue; end 
 for z=1:length(repName)
-    dirOutput= dir(fullfile([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}]))
+   %if size (repName, 1) == 0 ; continue; end 
+    display (['working on rep' repName{z}, 'the', num2str(z), 'of', num2str(length(repName))]);
+    dirOutput= dir(fullfile([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}]));
     repResult={dirOutput.name}';
     
-    %hard coded the output files > think of somthing more dynamic later
-    SummData=load([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{11}])
-    SwimStrokedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{12}])
-    curvedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{13}])
-    movedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{14}])
+% check for the required files
+%% hard coded the output files > think of something more dynamic later
+   CurrRep = [Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}]
+   try
+    SummData=load([CurrRep, filesep, repResult{11}]);
+    catch
+        error (['I can not find the', repResult{11} 'file, is it missing?'])
+    end
+    
+    try
+    SwimStrokedata = dataset('file',[CurrRep, filesep, repResult{12}],'delimiter',',','ReadVarNames',true);    
+    %SwimStrokedata=importdata();
+    %SwimStrokedata=dataset(importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{12}]));
+    catch
+        error (['I can not find the', repResult{12} 'file, is it missing?'])
+    end
+    
+    try
+    curvedata = dataset('file',[CurrRep, filesep, repResult{13}],'delimiter',',','ReadVarNames',true);    
+    %curvedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{13}]);
+    catch
+        error (['I can not find the', repResult{13} 'file, is it missing?'])
+    end
+    
+    try
+    movedata = dataset('file',[CurrRep, filesep, repResult{14}],'delimiter',',','ReadVarNames',true);      
+    %movedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{14}]);
+    catch
+        error (['I can not find the', repResult{14} 'file, is it missing?'])
+    end
+    
+% Compile data into structures
+%     curveDataSum.Headers.(TreatmentName{y}).(repName{z})=curvedata.colheaders;
+%     curveDataSum.Mean.(TreatmentName{y}).(repName{z})=mean(curvedata.data(6:end, :));
+%     curveDataSum.Min.(TreatmentName{y}).(repName{z})=min(curvedata.data(6:end, :));
+%     curveDataSum.Max.(TreatmentName{y}).(repName{z})=max(curvedata.data(6:end, :));
+%     curveDataSum.Range.(TreatmentName{y}).(repName{z})=range(curvedata.data(6:end, :));
+%     curveDataSum.StdDev.(TreatmentName{y}).(repName{z})=std(curvedata.data(6:end, :));
+%     curveDataSum.total.(TreatmentName{y}).(repName{z})=sum(curvedata.data(6:end, :));
+%     
+    SummDataSum.(TreatmentName{y}).(repName{z})=SummData;
 
-    SummData=load([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{11}])
-    SwimStrokedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{12}])
-    curvedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{13}])
-    movedata=importdata([Alldata, filesep, TreatmentName{y}, filesep, 'ResultsFiles', filesep, repName{z}, filesep, repResult{14}])
+%     SwimStrokeSum.Headers.(TreatmentName{y}).(repName{z})=SwimStrokedata.colheaders;
+%     SwimStrokeSum.Mean.(TreatmentName{y}).(repName{z})=mean(SwimStrokedata.data(6:end, :));
+%     SwimStrokeSum.Min.(TreatmentName{y}).(repName{z})=min(SwimStrokedata.data(6:end, :));
+%     SwimStrokeSum.Max.(TreatmentName{y}).(repName{z})=max(SwimStrokedata.data(6:end, :));
+%     SwimStrokeSum.Range.(TreatmentName{y}).(repName{z})=range(SwimStrokedata.data(6:end, :));
+%     SwimStrokeSum.StdDev.(TreatmentName{y}).(repName{z})=std(SwimStrokedata.data(6:end, :));
+%     SwimStrokeSum.total.(TreatmentName{y}).(repName{z})=sum(SwimStrokedata.data(6:end, :));
+%    
+%     movedataSum.Headers.(TreatmentName{y}).(repName{z})=movedata.colheaders;
+%     movedataSum.Mean.(TreatmentName{y}).(repName{z})=mean(movedata.data(6:end, :));
+%     movedataSum.Min.(TreatmentName{y}).(repName{z})=min(movedata.data(6:end, :));
+%     movedataSum.Max.(TreatmentName{y}).(repName{z})=max(movedata.data(6:end, :));
+%     movedataSum.Range.(TreatmentName{y}).(repName{z})=range(movedata.data(6:end, :));
+%     movedataSum.StdDev.(TreatmentName{y}).(repName{z})=std(movedata.data(6:end, :));
+%     movedataSum.total.(TreatmentName{y}).(repName{z})=sum(movedata.data(6:end, :));
+%     
+%% temporary strain specific replicates files
+    
+    MoveDtMEANtmp= [MoveDtMEANtmp; mean(double(movedata(6:end,:)))];
+    MoveDtSTDtmp= [MoveDtSTDtmp; std(double(movedata(6:end, :)))];
+    
+    StrokeDtMEANtmp= [StrokeDtMEANtmp; mean(double(SwimStrokedata(6:end, :)))];
+    StrokeDtSTDtmp= [StrokeDtSTDtmp; std(double(SwimStrokedata(6:end, :)))];
+    
+    CurveDtMEANtmp= [CurveDtMEANtmp; mean(double(curvedata(6:end, :)))]    ;
+    CurveDtABSL_MEANtmp= [CurveDtABSL_MEANtmp; mean(abs(double(curvedata(6:end, :))))] 
+    CurveDtSTDtmp= [CurveDtSTDtmp; std(double(curvedata(6:end, :)))];
+    
+    TrtmLong=[TrtmLong; TreatmentName{y}];
+    RepLong=[RepLong; repName{z}];
+   % export(CurveData,'file', [NameOut 'curvedata'],'Delimiter',',')
+end
+
+%% COMPILE data into matricies
+
+% compile rep data
+    MoveDtMEAN_rep= [MoveDtMEAN_rep; MoveDtMEANtmp];
+    MoveDtSTD_rep= [MoveDtSTD_rep;MoveDtSTDtmp];
+    
+    StrokeDtMEAN_rep= [StrokeDtMEAN_rep;StrokeDtMEANtmp];
+    StrokeDtSTD_rep= [StrokeDtSTD_rep;StrokeDtSTDtmp];
+    
+    CurveDtMEAN_rep= [CurveDtMEAN_rep;CurveDtMEANtmp]    ;
+    CurveDtSTD_rep= [CurveDtSTD_rep;CurveDtSTDtmp];
+    CurveDtABSL_MEAN_rep=[CurveDtABSL_MEAN_rep;CurveDtABSL_MEANtmp]
+        
+% Average rep data to get strain data 
+    Trtm=[Trtm; TreatmentName{y}]
+    
+    MoveGrandMeans= [MoveGrandMeans; mean(MoveDtMEANtmp)];
+    MoveStdofmeans= [MoveStdofmeans; std(MoveDtMEANtmp)];
+    MoveMeanofStd= [MoveMeanofStd; mean(MoveDtSTDtmp)];
+    
+    StrokeGrandMeans= [StrokeGrandMeans; mean(StrokeDtMEANtmp)];
+    StrokeSTDofMeans= [StrokeSTDofMeans; std(StrokeDtMEANtmp)];
+    StrokeMeanofSTD= [StrokeMeanofSTD; mean(StrokeDtSTDtmp)]   ;
+    
+    CurveGrandMeans= [CurveGrandMeans; mean(CurveDtMEANtmp)]    ;
+    CurveSTDofMeans= [CurveSTDofMeans; std(CurveDtMEANtmp)];
+    CurveMeanofSTD= [CurveMeanofSTD; mean(CurveDtSTDtmp)];
+       
+end
+%% get headers
+    Moveheaders=movedata.Properties.VarNames
+    Strokeheaders=SwimStrokedata.Properties.VarNames
+    Curveheaders=curvedata.Properties.VarNames
+    
+%% Make into DATASETS  with headers and obs names
     
     
-end
-end
-7 
+    MoveDtMEAN_rep = [dataset(TrtmLong), dataset(RepLong), mat2dataset(MoveDtMEAN_rep, 'VarNames', Moveheaders)];
+    MoveDtSTD_rep = [dataset(TrtmLong), dataset(RepLong), mat2dataset(MoveDtSTD_rep, 'VarNames', Moveheaders)];
+    
+    StrokeDtMEAN_rep = [dataset(TrtmLong), dataset(RepLong), mat2dataset(StrokeDtMEAN_rep , 'VarNames', Strokeheaders)];
+    StrokeDtSTD_rep = [dataset(TrtmLong), dataset(RepLong), mat2dataset(StrokeDtSTD_rep, 'VarNames', Strokeheaders)];
+    
+    CurveDtMEAN_rep = [dataset(TrtmLong), dataset(RepLong), mat2dataset(CurveDtMEAN_rep(:,2:end), 'VarNames', Curveheaders(2:end))];
+    CurveDtSTD_rep = [dataset(TrtmLong), dataset(RepLong), mat2dataset(CurveDtSTD_rep(:,2:end) , 'VarNames', Curveheaders(2:end))];
+    CurveDtABSL_MEAN_rep= [dataset(TrtmLong), dataset(RepLong), mat2dataset(CurveDtABSL_MEAN_rep(:,2:end), 'VarNames', Curveheaders(2:end))];
+    
+    %     MoveMeans_Overall=mat2dataset(MoveGrandMeans, 'VarNames', Moveheaders, 'ObsNames', Trtm);
+%     MoveStdofmeans_Overall= mat2dataset(MoveStdofmeans, 'VarNames', Moveheaders, 'ObsNames', Trtm);
+%     MoveMeanofStd_Overall= mat2dataset(MoveMeanofStd, 'VarNames', Moveheaders, 'ObsNames', Trtm);
+% 
+%     StrokeMeans_Overall = mat2dataset(StrokeGrandMeans, 'VarNames', Strokeheaders, 'ObsNames', Trtm);
+%     StrokeSTDofMeans_Overall = mat2dataset(StrokeSTDofMeans, 'VarNames', Strokeheaders, 'ObsNames', Trtm);
+%     StrokeMeanofSTD_Overall = mat2dataset(StrokeMeanofSTD, 'VarNames', Strokeheaders, 'ObsNames', Trtm)  ;
+%     
+%     CurveMeans_Overall = mat2dataset(CurveGrandMeans, 'VarNames', Curveheaders, 'ObsNames', Trtm);
+%     CurveSTDofMeans_Overall =  mat2dataset(CurveSTDofMeans, 'VarNames', Curveheaders, 'ObsNames', Trtm);
+%     CurveMeanofSTD_Overall =  mat2dataset(CurveMeanofSTD, 'VarNames', Curveheaders, 'ObsNames', Trtm)
+
+
+%% Make overall summaries into datasets with headers and obs names
+    MoveMeans_Overall=mat2dataset(MoveGrandMeans, 'VarNames', Moveheaders, 'ObsNames', Trtm)
+    MoveStdofmeans_Overall= mat2dataset(MoveStdofmeans, 'VarNames', Moveheaders, 'ObsNames', Trtm);
+    MoveMeanofStd_Overall= mat2dataset(MoveMeanofStd, 'VarNames', Moveheaders, 'ObsNames', Trtm);
+
+    StrokeMeans_Overall = mat2dataset(StrokeGrandMeans, 'VarNames', Strokeheaders, 'ObsNames', Trtm);
+    StrokeSTDofMeans_Overall = mat2dataset(StrokeSTDofMeans, 'VarNames', Strokeheaders, 'ObsNames', Trtm)
+    StrokeMeanofSTD_Overall = mat2dataset(StrokeMeanofSTD, 'VarNames', Strokeheaders, 'ObsNames', Trtm)  
+    
+    CurveMeans_Overall = mat2dataset(CurveGrandMeans(:,2:end), 'VarNames', Curveheaders(2:end), 'ObsNames', Trtm);
+    CurveSTDofMeans_Overall =  mat2dataset(CurveSTDofMeans(:,2:end), 'VarNames', Curveheaders(2:end), 'ObsNames', Trtm)
+    CurveMeanofSTD_Overall =  mat2dataset(CurveMeanofSTD(:,2:end), 'VarNames', Curveheaders(2:end), 'ObsNames', Trtm)
+
+%% MAKE OUTPUT TEXT FILES
+    % compiled data, CSV/dataset file of summary data
+    outputDir=[Alldata filesep 'ResultsFiles'];
+    mkdir(outputDir);
+    NameOut=[outputDir filesep];
+    mkdir(NameOut);
+
+    %export data sheets
+    %export(TrtmtSum,'file', [NameOut 'movedata'],'Delimiter',',')
+    export(MoveDtMEAN_rep,'file', [NameOut 'MoveDtMEAN_rep'],'Delimiter',',');
+    %export(MoveDtSTD_rep,'file', [NameOut 'MoveDtSTD_rep'],'Delimiter',',');
+    export(StrokeDtMEAN_rep,'file', [NameOut 'StrokeDtMEAN_rep'],'Delimiter',',');
+    %export(StrokeDtMEAN_rep,'file', [NameOut 'StrokeDtMEAN_rep'],'Delimiter',',');
+    export(CurveDtMEAN_rep,'file', [NameOut 'CurveDtMEAN_rep'],'Delimiter',',');
+    export(CurveDtSTD_rep,'file', [NameOut 'CurveDtSTD_rep'],'Delimiter',',');
+    export(MoveMeans_Overall,'file', [NameOut 'MoveMeans_Overall'],'Delimiter',',');
+    %export(MoveStdofmeans_Overall,'file', [NameOut 'curvedata'],'Delimiter',',');
+    export(StrokeMeans_Overall,'file', [NameOut 'StrokeMeans_Overall'],'Delimiter',',');
+    %export(StrokeSTDofMeans_Overall,'file', [NameOut 'StrokeSTDofMeans_Overall'],'Delimiter',',');
+    export(CurveMeans_Overall,'file', [NameOut 'CurveMeans_Overall'],'Delimiter',',');
+    export(CurveSTDofMeans_Overall,'file', [NameOut 'CurveSTDofMeans_Overall'],'Delimiter',',');
+    %export(CurveData,'file', [NameOut 'curvedata'],'Delimiter',',');
+
+
+%% GRAPH IT - summaries into datasets with headers and obs names
+
+% Plot average angles along body
+%get movement data for indivuduals split by strian - not sure about these
+%units
+
+% PLOT Average angles Average body position
+varNames=CurveMeans_Overall.Properties.VarNames(1:end)'
+Dt=[CurveMeans_Overall.Var2_1, CurveMeans_Overall.Var2_2, CurveMeans_Overall.Var2_3,...
+CurveMeans_Overall.Var2_4, CurveMeans_Overall.Var2_5, CurveMeans_Overall.Var2_6,...
+CurveMeans_Overall.Var2_7, CurveMeans_Overall.Var2_8, CurveMeans_Overall.Var2_9,...
+CurveMeans_Overall.Var2_10, CurveMeans_Overall.Var2_11];
+Y=CurveMeans_Overall.Properties.ObsNames
+
+%specify colors
+set(gca,'NextPlot','replacechildren');
+set(gca,'ColorOrder', lines(size(Y,1)));
+figure; parallelcoords(Dt, 'group',Y, 'labels', varNames);
+% Legend replot
+[legend_h,object_h,plot_h,text_strings] = legend()
+legend(plot_h, text_strings, 'Location', 'best')
+
+saveas (gcf, [NameOut 'CurveAvgs_overall'], 'pdf')
+    
+
+% gplotmatrix(ratings(:,1:2),ratings(:,[4 7]),group,... 
+%             'br','.o',[],'on','',categories(1:2,:),... 
+%              categories([4 7],:))
+
+
+%% Plot body angle for REPs
+varNames=CurveDtMEAN_rep.Properties.VarNames(3:end)'
+Dt=[CurveDtMEAN_rep.Var2_1, CurveDtMEAN_rep.Var2_2, CurveDtMEAN_rep.Var2_3,...
+CurveDtMEAN_rep.Var2_4, CurveDtMEAN_rep.Var2_5, CurveDtMEAN_rep.Var2_6,...
+CurveDtMEAN_rep.Var2_7, CurveDtMEAN_rep.Var2_8, CurveDtMEAN_rep.Var2_9,...
+CurveDtMEAN_rep.Var2_10, CurveDtMEAN_rep.Var2_11];
+Y=CurveDtMEAN_rep.TrtmLong
+
+%specify colors
+set(gca,'NextPlot','replacechildren');
+set(gca,'ColorOrder', lines(size(Y,1)));
+figure; parallelcoords(Dt, 'group',Y, 'labels', varNames);
+% Legend replot
+[legend_h,object_h,plot_h,text_strings] = legend()
+legend(plot_h, text_strings, 'Location', 'best')
+
+saveas (gcf, [NameOut 'CurveAvgs_reps'], 'pdf')
+    
+%figure;andrewsplot(Dt, 'group',Y);
+%figure;hbar(Dt, 'group',Y, 'labels', varNames);
+
+MakeTricolMap
+colormap(RWBcMap2)
+
+
+%% plot as heatmap         
+figure;imagesc(double(CurveMeans_Overall(:,1:end))); colorbar %specifiy title and axis
+trmtTbl=tabulate(CurveDtMEAN_rep.TrtmLong)
+trmt=trmtTbl(:,1)
+set(gca,'YTick',[1:length(trmt)])
+set(gca,'YTickLabel', trmt)
+saveas (gcf, [NameOut 'CurveAvgsHeat_Overall'], 'pdf')
+
+
+figure;imagesc(double(CurveDtMEAN_rep(:,3:end))); colorbar %specifiy title and axis
+colormap(RWBcMap2)
+trmtTbl=tabulate(CurveDtMEAN_rep.TrtmLong)
+trmt=trmtTbl(:,1)
+RepCt=size(CurveDtMEAN_rep, 1)
+YtickInt=[1:RepCt/length(trmt):RepCt]
+set(gca,'YTick',[1:YtickInt])
+set(gca,'YTickLabel', trmt)
+saveas (gcf, [NameOut 'CurveAvgsHeat_reps'], 'pdf')
+
+
+figure;imagesc(double(CurveDtMEAN_rep(:,3:end))); colorbar %specifiy title and axis
+colormap(RWBcMap2)
+trmtTbl=tabulate(CurveDtMEAN_rep.TrtmLong)
+trmt=trmtTbl(:,1)
+RepCt=size(CurveDtMEAN_rep, 1)
+YtickInt=[1:RepCt/length(trmt):RepCt]
+set(gca,'YTick',[1:YtickInt])
+set(gca,'YTickLabel', trmt)
+saveas (gcf, [NameOut 'CurveAvgsHeat_reps'], 'pdf')
+
+
+figure;imagesc(double(CurveDtABSL_MEAN_rep(:,3:end))); colorbar %specifiy title and axis
+colormap(RWBcMap2)
+trmtTbl=tabulate(CurveDtMEAN_rep.TrtmLong)
+trmt=trmtTbl(:,1)
+RepCt=size(CurveDtMEAN_rep, 1)
+YtickInt=[1:RepCt/length(trmt):RepCt]
+set(gca,'YTick',[1:YtickInt])
+set(gca,'YTickLabel', trmt)
+saveas (gcf, [NameOut 'CurveDtABSL_MEAN_rep'], 'pdf')
+
+
+figure;imagesc(double(CurveSTDofMeans_Overall(:,1:end))); colorbar %specifiy title and axis
+colormap(RWBcMap2)
+trmtTbl=tabulate(CurveDtMEAN_rep.TrtmLong)
+trmt=trmtTbl(:,1)
+RepCt=size(CurveDtMEAN_rep, 1)
+YtickInt=[1:RepCt/length(trmt):RepCt]
+set(gca,'YTick',[1:YtickInt])
+set(gca,'YTickLabel', trmt)
+saveas (gcf, [NameOut 'CurveSTDofMeans_Overall'], 'pdf')
+
+
+figure;imagesc(double(CurveMeanofSTD_Overall(:,1:end))); colorbar %specifiy title and axis
+colormap(RWBcMap2)
+trmtTbl=tabulate(CurveDtMEAN_rep.TrtmLong)
+trmt=trmtTbl(:,1)
+RepCt=size(CurveDtMEAN_rep, 1)
+YtickInt=[1:RepCt/length(trmt):RepCt]
+set(gca,'YTick',[1:YtickInt])
+set(gca,'YTickLabel', trmt)
+
+saveas (gcf, [NameOut 'CurveMeanofSTD_Overall'], 'pdf')
+
+
+figure;imagesc(double(CurveMeanofSTD_Overall(:,1:end))); colorbar %specifiy title and axis
+colormap(RWBcMap2)
+trmtTbl=tabulate(CurveDtMEAN_rep.TrtmLong)
+trmt=trmtTbl(:,1)
+RepCt=size(CurveDtMEAN_rep, 1)
+set(gca,'YTick',[1:length(trmt)])
+set(gca,'YTickLabel', trmt)
+title('avg variance(std) per strain')
+saveas (gcf, [NameOut 'CurveMeanofSTD_Overall'], 'pdf')
+
+figure;imagesc(double(CurveDtSTD_rep(:,3:end))); colorbar %specifiy title and axis
+colormap(RWBcMap2)
+trmtTbl=tabulate(CurveDtMEAN_rep.TrtmLong)
+trmt=trmtTbl(:,1)
+RepCt=size(CurveDtMEAN_rep, 1)
+YtickInt=[1:RepCt/length(trmt):RepCt]
+set(gca,'YTick',[1:YtickInt])
+set(gca,'YTickLabel', trmt)
+saveas (gcf, [NameOut 'CurveDtSTD_rep'], 'pdf')
+%% plot and save summary output
+
+%montage individual curve figures
+
         %% Add vales to the DATA matricies
-        if NameList{PaddedList_Count,1} == 'X'; %then fill a blank in some matricies
-            %keep zero tto retain spacerand goto next iteration
-            %distanceMv(PaddedList_Count,1)=distanceMv(PaddedList_Count-1,1);
-            time(PaddedList_Count) = insttime+max(time); %determined by FPS rate
-            %centroid(PaddedList_Count,1:2)=[centroid(PaddedList_Count-1,1:2)]; %just take the last value
-            continue;
-        elseif PaddedList_Count == 1%Add actual value
-            distanceMv(PaddedList_Count,1)=0;
-            distMv=0;
-            time(PaddedList_Count)=0; %determined by FPS rate
-            centroid(PaddedList_Count,1:2)=CurrCent;
-            %>imgs{DateFileNms_Count}=varStruct.images.imgBWL;%not sure if necc
-            CurveMtx(:,PaddedList_Count)=varStruct.SpineData.AngleLs;
-            SpineList{PaddedList_Count}=varStruct.SpineData.SpineList;
-            Pointlist{PaddedList_Count}=varStruct.SpineData.Pointlist;
-            %time(DateFileNms_Count)=insttime+time(DateFileNms_Count-1); %calculate times
-            continue
-        elseif (PaddedList_Count > 1);%after the first entry, put a VALUE or SPACER
+%         if NameList{PaddedList_Count,1} == 'X'; %then fill a blank in some matricies
+%             %keep zero tto retain spacerand goto next iteration
+%             %distanceMv(PaddedList_Count,1)=distanceMv(PaddedList_Count-1,1);
+%             time(PaddedList_Count) = insttime+max(time); %determined by FPS rate
+%             %centroid(PaddedList_Count,1:2)=[centroid(PaddedList_Count-1,1:2)]; %just take the last value
+%          
+%         elseif PaddedList_Count == 1%Add actual value
+%             distanceMv(PaddedList_Count,1)=0;
+%             distMv=0;
+%             time(PaddedList_Count)=0; %determined by FPS rate
+%             centroid(PaddedList_Count,1:2)=CurrCent;
+%             %>imgs{DateFileNms_Count}=varStruct.images.imgBWL;%not sure if necc
+%             CurveMtx(:,PaddedList_Count)=varStruct.SpineData.AngleLs;
+%             SpineList{PaddedList_Count}=varStruct.SpineData.SpineList;
+%             Pointlist{PaddedList_Count}=varStruct.SpineData.Pointlist;
+%             %time(DateFileNms_Count)=insttime+time(DateFileNms_Count-1); %calculate times
+%             continue
+%         elseif (PaddedList_Count > 1);%after the first entry, put a VALUE or SPACER
             %CALCULATE VALUES TO BE PLOTTED
             %>f=varStruct.images.img1;
             %[CurrCent]=FindCentr(varStruct.analysis.Img_Propfilt, 'CtrMass'); %CtrMass
             %find the last centroid (highest ROW value)with a value - required since 0
             %values pad the unscored regions
             
-            %% DISTANCE AND VELOCITY
-            %use last centroid and current centroid to calcualte velocity
-            % the odd loop is used because of discreopancies btwn padded and
-            % unpadded list
-            LastCentrRow=(max(find(centroid(:,1) >1)))-1
-            %Find the last centroud psotion and distance moved
-            if LastCentrRow > 1
-                LastCentr=centroid(LastCentrRow-1,:);
-                distMv=(pdist2(LastCentr,CurrCent))
-            elseif isempty(LastCentrRow),
-                distMv = 0;
-            elseif LastCentrRow <= 1;
-                distMv = 0;
-            end
-        end
+%             %% DISTANCE AND VELOCITY
+%             %use last centroid and current centroid to calcualte velocity
+%             % the odd loop is used because of discreopancies btwn padded and
+%             % unpadded list
+%             LastCentrRow=(max(find(centroid(:,1) >1)))-1
+%             %Find the last centroud psotion and distance moved
+%             if LastCentrRow > 1
+%                 LastCentr=centroid(LastCentrRow-1,:);
+%                 distMv=(pdist2(LastCentr,CurrCent))
+%             elseif isempty(LastCentrRow),
+%                 distMv = 0;
+%             elseif LastCentrRow <= 1;
+%                 distMv = 0;
+%             end
+%         end
  
     
     %end %add value or pad
     
     %% cocatenate the order corrected matricies
     %>imgs{DateFileNms_Count}=varStruct.images.imgBWL;%not sure if necc
-    centroid(PaddedList_Count,1:2)=CurrCent;
-    distanceMv(DateFileNms_Count,1)=distMv;
-    CurveMtx(:,PaddedList_Count)=varStruct.SpineData.AngleLs;
-    SpineList{PaddedList_Count}=varStruct.SpineData.SpineList;
-    Pointlist{PaddedList_Count}=varStruct.SpineData.Pointlist;
-    time(DateFileNms_Count)=insttime+time(DateFileNms_Count-1); %calculate times
-    
+%     centroid(PaddedList_Count,1:2)=CurrCent;
+%     distanceMv(DateFileNms_Count,1)=distMv;
+%     CurveMtx(:,PaddedList_Count)=varStruct.SpineData.AngleLs;
+%     SpineList{PaddedList_Count}=varStruct.SpineData.SpineList;
+%     Pointlist{PaddedList_Count}=varStruct.SpineData.Pointlist;
+%     time(DateFileNms_Count)=insttime+time(DateFileNms_Count-1); %calculate times
+%     
     %%PLACE VUSIALIZE FUNCITON HERE
     %end % initialize (row 1) or pad
     %end % cycle through images - all images from one folder processed at this point
-    
-    end %image loop
+  
     %% GET DERIVED PARAMETERS
     %these include path traveled (smoothed displacemnt)
     %and reset time for head subcycles (passed 0 degrees)
     
     % PATH PARAMETERS - USING ONLY NON ZERO VALUES 
     %Get the non zero values for centroid and corresonding time
-    centroidPlot=centroid((find(~centroid(:,1)==0)), 1:2);
-    
-    % USE THIS FOR COLOR EVOLUTION
-    timePlot=time(find(~centroid(:,1)==0));
-    %[wkSpnX,wkspnY]=ind2sub(size(SpineData.SpineList), find(SpineData.SpineList));
-    %cmap=colormap(jet (size(wkSpnX,1))) %copper
+%     centroidPlot=centroid((find(~centroid(:,1)==0)), 1:2);
+%     
+%     % USE THIS FOR COLOR EVOLUTION
+%     timePlot=time(find(~centroid(:,1)==0));
+%     %[wkSpnX,wkspnY]=ind2sub(size(SpineData.SpineList), find(SpineData.SpineList));
+%     %cmap=colormap(jet (size(wkSpnX,1))) %copper
     
     %% smooth path with sliding window
     %STILL NEEDS WORK (run of ZEROS)
