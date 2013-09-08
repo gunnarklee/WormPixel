@@ -15,7 +15,7 @@ SmoothMeth='moving'
 %within Plot4StacktiffOneWorm < later import all params as single matirx
 poshead=[]
 
-%% worm spining features
+%% worm spineing features
 pad=20
 numpts=13 %number of spine points
 
