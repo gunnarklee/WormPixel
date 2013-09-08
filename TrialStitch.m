@@ -521,20 +521,20 @@ saveas (gcf, [NameOut 'CurveDtSTD_rep'], 'pdf')
 %     centroidPlot=centroid((find(~centroid(:,1)==0)), 1:2);
 %     
 %     % USE THIS FOR COLOR EVOLUTION
-%     timePlot=time(find(~centroid(:,1)==0));
-%     %[wkSpnX,wkspnY]=ind2sub(size(SpineData.SpineList), find(SpineData.SpineList));
-%     %cmap=colormap(jet (size(wkSpnX,1))) %copper
+     timePlot=time(find(~centroid(:,1)==0));
+     %[wkSpnX,wkspnY]=ind2sub(size(SpineData.SpineList), find(SpineData.SpineList));
+     %cmap=colormap(jet (size(wkSpnX,1))) %copper
     
     %% smooth path with sliding window
     %STILL NEEDS WORK (run of ZEROS)
     % ** problem: path straight becomes static in the end (eg 37/265;% #223-258, jumps at 222 and 257)
   
-    smoothWin=25;
-    StraightWin=50;
-    if length(centroidPlot)< smoothWin
-        centroidPlot
-        error(['usable data is shorter than the sliding window. Only ', num2str(length(centroidPlot)) ' datum in " ',namedate{y,2},' " folder. Refilter or add more pictures'])
-    end    
+%    smoothWin=25;
+%    StraightWin=50;
+%    if length(centroidPlot)< smoothWin
+%        centroidPlot
+%        error(['usable data is shorter than the sliding window. Only ', num2str(length(centroidPlot)) ' datum in " ',namedate{y,2},' " folder. Refilter or add more pictures'])
+%    end    
     %Smooth forward
     %Last 25 (SmoothWin) are same value
     pathSmooth=[SmoothData(centroidPlot(:,1), smoothWin), SmoothData(centroidPlot(:,2), smoothWin)];
