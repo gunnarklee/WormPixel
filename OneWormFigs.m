@@ -3,9 +3,10 @@ function OneWormFigs(varargin)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
+  %TO DO: 
+  %make a montaged image from padded imgs
+
 %Version History
-
-
 
 p = inputParser;
 %p.addRequired('inputdir', @isdir);
@@ -129,7 +130,7 @@ for y=1:length(namedate(:,2));%cycle folders
     distanceMv=zeros(PaddedLeng, 1);   %velocity=[velocity;vel];
     time=zeros(PaddedLeng, 1);   %time=[time;insttime+time(end,:)];
     centroid=zeros(PaddedLeng, 2);   %centroid=[centroid;CurrCent];
-    %>>imgs=cell(leng, 1);  %imgs=[imgs;imgBWL];
+    imgs=cell(leng, 1);  %imgs=[imgs;imgBWL];
     CurveMtx=zeros(numpts-2, 1);%CurveMtx=[CurveMtx,SpineData.AngleLs];
     SpineList=cell(PaddedLeng, 1);   %SpineList=[SpineList,SpineData.SpineList];
     Pointlist=cell(PaddedLeng, 2);   %Pointlist=[Pointlist,SpineData.Pointlist];
@@ -139,7 +140,7 @@ for y=1:length(namedate(:,2));%cycle folders
         NameList{PaddedList_Count,1}
         DateFileNms_Count=DateFileNms_Count+1;%set up separate cont for date file names
         fileDirect=[DataDir filesep RecentFldr]
-        % check that here is a file (notspacer 'X') and it exists in a dir
+        % check that there is a file (not a spacer: 'X') and it exists in a dir
         if and(isdir(fileDirect), ~strcmpi(NameList{PaddedList_Count,1}, 'X')); 
             load([fileDirect filesep NameList{PaddedList_Count,1}]);
             [CurrCent]=FindCentr(varStruct.analysis.Img_Propfilt, 'CtrMass'); %CtrMass
@@ -157,7 +158,7 @@ for y=1:length(namedate(:,2));%cycle folders
             distMv=0;
             time(PaddedList_Count)=0; %determined by FPS rate
             centroid(PaddedList_Count,1:2)=CurrCent;
-            %>imgs{DateFileNms_Count}=varStruct.images.imgBWL;%not sure if necc
+            imgs{DateFileNms_Count}=varStruct.images.Imagesfilt{1};%not sure if necc
             CurveMtx(:,PaddedList_Count)=varStruct.SpineData.AngleLs;
             SpineList{PaddedList_Count}=varStruct.SpineData.SpineList;
             Pointlist{PaddedList_Count}=varStruct.SpineData.Pointlist;
@@ -190,13 +191,15 @@ for y=1:length(namedate(:,2));%cycle folders
     %end %add value or pad
     
     %% cocatenate the order corrected matricies
-    %>imgs{DateFileNms_Count}=varStruct.images.imgBWL;%not sure if necc
+    imgs{DateFileNms_Count}=varStruct.images.Imagesfilt{1};%not sure if necc
     centroid(PaddedList_Count,1:2)=CurrCent;
     distanceMv(DateFileNms_Count,1)=distMv;
     CurveMtx(:,PaddedList_Count)=varStruct.SpineData.AngleLs;
     SpineList{PaddedList_Count}=varStruct.SpineData.SpineList;
     Pointlist{PaddedList_Count}=varStruct.SpineData.Pointlist;
     time(DateFileNms_Count)=insttime+time(DateFileNms_Count-1); %calculate times
+    
+    %(DateFileNms_Count)=varStruct.images.Imagesfilt{1}
     
     %%PLACE VUSIALIZE FUNCITON HERE
     %end % initialize (row 1) or pad
@@ -221,7 +224,7 @@ for y=1:length(namedate(:,2));%cycle folders
     % ** problem: path straight becomes static in the end (eg 37/265;% #223-258, jumps at 222 and 257)
   
     smoothWin=25;
-    StraightWin=50;
+    StraightWin=20%50;
     if length(centroidPlot)< smoothWin
         centroidPlot
         error(['usable data is shorter than the sliding window. Only ', num2str(length(centroidPlot)) ' datum in " ',namedate{y,2},' " folder. Refilter or add more pictures'])
@@ -276,7 +279,7 @@ for y=1:length(namedate(:,2));%cycle folders
     
     %% SWIM STROKE statistics
     ZeroLine=[zeros(length(time),1),time];
-    OscilAngle=CurveMtx(3,1:end)';
+    OscilAngle=CurveMtx(NeckAngle,1:end)';
     
     %STROKE COUNT
     %looking for crossing of the midline (angle changes from + to -
@@ -390,6 +393,7 @@ for y=1:length(namedate(:,2));%cycle folders
     title ('Tricolor Curve Matrix allframes');% xlim ([1,size(img1,1)*(resz*1.25)]); ylim([1, size(img1,2)*(resz*1.25)]);
     saveas (gcf, [NameOut 'CurveMtxallframes'], 'pdf')
     
+   
     %% Path traveled - COLOR EVOLVING PATH!
     cmapTmRG=[];
     cmap=colormap(jet (size(centroidPlot,1))); %copper
@@ -680,12 +684,15 @@ for ColNm=1:size(Count,2);
     for RowNm=1:length(Count(:,ColNm))-winSz;
         TargetData=Count((RowNm:RowNm+winSz-1),ColNm);%display Target data in window
         medCt=median(Count((RowNm:RowNm+winSz-1),ColNm)) % get median for window
-        replPosn=RowNm+ceil(winSz/2)
-        RowNm
-        countSm(replPosn ,ColNm)=medCt; % assign median to
+        % assign median to
     end
     %fill end with median
+    
+    try 
     countSm(length(Count(:,ColNm))-winSz+1:length(Count(:,ColNm)))=medCt
+    catch
+        error('having difficulties smoothing the data')
+    end
 end
 end
 
