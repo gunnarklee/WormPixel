@@ -5,7 +5,7 @@ vers='FROMchronos7INTENSITY(8_9_11)- single cell flouresence'
 %% ImageAnalysisMode
 framerate=29
 MicroM_Pixel=1 %default to make it go
-resz = 2; %resizing factor
+resz = .25; %resizing factor
 EvenImgBgSub= 'single'
 imgfmt='*jpg'
 %path smoothng options
@@ -15,14 +15,16 @@ SmoothMeth='moving'
 %within Plot4StacktiffOneWorm < later import all params as single matirx
 poshead=[]
 
+
 %% worm spineing features
 pad=20
-numpts=13 %number of spine points
+numpts=4 %number of spine points, 13 for full worm
+NeckAngle=2 % which angle is the neck? 3 for 13 point worm
 
 %% Visulization modes
 SnglImgProofMd = 'off';  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
 DataCapMode = 'Simple'%^'StackGiff' %'StackTiff','Simple'
-allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
+allow_img= 'y'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
 ProofingImgs = 'n' % extra proofing images
 stoppoint='n'
@@ -31,7 +33,7 @@ SortByName= 'n' %sort in ASCII order. pad your numeric indees with zeros
 PadPrc=2.5;
  App='New'
  FntSz = 14;
-invertImage= 'y'
+invertImage= 'n'
 
 %% more parameters - DEACTIVATED OPTIONS
 IsolatePlate = 'N' %for standard chronos Apps this will be 'Y', Need a plate in img1 and img2    
