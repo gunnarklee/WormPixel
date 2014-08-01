@@ -24,7 +24,7 @@ NeckAngle=2 % which angle is the neck? 3 for 13 point worm
 %% Visulization modes
 SnglImgProofMd = 'off';  % _LEVE THIS OFF MOSTLY _single image proofing MODE 
 DataCapMode = 'Simple'%^'StackGiff' %'StackTiff','Simple'
-allow_img= 'y'%allow_img= input ('Allow images? (Y/N)', 's')
+allow_img= 'n'%allow_img= input ('Allow images? (Y/N)', 's')
 proofingImgVIS ='off'%'off' Visualize scored stacks as they are built
 ProofingImgs = 'n' % extra proofing images
 stoppoint='n'

@@ -12,10 +12,10 @@
 %%
 
 %OneWorm Pipeline
-%[InputDir]=ProfileWorm()
-%Outputdir=InputDir;
-%[InputDir]=GetWorm(InputDir)%(InputDir); % 'trialName', trialName
-%[InputDir]=ProcessSpine(InputDir, Outputdir);%(InputDir);
+[InputDir]=ProfileWorm()
+Outputdir=InputDir;
+[InputDir]=GetWorm(InputDir)%(InputDir); % 'trialName', trialName
+[InputDir]=ProcessSpine(InputDir, Outputdir);%(InputDir);
 OneWormFigs(InputDir, Outputdir);
 %TrialStitch %stitches together individual replicate (PIC_ folders) and sumarizes data by strain 
 
