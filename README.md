@@ -1,6 +1,6 @@
 # README #
-##WormPixel(formerly OneWorm)## 
-This README would normally document whatever steps are necessary to get your application up and running.
+** WormPixel(formerly OneWorm) ** 
+
 
 ### What is this repository for? ###
 
