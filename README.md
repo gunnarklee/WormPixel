@@ -1,6 +1,6 @@
 # README #
 
-## WormPixel(formerly OneWorm) ##
+### **WormPixel(formerly OneWorm)** ###
 
 ### What is this repository for? ###
 
@@ -8,7 +8,14 @@
 
 * WormPixel was originally developed to do high throughput biological assays on the genetic model organism C. elegans ("The Worm") but can be used for any image analysis task
 
-* The advantage that WormPixel offers over more traditional image analysis packages is that the modules are built to cluster the granular image analysis tasks into a four [useful blocks](https://sites.google.com/site/gunnarkleemann/home/wormview-package) ((1) tool calibration, (2) particle collection, (3) shape analysis, and (4) data compilation/ figure generation), thus allowing the rapid construction of image analysis application.
+* The advantage that WormPixel offers over more traditional image analysis packages is that the modules are built to cluster the granular image analysis tasks into a four [maximum fundamental aggregates](https://sites.google.com/site/gunnarkleemann/home/wormview-package) 
+
+**(1) tool calibration,** 
+**(2) particle collection,** 
+**(3) shape analysis,**
+**(4) data compilation/ figure generation;** 
+
+Thus allowing the rapid construction of custom image analysis applications from the fundamental aggregates.
 
 * Because OneWorm is open source it allows a user to access and modify the granular image analysis tasks if needed.
 
