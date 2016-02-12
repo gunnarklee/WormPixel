@@ -1,10 +1,10 @@
 # README #
-## OneWorm ##
+##WormPixel(formerly OneWorm)## 
 This README would normally document whatever steps are necessary to get your application up and running.
 
 ### What is this repository for? ###
 
-* ##WormPixel (formerly OneWorm)## is a library of image analysis modules that can be plugged together to create custom image analysis applications 
+* WormPixel is a library of image analysis modules that can be plugged together to create custom image analysis applications 
 
 * WormPixel was originally developed to do high throughput biological assays on the genetic model organism C. elegans ("The Worm") but can be used for any image analysis task
 
@@ -23,7 +23,7 @@ This README would normally document whatever steps are necessary to get your app
 
 * Clone the repository and add it to your search path
 
-* The output of each module is designed to take the input the previous modul
+* The output of each module is designed to take the input the previous module
 
 * Dependencies: Matlab image processing package
 
